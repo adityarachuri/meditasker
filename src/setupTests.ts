@@ -52,8 +52,22 @@ global.localStorage = localStorageMock as any;
 global.performance = {
   ...global.performance,
   now: jest.fn(() => Date.now()),
-  mark: jest.fn(),
-  measure: jest.fn(),
+  mark: jest.fn((markName: string) => ({
+    detail: null,
+    duration: 0,
+    entryType: 'mark' as const,
+    name: markName,
+    startTime: Date.now(),
+    toJSON: () => ({})
+  } as PerformanceMark)),
+  measure: jest.fn((measureName: string) => ({
+    detail: null,
+    duration: 0,
+    entryType: 'measure' as const,
+    name: measureName,
+    startTime: Date.now(),
+    toJSON: () => ({})
+  } as PerformanceMeasure)),
   getEntriesByType: jest.fn(() => []),
   getEntriesByName: jest.fn(() => []),
 };
