@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { sessionService } from '../../services/sessionService';
+import { sessionService } from '../../services/sessionService';
 import { Eye, EyeOff, Lock, Mail, AlertCircle, Loader2 } from 'lucide-react';
 
 export function LoginForm() {
@@ -10,6 +11,7 @@ export function LoginForm() {
     password: '',
   });
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [validationErrors, setValidationErrors] = useState<{
     email?: string;
@@ -51,6 +53,19 @@ export function LoginForm() {
     
     if (!validateForm()) {
       return;
+    }
+
+    // Configure session timeout based on "Remember me" setting
+    if (rememberMe) {
+      sessionService.configure({
+        timeout: 7 * 24 * 60 * 60 * 1000, // 7 days
+        secureStorage: false // Use localStorage for persistent sessions
+      });
+    } else {
+      sessionService.configure({
+        timeout: 30 * 60 * 1000, // 30 minutes
+        secureStorage: true // Use sessionStorage for better security
+      });
     }
 
     // Configure session timeout based on "Remember me" setting
@@ -221,6 +236,26 @@ export function LoginForm() {
               <span className="ml-2 text-sm text-gray-600">Remember me</span>
             </label>
           </div>
+          
+          {/* Remember Me */}
+          <div className="flex items-center mt-4">
+            <label className="flex items-center">
+              <input
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+              <span className="ml-2 text-sm text-gray-600">Remember me</span>
+            </label>
+          </div>
+        </div>
+
+        {/* Copyright and Disclaimer */}
+        <div className="mt-6 pt-6 border-t border-gray-200 text-center text-xs text-gray-500">
+          <p>By accessing this system, you agree to our terms of service and privacy policy.</p>
+          <p>Unauthorized access is prohibited and may be subject to legal action.</p>
+          <p className="mt-2">© Copyrighted to Softique Pvt Ltd., 2025. All rights reserved.</p>
         </div>
 
         {/* Demo Credentials */}

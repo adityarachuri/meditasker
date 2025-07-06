@@ -10,6 +10,7 @@ interface HeaderProps {
   onAddNew?: () => void;
   showAddButton?: boolean;
   sessionManager?: React.ReactNode;
+  sessionManager?: React.ReactNode;
 }
 
 export function Header({ title, onSearch, onAddNew, showAddButton = false, sessionManager }: HeaderProps) {
@@ -50,6 +51,9 @@ export function Header({ title, onSearch, onAddNew, showAddButton = false, sessi
           <div className="hidden lg:block">
             <EnterpriseMonitoring />
           </div>
+
+          {/* Session Manager */}
+          {sessionManager}
 
           {/* Session Manager */}
           {sessionManager}

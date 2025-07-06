@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
 import { sessionService } from '../services/sessionService';
+import { sessionService } from '../services/sessionService';
 
 export interface User {
   id: string;
@@ -161,9 +162,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             payload: { 
               user: sessionInfo.user, 
               token: sessionInfo.token 
+          dispatch({ 
+            type: 'LOGIN_SUCCESS', 
+            payload: { 
+              user: sessionInfo.user, 
+              token: sessionInfo.token 
             } 
           });
-        } catch (error) {
           sessionService.endSession();
           dispatch({ type: 'SET_LOADING', payload: false });
         }
@@ -199,7 +204,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       // Start session using sessionService
       sessionService.startSession(token, user);
-
       dispatch({ type: 'LOGIN_SUCCESS', payload: { user, token } });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Login failed';

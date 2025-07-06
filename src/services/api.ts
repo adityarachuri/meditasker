@@ -1,5 +1,6 @@
 import { QueryClient } from '@tanstack/react-query';
 import { sessionService } from './sessionService';
+import { sessionService } from './sessionService';
 
 // API Configuration
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://api.softique-health-insure.com';
