@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
+import { sessionService } from '../services/sessionService';
 
 export interface User {
   id: string;
@@ -150,16 +151,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Check for existing token on mount
   useEffect(() => {
     const checkAuthStatus = async () => {
-      const token = localStorage.getItem('auth_token');
-      const userStr = localStorage.getItem('auth_user');
+      // Use sessionService instead of direct localStorage access
+      const sessionInfo = sessionService.getSessionInfo();
       
-      if (token && userStr) {
+      if (sessionInfo) {
         try {
-          const user = JSON.parse(userStr);
-          dispatch({ type: 'LOGIN_SUCCESS', payload: { user, token } });
+          dispatch({ 
+            type: 'LOGIN_SUCCESS', 
+            payload: { 
+              user: sessionInfo.user, 
+              token: sessionInfo.token 
+            } 
+          });
         } catch (error) {
-          localStorage.removeItem('auth_token');
-          localStorage.removeItem('auth_user');
+          sessionService.endSession();
           dispatch({ type: 'SET_LOADING', payload: false });
         }
       } else {
@@ -192,9 +197,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Generate mock token
       const token = `mock_token_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
-      // Store in localStorage
-      localStorage.setItem('auth_token', token);
-      localStorage.setItem('auth_user', JSON.stringify(user));
+      // Start session using sessionService
+      sessionService.startSession(token, user);
 
       dispatch({ type: 'LOGIN_SUCCESS', payload: { user, token } });
     } catch (error) {
@@ -205,8 +209,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = () => {
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('auth_user');
+    // End session using sessionService
+    sessionService.endSession();
     dispatch({ type: 'LOGOUT' });
   };
 

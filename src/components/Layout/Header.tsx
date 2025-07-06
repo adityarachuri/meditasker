@@ -9,9 +9,10 @@ interface HeaderProps {
   onSearch?: (query: string) => void;
   onAddNew?: () => void;
   showAddButton?: boolean;
+  sessionManager?: React.ReactNode;
 }
 
-export function Header({ title, onSearch, onAddNew, showAddButton = false }: HeaderProps) {
+export function Header({ title, onSearch, onAddNew, showAddButton = false, sessionManager }: HeaderProps) {
   const { state } = useApp();
   const [showGlobalSearch, setShowGlobalSearch] = React.useState(false);
   const unreadNotifications = state.notifications.filter(n => !n.read).length;
@@ -49,6 +50,9 @@ export function Header({ title, onSearch, onAddNew, showAddButton = false }: Hea
           <div className="hidden lg:block">
             <EnterpriseMonitoring />
           </div>
+
+          {/* Session Manager */}
+          {sessionManager}
 
           {showAddButton && onAddNew && (
             <button

@@ -5,6 +5,7 @@ import { queryClient } from './services/api';
 import { AuthProvider } from './context/AuthContext';
 import { AppProvider } from './context/AppContext';
 import { ProtectedRoute } from './components/Auth/ProtectedRoute';
+import { SessionManager } from './components/Auth/SessionManager';
 import { LazyLoadWrapper } from './components/Performance/LazyLoadWrapper';
 import { DataInitializer } from './components/Performance/DataInitializer';
 import { RealTimeUpdates, useRealTimeUpdates } from './components/Advanced/RealTimeUpdates';
@@ -46,6 +47,7 @@ function ErrorFallback({ error, resetErrorBoundary }: { error: Error; resetError
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isDataInitialized, setIsDataInitialized] = useState(false);
+  const [showSessionManager, setShowSessionManager] = useState(true);
   const { getAverageRenderTime } = usePerformanceMonitor('App');
   const { updates, handleUpdate } = useRealTimeUpdates('current-user-id');
 
@@ -161,6 +163,13 @@ function App() {
                   <Header
                     title={getPageTitle()}
                     showAddButton={activeTab === 'projects' || activeTab === 'tasks'}
+                    sessionManager={showSessionManager ? 
+                      <SessionManager 
+                        onLogout={() => {
+                          // Handle logout
+                        }} 
+                      /> : null
+                    }
                   />
                   <main className="flex-1 p-6">
                     {renderContent()}
