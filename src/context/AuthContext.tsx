@@ -162,6 +162,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             payload: { 
               user: sessionInfo.user, 
               token: sessionInfo.token 
+            }
+          }
+          )
           dispatch({ 
             type: 'LOGIN_SUCCESS', 
             payload: { 
