@@ -44,7 +44,6 @@ function ErrorFallback({ error, resetErrorBoundary }: { error: Error; resetError
 
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [isDataInitialized, setIsDataInitialized] = useState(false);
   const { getAverageRenderTime } = usePerformanceMonitor('App');
   const { updates, handleUpdate } = useRealTimeUpdates('current-user-id');
 
@@ -136,17 +135,6 @@ function App() {
         );
     }
   };
-
-  // Show data initializer if not initialized
-  if (!isDataInitialized) {
-    return (
-      <ErrorBoundary FallbackComponent={ErrorFallback}>
-        <QueryClientProvider client={queryClient}>
-          <DataInitializer onInitialized={() => setIsDataInitialized(true)} />
-        </QueryClientProvider>
-      </ErrorBoundary>
-    );
-  }
 
   return (
     <ErrorBoundary FallbackComponent={ErrorFallback}>
