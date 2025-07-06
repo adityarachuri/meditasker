@@ -58,6 +58,14 @@ describe('LoginForm', () => {
     expect(screen.getByText('qa@softique-health-insure.com')).toBeInTheDocument();
   });
 
+  it('displays copyright and disclaimer', () => {
+    renderWithAuth(<LoginForm />);
+    
+    expect(screen.getByText('© Copyrighted to Softique Pvt Ltd., 2025. All rights reserved.')).toBeInTheDocument();
+    expect(screen.getByText('By accessing this system, you agree to our terms of service and privacy policy.')).toBeInTheDocument();
+    expect(screen.getByText('Unauthorized access is prohibited and may be subject to legal action.')).toBeInTheDocument();
+  });
+
   it('validates required fields', async () => {
     const user = userEvent.setup();
     renderWithAuth(<LoginForm />);

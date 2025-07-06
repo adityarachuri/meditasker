@@ -238,6 +238,13 @@ export function LoginForm() {
           </p>
         </div>
       </div>
+
+      {/* Copyright and Disclaimer */}
+      <div className="mt-8 text-center text-xs text-gray-500">
+        <p>By accessing this system, you agree to our terms of service and privacy policy.</p>
+        <p>Unauthorized access is prohibited and may be subject to legal action.</p>
+        <p className="mt-2">© Copyrighted to Softique Pvt Ltd., 2025. All rights reserved.</p>
+      </div>
         {/* Remember Me */}
         <div className="flex items-center justify-between">
           <label className="flex items-center">
