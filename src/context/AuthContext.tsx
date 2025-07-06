@@ -163,7 +163,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               token: sessionInfo.token 
             }
           });
-        }
+        } catch (error) {
           sessionService.endSession();
           dispatch({ type: 'SET_LOADING', payload: false });
         }
