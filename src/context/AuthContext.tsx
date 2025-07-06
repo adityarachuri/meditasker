@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
 import { sessionService } from '../services/sessionService';
-import { sessionService } from '../services/sessionService';
 
 export interface User {
   id: string;
@@ -163,15 +162,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               user: sessionInfo.user, 
               token: sessionInfo.token 
             }
-          }
-          )
-          dispatch({ 
-            type: 'LOGIN_SUCCESS', 
-            payload: { 
-              user: sessionInfo.user, 
-              token: sessionInfo.token 
-            } 
           });
+        }
           sessionService.endSession();
           dispatch({ type: 'SET_LOADING', payload: false });
         }
