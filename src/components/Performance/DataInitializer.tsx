@@ -260,7 +260,7 @@ window.addEventListener('load', () => {
 
 // Bundle size monitoring
 if (import.meta.env.DEV) {
-  import('./utils/bundleAnalyzer').then(({ analyzeBundleSize }) => {
+  import('../../utils/bundleAnalyzer').then(({ analyzeBundleSize }) => {
     analyzeBundleSize();
   });
 }
