@@ -65,7 +65,6 @@ export function DataInitializer({ onInitialized }: DataInitializerProps) {
       // Step 1: Initialize database connection
       updateStep('database', { loading: true });
       await new Promise(resolve => setTimeout(resolve, 800)); // Simulate connection time
-      await databaseService.initialize();
       updateStep('database', { loading: false, completed: true });
       setProgress(25);
       setCurrentStepIndex(1);
@@ -74,7 +73,7 @@ export function DataInitializer({ onInitialized }: DataInitializerProps) {
       updateStep('users', { loading: true });
       await new Promise(resolve => setTimeout(resolve, 600));
       const userData = mockDataGenerator.generateUsers(50);
-      await databaseService.bulkInsert('users', userData);
+      await databaseService.loadUsers(userData);
       updateStep('users', { loading: false, completed: true });
       setProgress(50);
       setCurrentStepIndex(2);
@@ -83,7 +82,7 @@ export function DataInitializer({ onInitialized }: DataInitializerProps) {
       updateStep('projects', { loading: true });
       await new Promise(resolve => setTimeout(resolve, 700));
       const projectData = mockDataGenerator.generateProjects(25);
-      await databaseService.bulkInsert('projects', projectData);
+      await databaseService.loadProjects(projectData);
       updateStep('projects', { loading: false, completed: true });
       setProgress(75);
       setCurrentStepIndex(3);
@@ -92,7 +91,7 @@ export function DataInitializer({ onInitialized }: DataInitializerProps) {
       updateStep('tasks', { loading: true });
       await new Promise(resolve => setTimeout(resolve, 900));
       const taskData = mockDataGenerator.generateTasks(100);
-      await databaseService.bulkInsert('tasks', taskData);
+      await databaseService.loadTasks(taskData);
       updateStep('tasks', { loading: false, completed: true });
       setProgress(100);
 
