@@ -5,8 +5,6 @@ import { queryClient } from './services/api';
 import { AppProvider } from './context/AppContext';
 import { LazyLoadWrapper } from './components/Performance/LazyLoadWrapper';
 import { RealTimeUpdates, useRealTimeUpdates } from './components/Advanced/RealTimeUpdates';
-import { useAuth } from './hooks/useAuth';
-import { LoginForm } from './components/Auth/LoginForm';
 import { Sidebar } from './components/Layout/Sidebar';
 import { Header } from './components/Layout/Header';
 import { Dashboard } from './components/Dashboard/Dashboard';
@@ -44,7 +42,6 @@ function ErrorFallback({ error, resetErrorBoundary }: { error: Error; resetError
 
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
-  const { isAuthenticated, isLoading } = useAuth();
   const { getAverageRenderTime } = usePerformanceMonitor('App');
   const { updates, handleUpdate } = useRealTimeUpdates('current-user-id');
 
@@ -137,27 +134,6 @@ function App() {
     }
   };
 
-  // Show loading spinner while checking authentication
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>
-    );
-  }
-
-  // Show login form if not authenticated
-  if (!isAuthenticated) {
-    return (
-      <ErrorBoundary FallbackComponent={ErrorFallback}>
-        <QueryClientProvider client={queryClient}>
-          <LoginForm />
-        </QueryClientProvider>
-      </ErrorBoundary>
-    );
-  }
-
-  // Show main application if authenticated
   return (
     <ErrorBoundary FallbackComponent={ErrorFallback}>
       <QueryClientProvider client={queryClient}>

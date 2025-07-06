@@ -1,9 +1,9 @@
 import React, { createContext, useContext, useReducer, ReactNode } from 'react';
 import { User, Project, Task, Sprint, Notification, Activity } from '../types';
 import { mockUsers, mockProjects, mockTasks, mockSprints, mockNotifications, mockActivities } from '../data/mockData';
-import { useAuth } from '../hooks/useAuth';
 
 interface AppState {
+  currentUser: User | null;
   users: User[];
   projects: Project[];
   tasks: Task[];
@@ -24,6 +24,7 @@ interface AppState {
 }
 
 type AppAction =
+  | { type: 'SET_CURRENT_USER'; payload: User | null }
   | { type: 'SET_LOADING'; payload: boolean }
   | { type: 'SET_ERROR'; payload: string | null }
   | { type: 'UPDATE_USER'; payload: User }
@@ -39,6 +40,7 @@ type AppAction =
   | { type: 'UPDATE_SETTINGS'; payload: Partial<AppState['settings']> };
 
 const initialState: AppState = {
+  currentUser: mockUsers[0], // Default to first user (Sarah Johnson)
   users: mockUsers,
   projects: mockProjects,
   tasks: mockTasks,
@@ -60,6 +62,8 @@ const initialState: AppState = {
 
 function appReducer(state: AppState, action: AppAction): AppState {
   switch (action.type) {
+    case 'SET_CURRENT_USER':
+      return { ...state, currentUser: action.payload };
     case 'SET_LOADING':
       return { ...state, loading: action.payload };
     case 'SET_ERROR':
@@ -70,6 +74,7 @@ function appReducer(state: AppState, action: AppAction): AppState {
         users: state.users.map(user =>
           user.id === action.payload.id ? action.payload : user
         ),
+        currentUser: state.currentUser?.id === action.payload.id ? action.payload : state.currentUser,
       };
     case 'ADD_TASK':
       return {
@@ -80,8 +85,8 @@ function appReducer(state: AppState, action: AppAction): AppState {
             id: Date.now().toString(),
             type: 'task_created',
             title: 'Task Created',
-            description: `Task "${action.payload.title}" was created`,
-            userId: action.payload.createdBy,
+            description: `${state.currentUser?.name} created "${action.payload.title}"`,
+            userId: state.currentUser?.id || '',
             projectId: action.payload.projectId,
             taskId: action.payload.id,
             createdAt: new Date().toISOString(),
@@ -100,8 +105,8 @@ function appReducer(state: AppState, action: AppAction): AppState {
             id: Date.now().toString(),
             type: 'task_updated',
             title: 'Task Updated',
-            description: `Task "${action.payload.title}" was updated`,
-            userId: action.payload.createdBy,
+            description: `${state.currentUser?.name} updated "${action.payload.title}"`,
+            userId: state.currentUser?.id || '',
             projectId: action.payload.projectId,
             taskId: action.payload.id,
             createdAt: new Date().toISOString(),
@@ -123,8 +128,8 @@ function appReducer(state: AppState, action: AppAction): AppState {
             id: Date.now().toString(),
             type: 'project_created',
             title: 'Project Created',
-            description: `Project "${action.payload.name}" was created`,
-            userId: action.payload.managerId,
+            description: `${state.currentUser?.name} created "${action.payload.name}" project`,
+            userId: state.currentUser?.id || '',
             projectId: action.payload.id,
             createdAt: new Date().toISOString(),
           },
