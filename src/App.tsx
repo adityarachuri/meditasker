@@ -3,9 +3,10 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { ErrorBoundary } from 'react-error-boundary';
 import { queryClient } from './services/api';
 import { AuthProvider } from './context/AuthContext';
-import { ProtectedRoute } from './components/Auth/ProtectedRoute';
 import { AppProvider } from './context/AppContext';
+import { ProtectedRoute } from './components/Auth/ProtectedRoute';
 import { LazyLoadWrapper } from './components/Performance/LazyLoadWrapper';
+import { DataInitializer } from './components/Performance/DataInitializer';
 import { RealTimeUpdates, useRealTimeUpdates } from './components/Advanced/RealTimeUpdates';
 import { Sidebar } from './components/Layout/Sidebar';
 import { Header } from './components/Layout/Header';
@@ -44,6 +45,7 @@ function ErrorFallback({ error, resetErrorBoundary }: { error: Error; resetError
 
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [isDataInitialized, setIsDataInitialized] = useState(false);
   const { getAverageRenderTime } = usePerformanceMonitor('App');
   const { updates, handleUpdate } = useRealTimeUpdates('current-user-id');
 
@@ -135,6 +137,17 @@ function App() {
         );
     }
   };
+
+  // Show data initializer if not initialized
+  if (!isDataInitialized) {
+    return (
+      <ErrorBoundary FallbackComponent={ErrorFallback}>
+        <QueryClientProvider client={queryClient}>
+          <DataInitializer onInitialized={() => setIsDataInitialized(true)} />
+        </QueryClientProvider>
+      </ErrorBoundary>
+    );
+  }
 
   return (
     <ErrorBoundary FallbackComponent={ErrorFallback}>

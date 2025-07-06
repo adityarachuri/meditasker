@@ -17,6 +17,8 @@ interface VirtualizedTableProps<T> {
   onRowClick?: (item: T, index: number) => void;
   className?: string;
   loading?: boolean;
+  enableVirtualization?: boolean;
+  optimizeForLargeDatasets?: boolean;
   onLoadMore?: () => void;
   hasMore?: boolean;
   enableVirtualization?: boolean;
@@ -35,6 +37,8 @@ export function VirtualizedTable<T extends { id: string }>({
   hasMore = false,
   enableVirtualization = true,
   optimizeForLargeDatasets = true
+  enableVirtualization = true,
+  optimizeForLargeDatasets = true
 }: VirtualizedTableProps<T>) {
   const totalWidth = useMemo(() => 
     columns.reduce((sum, col) => sum + col.width, 0), 
@@ -45,7 +49,9 @@ export function VirtualizedTable<T extends { id: string }>({
     const item = data[index];
     
     // Enterprise: Load more when approaching end (larger buffer for 1M records)
+    // Enterprise: Use larger buffer for smoother loading with large datasets
     const loadBuffer = optimizeForLargeDatasets ? 20 : 5;
+    if (onLoadMore && hasMore && !loading && index >= data.length - loadBuffer) {
     if (onLoadMore && hasMore && !loading && index >= data.length - loadBuffer) {
       onLoadMore();
     }
@@ -108,7 +114,7 @@ export function VirtualizedTable<T extends { id: string }>({
         itemCount={itemCount}
         itemSize={rowHeight}
         width={totalWidth}
-        overscanCount={optimizeForLargeDatasets ? 20 : 10}
+        overscanCount={optimizeForLargeDatasets ? 20 : 5}
       >
         {Row}
       </List>
@@ -117,7 +123,7 @@ export function VirtualizedTable<T extends { id: string }>({
       {loading && (
         <div className="flex items-center justify-center py-4">
           <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mr-2"></div>
-          <span className="text-sm text-gray-600">Loading more data...</span>
+          <span className="text-sm text-gray-600">Loading more data from 1M+ records...</span>
         </div>
       )}
     </div>

@@ -10,6 +10,8 @@ interface PaginatedResult<T> {
 interface UsePaginatedDataOptions {
   pageSize?: number;
   initialLoad?: boolean;
+  enableCaching?: boolean;
+  optimizeForLargeDatasets?: boolean;
   filters?: Record<string, any>;
   enableCaching?: boolean;
   optimizeForLargeDatasets?: boolean;
@@ -22,6 +24,8 @@ export function usePaginatedData<T>(
   const {
     pageSize = 200, // Larger page size for enterprise
     initialLoad = true,
+    enableCaching = true,
+    optimizeForLargeDatasets = true,
     filters = {},
     enableCaching = true,
     optimizeForLargeDatasets = true
@@ -36,6 +40,9 @@ export function usePaginatedData<T>(
 
   const filtersRef = useRef(filters);
   const abortControllerRef = useRef<AbortController | null>(null);
+  
+  // Enterprise: Track performance metrics
+  const queryTimeRef = useRef<number[]>([]);
 
   // Reset data when filters change
   useEffect(() => {
@@ -63,6 +70,9 @@ export function usePaginatedData<T>(
     // Cancel previous request
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
+      // Enterprise: Log aborted requests
+      console.log(`Enterprise: Aborted previous ${dataType} query due to new request`);
+      abortControllerRef.current = null;
     }
 
     abortControllerRef.current = new AbortController();
@@ -73,6 +83,9 @@ export function usePaginatedData<T>(
     const startTime = performance.now();
 
     try {
+      // Enterprise: Track query time
+      const startTime = performance.now();
+      
       let result: PaginatedResult<T>;
 
       switch (dataType) {
@@ -99,6 +112,14 @@ export function usePaginatedData<T>(
       setTotal(result.total);
       setCurrentPage(page);
       
+      // Enterprise: Record query performance
+      const queryTime = performance.now() - startTime;
+      queryTimeRef.current.push(queryTime);
+      if (queryTimeRef.current.length > 20) queryTimeRef.current.shift();
+      
+      // Enterprise: Log slow queries
+      if (queryTime > 500) console.warn(`Enterprise: Slow ${dataType} query detected: ${queryTime.toFixed(2)}ms`);
+      
       // Enterprise: Log performance metrics for large datasets
       if (optimizeForLargeDatasets) {
         const loadTime = performance.now() - startTime;
@@ -119,6 +140,8 @@ export function usePaginatedData<T>(
   const loadMore = useCallback(() => {
     // Enterprise: Throttle load more for large datasets
     if (!loading && hasMore && (!optimizeForLargeDatasets || data.length < 50000)) {
+    }
+    if (!loading && hasMore && (!optimizeForLargeDatasets || data.length < 50000)) {
       loadPage(currentPage + 1, false);
     }
   }, [loading, hasMore, currentPage, loadPage]);
@@ -127,6 +150,9 @@ export function usePaginatedData<T>(
     if (enableCaching) {
       databaseService.clearCache();
     }
+    setCurrentPage(1); 
+    // Enterprise: Reset performance metrics
+    queryTimeRef.current = [];
     setData([]);
     setCurrentPage(1);
     setHasMore(true);
@@ -138,7 +164,16 @@ export function usePaginatedData<T>(
     filtersRef.current = newFilters;
     setData([]);
     setCurrentPage(1);
-    setHasMore(true);
+    setHasMore(true); 
+    
+    // Enterprise: Debounce search for large datasets
+    if (optimizeForLargeDatasets) {
+      setTimeout(() => {
+        loadPage(1, true);
+      }, 300);
+    } else {
+      loadPage(1, true);
+    }
     
     // Enterprise: Debounce search for large datasets
     if (optimizeForLargeDatasets) {
@@ -170,5 +205,14 @@ export function usePaginatedData<T>(
     refresh,
     search,
     pageSize
+    
+    // Enterprise metrics (commented out to avoid breaking interface)
+    // getPerformanceMetrics: () => {
+    //   const times = queryTimeRef.current;
+    //   return {
+    //     avgQueryTime: times.length ? times.reduce((a, b) => a + b, 0) / times.length : 0,
+    //     totalQueries: times.length
+    //   };
+    // }
   };
 }
