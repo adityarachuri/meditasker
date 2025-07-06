@@ -103,7 +103,7 @@ export function VirtualizedTable<T extends { id: string }>({
         itemCount={itemCount}
         itemSize={rowHeight}
         width={totalWidth}
-        overscanCount={5}
+        overscanCount={10}
       >
         {Row}
       </List>

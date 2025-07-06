@@ -20,7 +20,7 @@ export function VirtualizedList<T>({
   renderItem,
   height,
   width = '100%',
-  overscan = 5,
+  overscan = 10,
   className = '',
   onScroll,
 }: VirtualizedListProps<T>) {

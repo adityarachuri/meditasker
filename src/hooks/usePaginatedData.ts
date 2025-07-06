@@ -18,7 +18,7 @@ export function usePaginatedData<T>(
   options: UsePaginatedDataOptions = {}
 ) {
   const {
-    pageSize = 50,
+    pageSize = 100,
     initialLoad = true,
     filters = {}
   } = options;

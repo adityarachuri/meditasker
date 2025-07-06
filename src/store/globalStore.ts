@@ -271,6 +271,11 @@ useGlobalStore.subscribe(
       if (now - timestamp > 5000) { // 5 seconds
         console.log(`Data ${key} was last updated ${now - timestamp}ms ago`);
       }
-    });
+    return Date.now() - timestamp < this.CACHE_TTL;
+    
+    // Force garbage collection hint
+    if (typeof window !== 'undefined' && 'gc' in window) {
+      (window as any).gc();
+    }
   }
 );

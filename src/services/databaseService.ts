@@ -61,7 +61,7 @@ export class DatabaseService {
       });
       
       // Allow event loop to process other tasks
-      if (i % 1000 === 0) {
+      if (i % 5000 === 0) {
         await new Promise(resolve => setTimeout(resolve, 0));
         console.log(`Indexed ${i + batch.length} users...`);
       }
@@ -77,7 +77,7 @@ export class DatabaseService {
     this.projectIndex.clear();
     this.projectsByStatus.clear();
     
-    const batchSize = 250;
+    const batchSize = 500;
     for (let i = 0; i < projects.length; i += batchSize) {
       const batch = projects.slice(i, i + batchSize);
       
@@ -90,7 +90,7 @@ export class DatabaseService {
         this.projectsByStatus.get(project.status)!.add(project.id);
       });
       
-      if (i % 500 === 0) {
+      if (i % 2500 === 0) {
         await new Promise(resolve => setTimeout(resolve, 0));
         console.log(`Indexed ${i + batch.length} projects...`);
       }
@@ -108,7 +108,7 @@ export class DatabaseService {
     this.tasksByAssignee.clear();
     this.tasksByStatus.clear();
     
-    const batchSize = 500;
+    const batchSize = 2000;
     for (let i = 0; i < tasks.length; i += batchSize) {
       const batch = tasks.slice(i, i + batchSize);
       
@@ -136,7 +136,7 @@ export class DatabaseService {
         this.tasksByStatus.get(task.status)!.add(task.id);
       });
       
-      if (i % 2000 === 0) {
+      if (i % 10000 === 0) {
         await new Promise(resolve => setTimeout(resolve, 0));
         console.log(`Indexed ${i + batch.length} tasks...`);
       }
