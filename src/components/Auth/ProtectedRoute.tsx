@@ -1,5 +1,6 @@
 import React from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { useSession } from '../../hooks/useSession';
 import { LoginForm } from './LoginForm';
 import { Loader2 } from 'lucide-react';
 
@@ -15,6 +16,11 @@ export function ProtectedRoute({
   fallback 
 }: ProtectedRouteProps) {
   const { state } = useAuth();
+  const { isActive } = useSession({
+    onExpire: () => {
+      // Session expired, will be handled by AuthContext
+    }
+  });
 
   // Show loading spinner while checking authentication
   if (state.isLoading) {
@@ -29,7 +35,7 @@ export function ProtectedRoute({
   }
 
   // Show login form if not authenticated
-  if (!state.isAuthenticated || !state.user) {
+  if (!state.isAuthenticated || !state.user || !isActive) {
     return fallback || <LoginForm />;
   }
 

@@ -3,6 +3,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { LoginForm } from '../LoginForm';
 import { AuthProvider } from '../../../context/AuthContext';
+import { sessionService } from '../../../services/sessionService';
 
 // Mock localStorage
 const mockLocalStorage = {
@@ -14,6 +15,13 @@ const mockLocalStorage = {
 Object.defineProperty(window, 'localStorage', {
   value: mockLocalStorage,
 });
+
+// Mock sessionService
+jest.mock('../../../services/sessionService', () => ({
+  sessionService: {
+    configure: jest.fn()
+  }
+}));
 
 const renderWithAuth = (component: React.ReactElement) => {
   return render(
@@ -168,6 +176,36 @@ describe('LoginForm', () => {
       expect(screen.getByText('Login Failed')).toBeInTheDocument();
       expect(screen.getByText('Invalid email or password')).toBeInTheDocument();
     });
+  });
+  
+  it('configures session service based on remember me setting', async () => {
+    const user = userEvent.setup();
+    renderWithAuth(<LoginForm />);
+    
+    const emailInput = screen.getByLabelText('Email address');
+    const passwordInput = screen.getByLabelText('Password');
+    const rememberMeCheckbox = screen.getByLabelText('Remember me');
+    const submitButton = screen.getByRole('button', { name: 'Sign in' });
+    
+    // Without remember me
+    await user.type(emailInput, 'admin@softique-health-insure.com');
+    await user.type(passwordInput, 'password123');
+    await user.click(submitButton);
+    
+    expect(sessionService.configure).toHaveBeenCalledWith(expect.objectContaining({
+      timeout: 30 * 60 * 1000, // 30 minutes
+      secureStorage: true
+    }));
+    
+    // With remember me
+    jest.clearAllMocks();
+    await user.click(rememberMeCheckbox);
+    await user.click(submitButton);
+    
+    expect(sessionService.configure).toHaveBeenCalledWith(expect.objectContaining({
+      timeout: 7 * 24 * 60 * 60 * 1000, // 7 days
+      secureStorage: false
+    }));
   });
 
   it('handles login failure with wrong password', async () => {

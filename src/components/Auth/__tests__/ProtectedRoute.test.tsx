@@ -2,6 +2,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ProtectedRoute } from '../ProtectedRoute';
 import { AuthProvider, useAuth } from '../../../context/AuthContext';
+import { useSession } from '../../../hooks/useSession';
 
 // Mock the useAuth hook
 jest.mock('../../../context/AuthContext', () => ({
@@ -9,7 +10,13 @@ jest.mock('../../../context/AuthContext', () => ({
   useAuth: jest.fn(),
 }));
 
+// Mock the useSession hook
+jest.mock('../../../hooks/useSession', () => ({
+  useSession: jest.fn()
+}));
+
 const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>;
+const mockUseSession = useSession as jest.MockedFunction<typeof useSession>;
 
 const TestComponent = () => <div>Protected Content</div>;
 
@@ -24,6 +31,19 @@ const renderWithAuth = (component: React.ReactElement) => {
 describe('ProtectedRoute', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    
+    // Default mock implementation for useSession
+    mockUseSession.mockReturnValue({
+      isActive: true,
+      sessionInfo: null,
+      timeRemaining: 0,
+      formattedTimeRemaining: '00:00',
+      startSession: jest.fn(),
+      endSession: jest.fn(),
+      renewSession: jest.fn(),
+      user: null,
+      token: null
+    });
   });
 
   it('shows loading spinner when authentication is loading', () => {
@@ -62,6 +82,41 @@ describe('ProtectedRoute', () => {
       login: jest.fn(),
       logout: jest.fn(),
       clearError: jest.fn(),
+    });
+
+    render(
+      <ProtectedRoute>
+        <TestComponent />
+      </ProtectedRoute>
+    );
+
+    expect(screen.getByText('Welcome back')).toBeInTheDocument();
+    expect(screen.queryByText('Protected Content')).not.toBeInTheDocument();
+  });
+
+  it('shows login form when session is inactive', () => {
+    mockUseAuth.mockReturnValue({
+      state: {
+        user: {
+          id: '1',
+          email: 'test@example.com',
+          name: 'Test User',
+          role: 'developer',
+          department: 'Engineering',
+        },
+        isAuthenticated: true,
+        isLoading: false,
+        error: null,
+        token: 'mock-token',
+      },
+      login: jest.fn(),
+      logout: jest.fn(),
+      clearError: jest.fn(),
+    });
+    
+    mockUseSession.mockReturnValue({
+      ...mockUseSession(),
+      isActive: false
     });
 
     render(

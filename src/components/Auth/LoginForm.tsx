@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { sessionService } from '../../services/sessionService';
 import { Eye, EyeOff, Lock, Mail, AlertCircle, Loader2 } from 'lucide-react';
 
 export function LoginForm() {
@@ -9,6 +10,7 @@ export function LoginForm() {
     password: '',
   });
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const [validationErrors, setValidationErrors] = useState<{
     email?: string;
     password?: string;
@@ -49,6 +51,19 @@ export function LoginForm() {
     
     if (!validateForm()) {
       return;
+    }
+
+    // Configure session timeout based on "Remember me" setting
+    if (rememberMe) {
+      sessionService.configure({
+        timeout: 7 * 24 * 60 * 60 * 1000, // 7 days
+        secureStorage: false // Use localStorage for persistent sessions
+      });
+    } else {
+      sessionService.configure({
+        timeout: 30 * 60 * 1000, // 30 minutes
+        secureStorage: true // Use sessionStorage for better security
+      });
     }
 
     try {
@@ -223,6 +238,19 @@ export function LoginForm() {
           </p>
         </div>
       </div>
+        {/* Remember Me */}
+        <div className="flex items-center justify-between">
+          <label className="flex items-center">
+            <input
+              type="checkbox"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            />
+            <span className="ml-2 text-sm text-gray-600">Remember me</span>
+          </label>
+        </div>
+
     </div>
   );
 }

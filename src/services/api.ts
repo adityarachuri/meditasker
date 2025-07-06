@@ -1,4 +1,5 @@
 import { QueryClient } from '@tanstack/react-query';
+import { sessionService } from './sessionService';
 
 // API Configuration
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://api.softique-health-insure.com';
@@ -62,7 +63,7 @@ class ApiClient {
   }
 
   private getAuthToken(): string {
-    return localStorage.getItem('auth_token') || '';
+    return sessionService.getToken() || '';
   }
 
   private generateRequestId(): string {
