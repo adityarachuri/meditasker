@@ -250,6 +250,13 @@ export function LoginForm() {
             Password for all demo accounts: <code className="bg-gray-100 px-1 rounded">password123</code>
           </p>
         </div>
+
+        {/* Copyright and Disclaimer */}
+        <div className="mt-6 pt-6 border-t border-gray-200 text-center text-xs text-gray-500">
+          <p>By accessing this system, you agree to our terms of service and privacy policy.</p>
+          <p>Unauthorized access is prohibited and may be subject to legal action.</p>
+          <p className="mt-2">© Copyrighted to Softique Pvt Ltd., 2025. All rights reserved.</p>
+        </div>
       </div>
 
       {/* Copyright and Disclaimer */}
