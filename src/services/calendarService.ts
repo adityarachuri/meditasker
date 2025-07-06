@@ -36,7 +36,7 @@ export class CalendarService {
   }
 
   private async generateEventsFromTasks(): Promise<void> {
-    const tasksResult = await databaseService.getTasks(1, 10000); // Get first 10k tasks
+    const tasksResult = await databaseService.getTasks(1, 5000); // Get first 5k tasks
     
     tasksResult.data.forEach(task => {
       if (task.dueDate) {
@@ -65,7 +65,7 @@ export class CalendarService {
   }
 
   private async generateEventsFromProjects(): Promise<void> {
-    const projectsResult = await databaseService.getProjects(1, 1000); // Get first 1k projects
+    const projectsResult = await databaseService.getProjects(1, 500); // Get first 500 projects
     
     projectsResult.data.forEach(project => {
       // Project start event
@@ -112,7 +112,7 @@ export class CalendarService {
   }
 
   private async generateSampleMeetings(): Promise<void> {
-    const usersResult = await databaseService.getUsers(1, 100); // Get first 100 users
+    const usersResult = await databaseService.getUsers(1, 50); // Get first 50 users
     const users = usersResult.data;
     
     // Generate recurring meetings
@@ -127,7 +127,7 @@ export class CalendarService {
     startDate.setMonth(startDate.getMonth() - 1); // Start from last month
 
     meetingTypes.forEach((meetingType, index) => {
-      for (let i = 0; i < 30; i++) { // Generate 30 instances
+      for (let i = 0; i < 15; i++) { // Generate 15 instances
         const eventDate = new Date(startDate);
         
         if (meetingType.recurrence === 'daily') {
