@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Loader2, Database, Users, FolderOpen, CheckSquare } from 'lucide-react';
 import { databaseService } from '../../services/databaseService';
-import { generateMockData } from '../../data/mockDataGenerator';
+import { mockDataGenerator } from '../../data/mockDataGenerator';
 
 interface DataInitializerProps {
   onInitialized: () => void;
@@ -73,7 +73,7 @@ export function DataInitializer({ onInitialized }: DataInitializerProps) {
       // Step 2: Load user data
       updateStep('users', { loading: true });
       await new Promise(resolve => setTimeout(resolve, 600));
-      const userData = generateMockData('users', 50);
+      const userData = mockDataGenerator.generateUsers(50);
       await databaseService.bulkInsert('users', userData);
       updateStep('users', { loading: false, completed: true });
       setProgress(50);
@@ -82,7 +82,7 @@ export function DataInitializer({ onInitialized }: DataInitializerProps) {
       // Step 3: Load projects
       updateStep('projects', { loading: true });
       await new Promise(resolve => setTimeout(resolve, 700));
-      const projectData = generateMockData('projects', 25);
+      const projectData = mockDataGenerator.generateProjects(25);
       await databaseService.bulkInsert('projects', projectData);
       updateStep('projects', { loading: false, completed: true });
       setProgress(75);
@@ -91,7 +91,7 @@ export function DataInitializer({ onInitialized }: DataInitializerProps) {
       // Step 4: Load tasks
       updateStep('tasks', { loading: true });
       await new Promise(resolve => setTimeout(resolve, 900));
-      const taskData = generateMockData('tasks', 100);
+      const taskData = mockDataGenerator.generateTasks(100);
       await databaseService.bulkInsert('tasks', taskData);
       updateStep('tasks', { loading: false, completed: true });
       setProgress(100);
