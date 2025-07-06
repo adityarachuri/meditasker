@@ -6,7 +6,6 @@ import { AuthProvider } from './context/AuthContext';
 import { AppProvider } from './context/AppContext';
 import { ProtectedRoute } from './components/Auth/ProtectedRoute';
 import { SessionManager } from './components/Auth/SessionManager';
-import { SessionManager } from './components/Auth/SessionManager';
 import { LazyLoadWrapper } from './components/Performance/LazyLoadWrapper';
 import { DataInitializer } from './components/Performance/DataInitializer';
 import { RealTimeUpdates, useRealTimeUpdates } from './components/Advanced/RealTimeUpdates';
@@ -14,7 +13,6 @@ import { Sidebar } from './components/Layout/Sidebar';
 import { Header } from './components/Layout/Header';
 import { Dashboard } from './components/Dashboard/Dashboard';
 import { ProjectListVirtualized } from './components/Projects/ProjectListVirtualized';
-import { Footer } from './components/Layout/Footer';
 import { Footer } from './components/Layout/Footer';
 import { TaskListVirtualized } from './components/Tasks/TaskListVirtualized';
 import { Calendar } from './components/Calendar/Calendar';
@@ -50,7 +48,6 @@ function ErrorFallback({ error, resetErrorBoundary }: { error: Error; resetError
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isDataInitialized, setIsDataInitialized] = useState(false);
-  const [showSessionManager, setShowSessionManager] = useState(true);
   const [showSessionManager, setShowSessionManager] = useState(true);
   const { getAverageRenderTime } = usePerformanceMonitor('App');
   const { updates, handleUpdate } = useRealTimeUpdates('current-user-id');
@@ -174,18 +171,10 @@ function App() {
                         }} 
                       /> : null
                     }
-                    sessionManager={showSessionManager ? 
-                      <SessionManager 
-                        onLogout={() => {
-                          // Handle logout
-                        }} 
-                      /> : null
-                    }
                   />
                   <main className="flex-1 p-6">
                     {renderContent()}
                   </main>
-                  <Footer />
                   <Footer />
                   
                   {/* Real-time updates indicator */}
