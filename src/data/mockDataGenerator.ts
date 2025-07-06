@@ -24,7 +24,7 @@ export class MockDataGenerator {
   // Generate users in smaller batches for medium-scale datasets
   generateUsers(count: number): User[] {
     const users: User[] = [];
-    const batchSize = 1000;
+    const batchSize = 500;
     
     for (let i = 0; i < count; i += batchSize) {
       const currentBatch = Math.min(batchSize, count - i);
@@ -32,7 +32,7 @@ export class MockDataGenerator {
       users.push(...batch);
       
       // Allow garbage collection between batches
-      if (i % 5000 === 0) {
+      if (i % 1000 === 0) {
         console.log(`Generated ${i + currentBatch} users...`);
       }
     }
@@ -63,14 +63,14 @@ export class MockDataGenerator {
 
   generateProjects(count: number): Project[] {
     const projects: Project[] = [];
-    const batchSize = 500;
+    const batchSize = 250;
     
     for (let i = 0; i < count; i += batchSize) {
       const currentBatch = Math.min(batchSize, count - i);
       const batch = this.generateProjectBatch(i, currentBatch);
       projects.push(...batch);
       
-      if (i % 2500 === 0) {
+      if (i % 500 === 0) {
         console.log(`Generated ${i + currentBatch} projects...`);
       }
     }
@@ -115,14 +115,14 @@ export class MockDataGenerator {
 
   generateTasks(count: number): Task[] {
     const tasks: Task[] = [];
-    const batchSize = 1000;
+    const batchSize = 500;
     
     for (let i = 0; i < count; i += batchSize) {
       const currentBatch = Math.min(batchSize, count - i);
       const batch = this.generateTaskBatch(i, currentBatch);
       tasks.push(...batch);
       
-      if (i % 10000 === 0) {
+      if (i % 2000 === 0) {
         console.log(`Generated ${i + currentBatch} tasks...`);
       }
     }
