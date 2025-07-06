@@ -97,6 +97,7 @@ export function TeamList() {
           <p className="text-gray-500">No team members found matching your criteria.</p>
         </div>
       )}
+      
     </div>
   );
 }

@@ -131,6 +131,7 @@ export function NotificationList() {
           <p className="text-gray-500">No notifications yet</p>
         </div>
       )}
+      
     </div>
   );
 }

@@ -13,6 +13,7 @@ import { Sidebar } from './components/Layout/Sidebar';
 import { Header } from './components/Layout/Header';
 import { Dashboard } from './components/Dashboard/Dashboard';
 import { ProjectListVirtualized } from './components/Projects/ProjectListVirtualized';
+import { Footer } from './components/Layout/Footer';
 import { TaskListVirtualized } from './components/Tasks/TaskListVirtualized';
 import { Calendar } from './components/Calendar/Calendar';
 import { TeamList } from './components/Team/TeamList';
@@ -174,6 +175,7 @@ function App() {
                   <main className="flex-1 p-6">
                     {renderContent()}
                   </main>
+                  <Footer />
                   
                   {/* Real-time updates indicator */}
                   <div className="fixed bottom-4 right-4 z-50">

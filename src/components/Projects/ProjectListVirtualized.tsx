@@ -213,6 +213,7 @@ export function ProjectListVirtualized() {
           <p className="text-gray-500">No projects found matching your criteria from 1M+ records.</p>
         </div>
       )}
+      
     </div>
   );
 }
