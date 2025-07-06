@@ -1,0 +1,176 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Theme and appearance customizations */
+:root {
+  --color-primary-rgb: 59, 130, 246; /* blue-500 */
+  --color-primary-hover-rgb: 37, 99, 235; /* blue-600 */
+  --color-primary-light-rgb: 219, 234, 254; /* blue-100 */
+}
+
+[data-color-scheme="green"] {
+  --color-primary-rgb: 34, 197, 94; /* green-500 */
+  --color-primary-hover-rgb: 22, 163, 74; /* green-600 */
+  --color-primary-light-rgb: 220, 252, 231; /* green-100 */
+}
+
+[data-color-scheme="purple"] {
+  --color-primary-rgb: 139, 92, 246; /* purple-500 */
+  --color-primary-hover-rgb: 124, 58, 237; /* purple-600 */
+  --color-primary-light-rgb: 237, 233, 254; /* purple-100 */
+}
+
+[data-color-scheme="orange"] {
+  --color-primary-rgb: 249, 115, 22; /* orange-500 */
+  --color-primary-hover-rgb: 234, 88, 12; /* orange-600 */
+  --color-primary-light-rgb: 255, 237, 213; /* orange-100 */
+}
+
+/* Apply custom colors to UI elements */
+.bg-blue-600, .bg-blue-500 {
+  background-color: rgb(var(--color-primary-rgb)) !important;
+}
+
+.hover\:bg-blue-700:hover, .hover\:bg-blue-600:hover {
+  background-color: rgb(var(--color-primary-hover-rgb)) !important;
+}
+
+.text-blue-600, .text-blue-700 {
+  color: rgb(var(--color-primary-rgb)) !important;
+}
+
+.border-blue-500, .border-blue-700 {
+  border-color: rgb(var(--color-primary-rgb)) !important;
+}
+
+.bg-blue-50 {
+  background-color: rgb(var(--color-primary-light-rgb)) !important;
+}
+
+.focus\:ring-blue-500:focus {
+  --tw-ring-color: rgb(var(--color-primary-rgb)) !important;
+}
+
+.focus\:border-blue-500:focus {
+  border-color: rgb(var(--color-primary-rgb)) !important;
+}
+
+/* Sidebar active state */
+.bg-blue-50.text-blue-700 {
+  background-color: rgb(var(--color-primary-light-rgb)) !important;
+  color: rgb(var(--color-primary-rgb)) !important;
+}
+
+/* Button styles */
+button.bg-blue-600 {
+  background-color: rgb(var(--color-primary-rgb)) !important;
+}
+
+button.bg-blue-600:hover {
+  background-color: rgb(var(--color-primary-hover-rgb)) !important;
+}
+
+/* Progress bars */
+.bg-blue-600 {
+  background-color: rgb(var(--color-primary-rgb)) !important;
+}
+
+/* Toggle switches */
+.peer-checked\:bg-blue-600:checked ~ * {
+  background-color: rgb(var(--color-primary-rgb)) !important;
+}
+
+input[type="checkbox"]:checked + .peer-checked\:bg-blue-600 {
+  background-color: rgb(var(--color-primary-rgb)) !important;
+}
+
+/* Focus ring colors */
+.peer-focus\:ring-blue-300:focus ~ * {
+  --tw-ring-color: rgb(var(--color-primary-light-rgb)) !important;
+}
+
+/* Font size variations */
+[data-font-size="small"] {
+  font-size: 14px;
+}
+
+[data-font-size="medium"] {
+  font-size: 16px;
+}
+
+[data-font-size="large"] {
+  font-size: 18px;
+}
+
+/* Compact mode */
+.compact-mode .p-6 {
+  padding: 1rem;
+}
+
+.compact-mode .p-4 {
+  padding: 0.75rem;
+}
+
+.compact-mode .space-y-6 > * + * {
+  margin-top: 1rem;
+}
+
+.compact-mode .space-y-4 > * + * {
+  margin-top: 0.75rem;
+}
+
+/* Disable animations */
+.no-animations *,
+.no-animations *::before,
+.no-animations *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}
+
+/* Dark theme support */
+.dark {
+  color-scheme: dark;
+}
+
+.dark body {
+  background-color: #1f2937;
+  color: #f9fafb;
+}
+
+.dark .bg-white {
+  background-color: #374151;
+}
+
+.dark .bg-gray-50 {
+  background-color: #4b5563;
+}
+
+.dark .bg-gray-100 {
+  background-color: #6b7280;
+}
+
+.dark .text-gray-900 {
+  color: #f9fafb;
+}
+
+.dark .text-gray-700 {
+  color: #d1d5db;
+}
+
+.dark .text-gray-600 {
+  color: #9ca3af;
+}
+
+.dark .text-gray-500 {
+  color: #6b7280;
+}
+
+.dark .border-gray-200 {
+  border-color: #4b5563;
+}
+
+.dark .border-gray-300 {
+  border-color: #6b7280;
+}
