@@ -36,7 +36,7 @@ export function VirtualizedTable<T extends { id: string }>({
   onLoadMore,
   hasMore = false,
   enableVirtualization = true,
-  optimizeForLargeDatasets = true
+  optimizeForLargeDatasets = true,
   enableVirtualization = true,
   optimizeForLargeDatasets = true
 }: VirtualizedTableProps<T>) {
@@ -51,7 +51,6 @@ export function VirtualizedTable<T extends { id: string }>({
     // Enterprise: Load more when approaching end (larger buffer for 1M records)
     // Enterprise: Use larger buffer for smoother loading with large datasets
     const loadBuffer = optimizeForLargeDatasets ? 20 : 5;
-    if (onLoadMore && hasMore && !loading && index >= data.length - loadBuffer) {
     if (onLoadMore && hasMore && !loading && index >= data.length - loadBuffer) {
       onLoadMore();
     }
@@ -86,7 +85,7 @@ export function VirtualizedTable<T extends { id: string }>({
         ))}
       </div>
     );
-  }, [data, columns, onRowClick, onLoadMore, hasMore, loading]);
+  }, [data, columns, onRowClick, onLoadMore, hasMore, loading, optimizeForLargeDatasets]);
 
   const itemCount = hasMore ? data.length + 1 : data.length;
 
