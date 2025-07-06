@@ -28,7 +28,7 @@ export function DataInitializer({ onInitialized }: DataInitializerProps) {
     try {
       // Generate and load users (100,000)
       setCurrentStep('Generating users...');
-      const users = mockDataGenerator.generateUsers(10000);
+      const users = mockDataGenerator.generateUsers(100000);
       setProgress(prev => ({ ...prev, users: 50 }));
 
       setCurrentStep('Indexing users...');
@@ -37,7 +37,7 @@ export function DataInitializer({ onInitialized }: DataInitializerProps) {
 
       // Generate and load projects (10,000)
       setCurrentStep('Generating projects...');
-      const projects = mockDataGenerator.generateProjects(5000);
+      const projects = mockDataGenerator.generateProjects(10000);
       setProgress(prev => ({ ...prev, projects: 50 }));
 
       setCurrentStep('Indexing projects...');
@@ -46,7 +46,7 @@ export function DataInitializer({ onInitialized }: DataInitializerProps) {
 
       // Generate and load tasks (890,000)
       setCurrentStep('Generating tasks...');
-      const tasks = mockDataGenerator.generateTasks(85000);
+      const tasks = mockDataGenerator.generateTasks(890000);
       setProgress(prev => ({ ...prev, tasks: 50 }));
 
       setCurrentStep('Indexing tasks...');
@@ -82,7 +82,7 @@ export function DataInitializer({ onInitialized }: DataInitializerProps) {
           </div>
           <h2 className="text-2xl font-bold text-gray-900 mb-4">Database Ready</h2>
           <p className="text-gray-600 mb-6">
-            Successfully loaded 100K records with optimized indexing for enterprise-scale performance.
+            Successfully loaded 1 million records with enterprise-grade indexing and performance optimizations.
           </p>
           
           <div className="grid grid-cols-3 gap-4 mb-6">
@@ -120,10 +120,10 @@ export function DataInitializer({ onInitialized }: DataInitializerProps) {
         <div className="text-center mb-6">
           <Database className="w-16 h-16 mx-auto text-blue-600 mb-4" />
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
-            Scale to 100K Records
+            Scale to 1 Million Records
           </h2>
           <p className="text-gray-600">
-            Initialize the database with 100,000 records including users, projects, and tasks with optimized indexing for enterprise-scale performance.
+            Initialize the database with 1 million records including users, projects, and tasks with enterprise-grade indexing, caching, and performance optimizations.
           </p>
         </div>
 
@@ -145,7 +145,7 @@ export function DataInitializer({ onInitialized }: DataInitializerProps) {
             <div className="space-y-3">
               <div>
                 <div className="flex justify-between text-sm text-gray-600 mb-1">
-                  <span>Users (10,000)</span>
+                  <span>Users (100,000)</span>
                   <span>{progress.users}%</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2">
@@ -158,7 +158,7 @@ export function DataInitializer({ onInitialized }: DataInitializerProps) {
 
               <div>
                 <div className="flex justify-between text-sm text-gray-600 mb-1">
-                  <span>Projects (5,000)</span>
+                  <span>Projects (10,000)</span>
                   <span>{progress.projects}%</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2">
@@ -171,7 +171,7 @@ export function DataInitializer({ onInitialized }: DataInitializerProps) {
 
               <div>
                 <div className="flex justify-between text-sm text-gray-600 mb-1">
-                  <span>Tasks (85,000)</span>
+                  <span>Tasks (890,000)</span>
                   <span>{progress.tasks}%</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2">

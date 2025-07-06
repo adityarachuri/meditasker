@@ -1,6 +1,8 @@
 import React from 'react';
-import { Search, Bell, Plus } from 'lucide-react';
+import { Search, Bell, Plus, Database } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
+import { EnterpriseMonitoring } from '../Advanced/EnterpriseMonitoring';
+import { GlobalSearch } from '../Advanced/GlobalSearch';
 
 interface HeaderProps {
   title: string;
@@ -11,6 +13,7 @@ interface HeaderProps {
 
 export function Header({ title, onSearch, onAddNew, showAddButton = false }: HeaderProps) {
   const { state } = useApp();
+  const [showGlobalSearch, setShowGlobalSearch] = React.useState(false);
   const unreadNotifications = state.notifications.filter(n => !n.read).length;
 
   return (
@@ -21,7 +24,16 @@ export function Header({ title, onSearch, onAddNew, showAddButton = false }: Hea
         </div>
 
         <div className="flex items-center space-x-4">
-          {onSearch && (
+          <button
+            onClick={() => setShowGlobalSearch(!showGlobalSearch)}
+            className="flex items-center px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+            title="Global Search (1M+ records)"
+          >
+            <Search className="w-4 h-4 mr-2" />
+            <span className="hidden md:inline">Search All</span>
+          </button>
+          
+          {onSearch && !showGlobalSearch && (
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <input
@@ -32,6 +44,11 @@ export function Header({ title, onSearch, onAddNew, showAddButton = false }: Hea
               />
             </div>
           )}
+
+          {/* Enterprise Monitoring */}
+          <div className="hidden lg:block">
+            <EnterpriseMonitoring />
+          </div>
 
           {showAddButton && onAddNew && (
             <button
@@ -55,6 +72,13 @@ export function Header({ title, onSearch, onAddNew, showAddButton = false }: Hea
           </div>
         </div>
       </div>
+      
+      {/* Global Search Overlay */}
+      {showGlobalSearch && (
+        <div className="absolute top-full left-0 right-0 z-50 p-6 bg-white border-b border-gray-200 shadow-lg">
+          <GlobalSearch onClose={() => setShowGlobalSearch(false)} />
+        </div>
+      )}
     </header>
   );
 }

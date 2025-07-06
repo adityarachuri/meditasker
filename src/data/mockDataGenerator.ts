@@ -1,6 +1,6 @@
 import { User, Project, Task, Sprint, Notification, Activity } from '../types';
 
-// Efficient data generation for large-scale datasets (100K+ records)
+// Enterprise-grade data generation for massive datasets (1M+ records)
 export class MockDataGenerator {
   private static instance: MockDataGenerator;
   private userPool: User[] = [];
@@ -13,6 +13,10 @@ export class MockDataGenerator {
     project: ['planning', 'active', 'on-hold', 'completed', 'cancelled'] as const,
     task: ['todo', 'in-progress', 'review', 'completed', 'blocked'] as const
   };
+  
+  // Enterprise optimization
+  private nameCache = new Map<number, string>();
+  private descriptionCache = new Map<number, string>();
 
   static getInstance(): MockDataGenerator {
     if (!MockDataGenerator.instance) {
@@ -24,7 +28,7 @@ export class MockDataGenerator {
   // Generate users in optimized batches for large-scale datasets
   generateUsers(count: number): User[] {
     const users: User[] = [];
-    const batchSize = 1000;
+    const batchSize = 2000; // Larger batches for enterprise
     
     for (let i = 0; i < count; i += batchSize) {
       const currentBatch = Math.min(batchSize, count - i);
@@ -32,8 +36,12 @@ export class MockDataGenerator {
       users.push(...batch);
       
       // Allow garbage collection between batches
-      if (i % 5000 === 0) {
+      if (i % 10000 === 0) {
         console.log(`Generated ${i + currentBatch} users...`);
+        // Force garbage collection hint
+        if (typeof window !== 'undefined' && 'gc' in window) {
+          (window as any).gc();
+        }
       }
     }
     
@@ -63,15 +71,19 @@ export class MockDataGenerator {
 
   generateProjects(count: number): Project[] {
     const projects: Project[] = [];
-    const batchSize = 500;
+    const batchSize = 1000; // Larger batches for enterprise
     
     for (let i = 0; i < count; i += batchSize) {
       const currentBatch = Math.min(batchSize, count - i);
       const batch = this.generateProjectBatch(i, currentBatch);
       projects.push(...batch);
       
-      if (i % 2500 === 0) {
+      if (i % 5000 === 0) {
         console.log(`Generated ${i + currentBatch} projects...`);
+        // Force garbage collection hint
+        if (typeof window !== 'undefined' && 'gc' in window) {
+          (window as any).gc();
+        }
       }
     }
     
@@ -115,15 +127,19 @@ export class MockDataGenerator {
 
   generateTasks(count: number): Task[] {
     const tasks: Task[] = [];
-    const batchSize = 2000;
+    const batchSize = 5000; // Much larger batches for 890k tasks
     
     for (let i = 0; i < count; i += batchSize) {
       const currentBatch = Math.min(batchSize, count - i);
       const batch = this.generateTaskBatch(i, currentBatch);
       tasks.push(...batch);
       
-      if (i % 10000 === 0) {
+      if (i % 50000 === 0) {
         console.log(`Generated ${i + currentBatch} tasks...`);
+        // Force garbage collection hint
+        if (typeof window !== 'undefined' && 'gc' in window) {
+          (window as any).gc();
+        }
       }
     }
     
@@ -173,6 +189,11 @@ export class MockDataGenerator {
 
   // Utility methods
   private generateName(index: number): string {
+    // Use cache for performance
+    if (this.nameCache.has(index)) {
+      return this.nameCache.get(index)!;
+    }
+    
     const firstNames = [
       'Sarah', 'Michael', 'Emily', 'David', 'Lisa', 'John', 'Jessica', 'Robert',
       'Ashley', 'Christopher', 'Amanda', 'Matthew', 'Jennifer', 'Joshua', 'Michelle'
@@ -182,7 +203,14 @@ export class MockDataGenerator {
       'Davis', 'Miller', 'Wilson', 'Moore', 'Taylor', 'Anderson', 'Thomas', 'Jackson'
     ];
     
-    return `${firstNames[index % firstNames.length]} ${lastNames[Math.floor(index / firstNames.length) % lastNames.length]}`;
+    const name = `${firstNames[index % firstNames.length]} ${lastNames[Math.floor(index / firstNames.length) % lastNames.length]}`;
+    
+    // Cache for reuse (limit cache size)
+    if (this.nameCache.size < 10000) {
+      this.nameCache.set(index, name);
+    }
+    
+    return name;
   }
 
   private generateRandomDate(startYear: number, endYear: number): string {
@@ -193,6 +221,11 @@ export class MockDataGenerator {
   }
 
   private generateProjectDescription(index: number): string {
+    // Use cache for performance
+    if (this.descriptionCache.has(index)) {
+      return this.descriptionCache.get(index)!;
+    }
+    
     const templates = [
       'Advanced system for processing and managing insurance claims with automated workflows',
       'Modern web portal providing members with self-service capabilities and account management',
@@ -202,7 +235,14 @@ export class MockDataGenerator {
       'Machine learning system for detecting fraudulent claims and suspicious activities'
     ];
     
-    return templates[index % templates.length];
+    const description = templates[index % templates.length];
+    
+    // Cache for reuse (limit cache size)
+    if (this.descriptionCache.size < 5000) {
+      this.descriptionCache.set(index, description);
+    }
+    
+    return description;
   }
 
   private generateTaskDescription(index: number): string {
@@ -279,6 +319,13 @@ export class MockDataGenerator {
     this.userPool = [];
     this.projectPool = [];
     this.taskPool = [];
+    this.nameCache.clear();
+    this.descriptionCache.clear();
+    
+    // Force garbage collection hint
+    if (typeof window !== 'undefined' && 'gc' in window) {
+      (window as any).gc();
+    }
   }
 
   getMemoryUsage(): { users: number; projects: number; tasks: number } {
@@ -287,6 +334,24 @@ export class MockDataGenerator {
       projects: this.projectPool.length,
       tasks: this.taskPool.length
     };
+  }
+  
+  // Enterprise performance optimization
+  optimizeForLargeDatasets(): void {
+    // Pre-generate common data patterns
+    console.log('Optimizing for enterprise-scale data generation...');
+    
+    // Pre-populate name cache with common patterns
+    for (let i = 0; i < 1000; i++) {
+      this.generateName(i);
+    }
+    
+    // Pre-populate description cache
+    for (let i = 0; i < 100; i++) {
+      this.generateProjectDescription(i);
+    }
+    
+    console.log('Enterprise optimization complete');
   }
 }
 

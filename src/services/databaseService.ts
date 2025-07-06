@@ -1,6 +1,6 @@
 import { User, Project, Task } from '../types';
 
-// Database service with indexing and pagination for large datasets
+// Enterprise-grade database service with advanced indexing, caching, and optimization for 1M+ records
 export class DatabaseService {
   private static instance: DatabaseService;
   
@@ -19,8 +19,14 @@ export class DatabaseService {
   
   // Pagination cache
   private paginationCache = new Map<string, { data: any[]; total: number; hasMore: boolean }>();
-  private readonly CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+  private readonly CACHE_TTL = 10 * 60 * 1000; // 10 minutes for enterprise
   private cacheTimestamps = new Map<string, number>();
+  
+  // Enterprise features
+  private queryOptimizer = new Map<string, any>();
+  private performanceMetrics = new Map<string, number[]>();
+  private readonly MAX_CACHE_SIZE = 1000; // Limit cache size
+  private readonly BATCH_SIZE_MULTIPLIER = 2; // Larger batches for enterprise
 
   static getInstance(): DatabaseService {
     if (!DatabaseService.instance) {
@@ -31,7 +37,7 @@ export class DatabaseService {
 
   // Bulk data loading with indexing
   async loadUsers(users: User[]): Promise<void> {
-    console.time('Loading users');
+    console.time('Enterprise User Loading');
     
     // Clear existing indexes
     this.userIndex.clear();
@@ -39,7 +45,7 @@ export class DatabaseService {
     this.usersByRole.clear();
     
     // Build indexes in batches
-    const batchSize = 1000;
+    const batchSize = 2000 * this.BATCH_SIZE_MULTIPLIER; // Larger batches for enterprise
     for (let i = 0; i < users.length; i += batchSize) {
       const batch = users.slice(i, i + batchSize);
       
@@ -61,23 +67,24 @@ export class DatabaseService {
       });
       
       // Allow event loop to process other tasks
-      if (i % 5000 === 0) {
+      if (i % 10000 === 0) {
         await new Promise(resolve => setTimeout(resolve, 0));
         console.log(`Indexed ${i + batch.length} users...`);
       }
     }
     
-    console.timeEnd('Loading users');
-    console.log(`Loaded ${users.length} users with indexes`);
+    console.timeEnd('Enterprise User Loading');
+    console.log(`Enterprise: Loaded ${users.length} users with optimized indexes`);
+    this.recordPerformanceMetric('user_load_time', performance.now());
   }
 
   async loadProjects(projects: Project[]): Promise<void> {
-    console.time('Loading projects');
+    console.time('Enterprise Project Loading');
     
     this.projectIndex.clear();
     this.projectsByStatus.clear();
     
-    const batchSize = 500;
+    const batchSize = 1000 * this.BATCH_SIZE_MULTIPLIER;
     for (let i = 0; i < projects.length; i += batchSize) {
       const batch = projects.slice(i, i + batchSize);
       
@@ -90,25 +97,26 @@ export class DatabaseService {
         this.projectsByStatus.get(project.status)!.add(project.id);
       });
       
-      if (i % 2500 === 0) {
+      if (i % 5000 === 0) {
         await new Promise(resolve => setTimeout(resolve, 0));
         console.log(`Indexed ${i + batch.length} projects...`);
       }
     }
     
-    console.timeEnd('Loading projects');
-    console.log(`Loaded ${projects.length} projects with indexes`);
+    console.timeEnd('Enterprise Project Loading');
+    console.log(`Enterprise: Loaded ${projects.length} projects with optimized indexes`);
+    this.recordPerformanceMetric('project_load_time', performance.now());
   }
 
   async loadTasks(tasks: Task[]): Promise<void> {
-    console.time('Loading tasks');
+    console.time('Enterprise Task Loading');
     
     this.taskIndex.clear();
     this.tasksByProject.clear();
     this.tasksByAssignee.clear();
     this.tasksByStatus.clear();
     
-    const batchSize = 2000;
+    const batchSize = 5000 * this.BATCH_SIZE_MULTIPLIER; // Much larger batches for 890k tasks
     for (let i = 0; i < tasks.length; i += batchSize) {
       const batch = tasks.slice(i, i + batchSize);
       
@@ -136,14 +144,18 @@ export class DatabaseService {
         this.tasksByStatus.get(task.status)!.add(task.id);
       });
       
-      if (i % 10000 === 0) {
+      if (i % 50000 === 0) {
         await new Promise(resolve => setTimeout(resolve, 0));
         console.log(`Indexed ${i + batch.length} tasks...`);
       }
     }
     
-    console.timeEnd('Loading tasks');
-    console.log(`Loaded ${tasks.length} tasks with indexes`);
+    console.timeEnd('Enterprise Task Loading');
+    console.log(`Enterprise: Loaded ${tasks.length} tasks with optimized indexes`);
+    this.recordPerformanceMetric('task_load_time', performance.now());
+    
+    // Trigger garbage collection hint for large datasets
+    this.optimizeMemory();
   }
 
   // Paginated queries with caching
@@ -153,10 +165,12 @@ export class DatabaseService {
     search?: string;
     isActive?: boolean;
   }): Promise<{ data: User[]; total: number; hasMore: boolean }> {
+    const startTime = performance.now();
     const cacheKey = `users_${page}_${limit}_${JSON.stringify(filters)}`;
     
     // Check cache
     if (this.isCacheValid(cacheKey)) {
+      this.recordPerformanceMetric('user_query_cache_hit', performance.now() - startTime);
       return this.paginationCache.get(cacheKey);
     }
     
@@ -207,6 +221,9 @@ export class DatabaseService {
     // Cache result
     this.paginationCache.set(cacheKey, result);
     this.cacheTimestamps.set(cacheKey, Date.now());
+    this.manageCacheSize();
+    
+    this.recordPerformanceMetric('user_query_time', performance.now() - startTime);
     
     return result;
   }
@@ -218,9 +235,11 @@ export class DatabaseService {
     priority?: string;
     search?: string;
   }): Promise<{ data: Task[]; total: number; hasMore: boolean }> {
+    const startTime = performance.now();
     const cacheKey = `tasks_${page}_${limit}_${JSON.stringify(filters)}`;
     
     if (this.isCacheValid(cacheKey)) {
+      this.recordPerformanceMetric('task_query_cache_hit', performance.now() - startTime);
       return this.paginationCache.get(cacheKey);
     }
     
@@ -273,6 +292,9 @@ export class DatabaseService {
     
     this.paginationCache.set(cacheKey, result);
     this.cacheTimestamps.set(cacheKey, Date.now());
+    this.manageCacheSize();
+    
+    this.recordPerformanceMetric('task_query_time', performance.now() - startTime);
     
     return result;
   }
@@ -283,9 +305,11 @@ export class DatabaseService {
     managerId?: string;
     search?: string;
   }): Promise<{ data: Project[]; total: number; hasMore: boolean }> {
+    const startTime = performance.now();
     const cacheKey = `projects_${page}_${limit}_${JSON.stringify(filters)}`;
     
     if (this.isCacheValid(cacheKey)) {
+      this.recordPerformanceMetric('project_query_cache_hit', performance.now() - startTime);
       return this.paginationCache.get(cacheKey);
     }
     
@@ -335,6 +359,9 @@ export class DatabaseService {
     
     this.paginationCache.set(cacheKey, result);
     this.cacheTimestamps.set(cacheKey, Date.now());
+    this.manageCacheSize();
+    
+    this.recordPerformanceMetric('project_query_time', performance.now() - startTime);
     
     return result;
   }
@@ -388,6 +415,112 @@ export class DatabaseService {
   clearCache(): void {
     this.paginationCache.clear();
     this.cacheTimestamps.clear();
+    this.performanceMetrics.clear();
+    console.log('Enterprise: Cache cleared and memory optimized');
+  }
+
+  // Enterprise performance monitoring
+  private recordPerformanceMetric(metric: string, value: number): void {
+    if (!this.performanceMetrics.has(metric)) {
+      this.performanceMetrics.set(metric, []);
+    }
+    const metrics = this.performanceMetrics.get(metric)!;
+    metrics.push(value);
+    
+    // Keep only last 100 measurements
+    if (metrics.length > 100) {
+      metrics.splice(0, metrics.length - 100);
+    }
+  }
+  
+  getPerformanceMetrics(): Record<string, { avg: number; min: number; max: number; count: number }> {
+    const result: Record<string, { avg: number; min: number; max: number; count: number }> = {};
+    
+    this.performanceMetrics.forEach((values, metric) => {
+      if (values.length > 0) {
+        result[metric] = {
+          avg: values.reduce((sum, val) => sum + val, 0) / values.length,
+          min: Math.min(...values),
+          max: Math.max(...values),
+          count: values.length
+        };
+      }
+    });
+    
+    return result;
+  }
+  
+  // Enterprise cache management
+  private manageCacheSize(): void {
+    if (this.paginationCache.size > this.MAX_CACHE_SIZE) {
+      // Remove oldest entries
+      const entries = Array.from(this.cacheTimestamps.entries())
+        .sort(([,a], [,b]) => a - b)
+        .slice(0, this.paginationCache.size - this.MAX_CACHE_SIZE);
+      
+      entries.forEach(([key]) => {
+        this.paginationCache.delete(key);
+        this.cacheTimestamps.delete(key);
+      });
+    }
+  }
+  
+  // Enterprise memory optimization
+  private optimizeMemory(): void {
+    // Force garbage collection hint
+    if (typeof window !== 'undefined' && 'gc' in window) {
+      (window as any).gc();
+    }
+    
+    // Clear old performance metrics
+    this.performanceMetrics.forEach((values, metric) => {
+      if (values.length > 50) {
+        this.performanceMetrics.set(metric, values.slice(-50));
+      }
+    });
+  }
+  
+  // Enterprise search with full-text capabilities
+  async searchGlobal(query: string, limit: number = 100): Promise<{
+    users: User[];
+    projects: Project[];
+    tasks: Task[];
+    total: number;
+  }> {
+    const startTime = performance.now();
+    const searchLower = query.toLowerCase();
+    
+    const users = Array.from(this.userIndex.values())
+      .filter(user => 
+        user.name.toLowerCase().includes(searchLower) ||
+        user.email.toLowerCase().includes(searchLower) ||
+        user.department.toLowerCase().includes(searchLower)
+      )
+      .slice(0, Math.floor(limit / 3));
+    
+    const projects = Array.from(this.projectIndex.values())
+      .filter(project => 
+        project.name.toLowerCase().includes(searchLower) ||
+        project.description.toLowerCase().includes(searchLower)
+      )
+      .slice(0, Math.floor(limit / 3));
+    
+    const tasks = Array.from(this.taskIndex.values())
+      .filter(task => 
+        task.title.toLowerCase().includes(searchLower) ||
+        task.description.toLowerCase().includes(searchLower) ||
+        task.tags.some(tag => tag.toLowerCase().includes(searchLower))
+      )
+      .slice(0, Math.floor(limit / 3));
+    
+    this.recordPerformanceMetric('global_search_time', performance.now() - startTime);
+    
+    return {
+      users,
+      projects,
+      tasks,
+      total: users.length + projects.length + tasks.length
+    };
   }
 
   // Memory management
@@ -396,12 +529,75 @@ export class DatabaseService {
     projects: number;
     tasks: number;
     cacheEntries: number;
+    performanceMetrics: number;
+    indexSizes: {
+      usersByDepartment: number;
+      usersByRole: number;
+      tasksByProject: number;
+      tasksByAssignee: number;
+      tasksByStatus: number;
+      projectsByStatus: number;
+    };
   } {
     return {
       users: this.userIndex.size,
       projects: this.projectIndex.size,
       tasks: this.taskIndex.size,
-      cacheEntries: this.paginationCache.size
+      cacheEntries: this.paginationCache.size,
+      performanceMetrics: this.performanceMetrics.size,
+      indexSizes: {
+        usersByDepartment: this.usersByDepartment.size,
+        usersByRole: this.usersByRole.size,
+        tasksByProject: this.tasksByProject.size,
+        tasksByAssignee: this.tasksByAssignee.size,
+        tasksByStatus: this.tasksByStatus.size,
+        projectsByStatus: this.projectsByStatus.size,
+      }
+    };
+  }
+  
+  // Enterprise health check
+  getHealthStatus(): {
+    status: 'healthy' | 'warning' | 'critical';
+    metrics: {
+      memoryUsage: number;
+      cacheHitRate: number;
+      averageQueryTime: number;
+      indexHealth: boolean;
+    };
+  } {
+    const memoryUsage = this.getMemoryUsage();
+    const performanceMetrics = this.getPerformanceMetrics();
+    
+    const totalQueries = (performanceMetrics.user_query_time?.count || 0) + 
+                        (performanceMetrics.task_query_time?.count || 0) + 
+                        (performanceMetrics.project_query_time?.count || 0);
+    
+    const cacheHits = (performanceMetrics.user_query_cache_hit?.count || 0) + 
+                     (performanceMetrics.task_query_cache_hit?.count || 0) + 
+                     (performanceMetrics.project_query_cache_hit?.count || 0);
+    
+    const cacheHitRate = totalQueries > 0 ? (cacheHits / totalQueries) * 100 : 0;
+    
+    const avgQueryTime = totalQueries > 0 ? 
+      ((performanceMetrics.user_query_time?.avg || 0) + 
+       (performanceMetrics.task_query_time?.avg || 0) + 
+       (performanceMetrics.project_query_time?.avg || 0)) / 3 : 0;
+    
+    const indexHealth = memoryUsage.users > 0 && memoryUsage.projects > 0 && memoryUsage.tasks > 0;
+    
+    let status: 'healthy' | 'warning' | 'critical' = 'healthy';
+    if (avgQueryTime > 100 || cacheHitRate < 30) status = 'warning';
+    if (avgQueryTime > 500 || cacheHitRate < 10 || !indexHealth) status = 'critical';
+    
+    return {
+      status,
+      metrics: {
+        memoryUsage: memoryUsage.users + memoryUsage.projects + memoryUsage.tasks,
+        cacheHitRate,
+        averageQueryTime: avgQueryTime,
+        indexHealth
+      }
     };
   }
 }

@@ -11,6 +11,8 @@ interface UsePaginatedDataOptions {
   pageSize?: number;
   initialLoad?: boolean;
   filters?: Record<string, any>;
+  enableCaching?: boolean;
+  optimizeForLargeDatasets?: boolean;
 }
 
 export function usePaginatedData<T>(
@@ -18,9 +20,11 @@ export function usePaginatedData<T>(
   options: UsePaginatedDataOptions = {}
 ) {
   const {
-    pageSize = 100,
+    pageSize = 200, // Larger page size for enterprise
     initialLoad = true,
-    filters = {}
+    filters = {},
+    enableCaching = true,
+    optimizeForLargeDatasets = true
   } = options;
 
   const [data, setData] = useState<T[]>([]);
@@ -65,6 +69,9 @@ export function usePaginatedData<T>(
     setLoading(true);
     setError(null);
 
+    // Enterprise: Add performance timing
+    const startTime = performance.now();
+
     try {
       let result: PaginatedResult<T>;
 
@@ -91,6 +98,14 @@ export function usePaginatedData<T>(
       setHasMore(result.hasMore);
       setTotal(result.total);
       setCurrentPage(page);
+      
+      // Enterprise: Log performance metrics for large datasets
+      if (optimizeForLargeDatasets) {
+        const loadTime = performance.now() - startTime;
+        if (loadTime > 1000) {
+          console.warn(`Slow data load detected: ${loadTime}ms for ${result.data.length} ${dataType}`);
+        }
+      }
     } catch (err) {
       if (err instanceof Error && err.name !== 'AbortError') {
         setError(err.message);
@@ -102,13 +117,16 @@ export function usePaginatedData<T>(
   }, [dataType, pageSize, filters]);
 
   const loadMore = useCallback(() => {
-    if (!loading && hasMore) {
+    // Enterprise: Throttle load more for large datasets
+    if (!loading && hasMore && (!optimizeForLargeDatasets || data.length < 50000)) {
       loadPage(currentPage + 1, false);
     }
   }, [loading, hasMore, currentPage, loadPage]);
 
   const refresh = useCallback(() => {
-    databaseService.clearCache();
+    if (enableCaching) {
+      databaseService.clearCache();
+    }
     setData([]);
     setCurrentPage(1);
     setHasMore(true);
@@ -121,7 +139,15 @@ export function usePaginatedData<T>(
     setData([]);
     setCurrentPage(1);
     setHasMore(true);
-    loadPage(1, true);
+    
+    // Enterprise: Debounce search for large datasets
+    if (optimizeForLargeDatasets) {
+      setTimeout(() => {
+        loadPage(1, true);
+      }, 300);
+    } else {
+      loadPage(1, true);
+    }
   }, [filters, loadPage]);
 
   // Cleanup

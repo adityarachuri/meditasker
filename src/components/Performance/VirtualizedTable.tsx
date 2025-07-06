@@ -19,6 +19,8 @@ interface VirtualizedTableProps<T> {
   loading?: boolean;
   onLoadMore?: () => void;
   hasMore?: boolean;
+  enableVirtualization?: boolean;
+  optimizeForLargeDatasets?: boolean;
 }
 
 export function VirtualizedTable<T extends { id: string }>({
@@ -30,7 +32,9 @@ export function VirtualizedTable<T extends { id: string }>({
   className = '',
   loading = false,
   onLoadMore,
-  hasMore = false
+  hasMore = false,
+  enableVirtualization = true,
+  optimizeForLargeDatasets = true
 }: VirtualizedTableProps<T>) {
   const totalWidth = useMemo(() => 
     columns.reduce((sum, col) => sum + col.width, 0), 
@@ -40,8 +44,9 @@ export function VirtualizedTable<T extends { id: string }>({
   const Row = useCallback(({ index, style }: { index: number; style: React.CSSProperties }) => {
     const item = data[index];
     
-    // Load more when approaching end
-    if (onLoadMore && hasMore && !loading && index >= data.length - 5) {
+    // Enterprise: Load more when approaching end (larger buffer for 1M records)
+    const loadBuffer = optimizeForLargeDatasets ? 20 : 5;
+    if (onLoadMore && hasMore && !loading && index >= data.length - loadBuffer) {
       onLoadMore();
     }
 
@@ -103,7 +108,7 @@ export function VirtualizedTable<T extends { id: string }>({
         itemCount={itemCount}
         itemSize={rowHeight}
         width={totalWidth}
-        overscanCount={10}
+        overscanCount={optimizeForLargeDatasets ? 20 : 10}
       >
         {Row}
       </List>
