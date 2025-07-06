@@ -1,6 +1,6 @@
 import { User, Project, Task, Sprint, Notification, Activity, DashboardMetrics } from '../types';
 
-export const mockUsers: User[] = [
+export const mockUsers: User[] = [ 
   {
     id: '1',
     name: 'Sarah Johnson',
@@ -50,6 +50,206 @@ export const mockUsers: User[] = [
     joinDate: '2022-11-30',
     isActive: true,
     avatar: 'https://images.pexels.com/photos/1181519/pexels-photo-1181519.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop'
+  },
+  {
+    id: '6',
+    name: 'Alex Rivera',
+    email: 'alex.rivera@softique-health-insure.com',
+    role: 'developer',
+    department: 'Product Engineering',
+    joinDate: '2023-05-15',
+    isActive: true,
+    avatar: 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop'
+  },
+  {
+    id: '7',
+    name: 'Priya Patel',
+    email: 'priya.patel@softique-health-insure.com',
+    role: 'qa',
+    department: 'Quality Assurance',
+    joinDate: '2023-06-01',
+    isActive: true,
+    avatar: 'https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop'
+  },
+  {
+    id: '8',
+    name: 'James Wilson',
+    email: 'james.wilson@softique-health-insure.com',
+    role: 'manager',
+    department: 'Project Management',
+    joinDate: '2022-09-12',
+    isActive: true,
+    avatar: 'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop'
+  },
+  {
+    id: '9',
+    name: 'Sophia Lee',
+    email: 'sophia.lee@softique-health-insure.com',
+    role: 'designer',
+    department: 'Product Engineering',
+    joinDate: '2023-07-20',
+    isActive: true,
+    avatar: 'https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop'
+  },
+  {
+    id: '10',
+    name: 'Marcus Johnson',
+    email: 'marcus.johnson@softique-health-insure.com',
+    role: 'developer',
+    department: 'Product Engineering',
+    joinDate: '2023-04-10',
+    isActive: true,
+    avatar: 'https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop'
+  },
+  {
+    id: '11',
+    name: 'Olivia Martinez',
+    email: 'olivia.martinez@softique-health-insure.com',
+    role: 'qa',
+    department: 'Quality Assurance',
+    joinDate: '2023-08-05',
+    isActive: true,
+    avatar: 'https://images.pexels.com/photos/733872/pexels-photo-733872.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop'
+  },
+  {
+    id: '12',
+    name: 'Daniel Kim',
+    email: 'daniel.kim@softique-health-insure.com',
+    role: 'developer',
+    department: 'DevOps',
+    joinDate: '2023-02-15',
+    isActive: true,
+    avatar: 'https://images.pexels.com/photos/91227/pexels-photo-91227.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop'
+  },
+  {
+    id: '13',
+    name: 'Emma Thompson',
+    email: 'emma.thompson@softique-health-insure.com',
+    role: 'manager',
+    department: 'Project Management',
+    joinDate: '2022-10-18',
+    isActive: true,
+    avatar: 'https://images.pexels.com/photos/1065084/pexels-photo-1065084.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop'
+  },
+  {
+    id: '14',
+    name: 'Ryan Garcia',
+    email: 'ryan.garcia@softique-health-insure.com',
+    role: 'developer',
+    department: 'Site Reliability Engineering',
+    joinDate: '2023-01-20',
+    isActive: true,
+    avatar: 'https://images.pexels.com/photos/2379005/pexels-photo-2379005.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop'
+  },
+  {
+    id: '15',
+    name: 'Natalie Wong',
+    email: 'natalie.wong@softique-health-insure.com',
+    role: 'designer',
+    department: 'Product Engineering',
+    joinDate: '2023-09-01',
+    isActive: true,
+    avatar: 'https://images.pexels.com/photos/1036623/pexels-photo-1036623.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop'
+  },
+  {
+    id: '16',
+    name: 'Christopher Davis',
+    email: 'christopher.davis@softique-health-insure.com',
+    role: 'admin',
+    department: 'Leadership',
+    joinDate: '2022-08-10',
+    isActive: true,
+    avatar: 'https://images.pexels.com/photos/2182970/pexels-photo-2182970.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop'
+  },
+  {
+    id: '17',
+    name: 'Zoe Williams',
+    email: 'zoe.williams@softique-health-insure.com',
+    role: 'developer',
+    department: 'Product Engineering',
+    joinDate: '2023-03-15',
+    isActive: true,
+    avatar: 'https://images.pexels.com/photos/1024311/pexels-photo-1024311.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop'
+  },
+  {
+    id: '18',
+    name: 'Benjamin Taylor',
+    email: 'benjamin.taylor@softique-health-insure.com',
+    role: 'qa',
+    department: 'Quality Assurance',
+    joinDate: '2023-07-01',
+    isActive: true,
+    avatar: 'https://images.pexels.com/photos/1516680/pexels-photo-1516680.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop'
+  },
+  {
+    id: '19',
+    name: 'Amara Okafor',
+    email: 'amara.okafor@softique-health-insure.com',
+    role: 'developer',
+    department: 'Research',
+    joinDate: '2023-05-22',
+    isActive: true,
+    avatar: 'https://images.pexels.com/photos/1181686/pexels-photo-1181686.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop'
+  },
+  {
+    id: '20',
+    name: 'Hiroshi Tanaka',
+    email: 'hiroshi.tanaka@softique-health-insure.com',
+    role: 'developer',
+    department: 'DevOps',
+    joinDate: '2023-04-05',
+    isActive: true,
+    avatar: 'https://images.pexels.com/photos/1681010/pexels-photo-1681010.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop'
+  },
+  {
+    id: '21',
+    name: 'Isabella Rossi',
+    email: 'isabella.rossi@softique-health-insure.com',
+    role: 'designer',
+    department: 'Product Engineering',
+    joinDate: '2023-08-15',
+    isActive: true,
+    avatar: 'https://images.pexels.com/photos/1587009/pexels-photo-1587009.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop'
+  },
+  {
+    id: '22',
+    name: 'Raj Patel',
+    email: 'raj.patel@softique-health-insure.com',
+    role: 'developer',
+    department: 'Site Reliability Engineering',
+    joinDate: '2023-02-28',
+    isActive: true,
+    avatar: 'https://images.pexels.com/photos/1121796/pexels-photo-1121796.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop'
+  },
+  {
+    id: '23',
+    name: 'Grace Chen',
+    email: 'grace.chen@softique-health-insure.com',
+    role: 'researcher',
+    department: 'Research',
+    joinDate: '2023-06-10',
+    isActive: true,
+    avatar: 'https://images.pexels.com/photos/1197132/pexels-photo-1197132.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop'
+  },
+  {
+    id: '24',
+    name: 'Lucas Fernandez',
+    email: 'lucas.fernandez@softique-health-insure.com',
+    role: 'manager',
+    department: 'Project Management',
+    joinDate: '2022-11-15',
+    isActive: true,
+    avatar: 'https://images.pexels.com/photos/1080213/pexels-photo-1080213.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop'
+  },
+  {
+    id: '25',
+    name: 'Aisha Mohammed',
+    email: 'aisha.mohammed@softique-health-insure.com',
+    role: 'developer',
+    department: 'Product Engineering',
+    joinDate: '2023-03-01',
+    isActive: true,
+    avatar: 'https://images.pexels.com/photos/1820919/pexels-photo-1820919.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop'
   }
 ];
 

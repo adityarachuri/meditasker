@@ -4,7 +4,7 @@ export interface User {
   id: string;
   email: string;
   name: string;
-  role: 'admin' | 'manager' | 'developer' | 'designer' | 'qa';
+  role: 'admin' | 'manager' | 'developer' | 'designer' | 'qa' | 'researcher';
   avatar?: string;
   department: string;
 }
@@ -133,6 +133,14 @@ const mockUsers: User[] = [
     role: 'qa',
     department: 'Quality Assurance',
     avatar: 'https://images.pexels.com/photos/1040880/pexels-photo-1040880.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop'
+  },
+  {
+    id: '6',
+    email: 'researcher@softique-health-insure.com',
+    name: 'Grace Chen',
+    role: 'researcher',
+    department: 'Research',
+    avatar: 'https://images.pexels.com/photos/1197132/pexels-photo-1197132.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop'
   }
 ];
 

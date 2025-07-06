@@ -29,7 +29,9 @@ export function TeamMemberCard({ user }: TeamMemberCardProps) {
       case 'designer':
         return 'bg-pink-100 text-pink-800';
       case 'qa':
-        return 'bg-orange-100 text-orange-800';
+        return 'bg-orange-100 text-orange-800'; 
+      case 'researcher':
+        return 'bg-indigo-100 text-indigo-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }

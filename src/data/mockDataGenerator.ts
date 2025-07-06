@@ -5,9 +5,9 @@ export class MockDataGenerator {
   private static instance: MockDataGenerator;
   private userPool: User[] = [];
   private projectPool: Project[] = [];
-  private taskPool: Task[] = [];
-  private departments = ['Engineering', 'Design', 'QA', 'DevOps', 'Product', 'Marketing', 'Sales', 'HR'];
-  private roles = ['admin', 'manager', 'developer', 'designer', 'qa'] as const;
+  private taskPool: Task[] = []; 
+  private departments = ['Engineering', 'Design', 'QA', 'DevOps', 'Product', 'Marketing', 'Sales', 'HR', 'Research', 'Project Management', 'Leadership', 'Site Reliability Engineering'];
+  private roles = ['admin', 'manager', 'developer', 'designer', 'qa', 'researcher'] as const;
   private priorities = ['low', 'medium', 'high', 'critical'] as const;
   private statuses = {
     project: ['planning', 'active', 'on-hold', 'completed', 'cancelled'] as const,

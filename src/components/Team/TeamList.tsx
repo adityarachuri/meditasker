@@ -22,7 +22,8 @@ export function TeamList() {
     { value: 'manager', label: 'Manager' },
     { value: 'developer', label: 'Developer' },
     { value: 'designer', label: 'Designer' },
-    { value: 'qa', label: 'QA' },
+    { value: 'qa', label: 'QA' }, 
+    { value: 'researcher', label: 'Researcher' },
   ];
 
   const getTeamStats = () => {
@@ -45,7 +46,7 @@ export function TeamList() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <h3 className="text-sm font-medium text-gray-500">Total Members</h3>
-          <p className="text-2xl font-bold text-gray-900 mt-1">{stats.totalMembers}</p>
+          <p className="text-2xl font-bold text-gray-900 mt-1">{stats.totalMembers} <span className="text-sm text-green-600">+20</span></p>
         </div>
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <h3 className="text-sm font-medium text-gray-500">Active Members</h3>
