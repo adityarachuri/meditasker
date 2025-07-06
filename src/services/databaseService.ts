@@ -18,7 +18,7 @@ export class DatabaseService {
   private projectsByStatus = new Map<string, Set<string>>();
   
   // Pagination cache
-  private paginationCache = new Map<string, any[]>();
+  private paginationCache = new Map<string, { data: any[]; total: number; hasMore: boolean }>();
   private readonly CACHE_TTL = 5 * 60 * 1000; // 5 minutes
   private cacheTimestamps = new Map<string, number>();
 
