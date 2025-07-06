@@ -28,7 +28,7 @@ const menuItems = [
 ];
 
 export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
-  const { user, logout } = useAuth();
+  const { state } = useApp();
   const unreadNotifications = state.notifications.filter(n => !n.read).length;
   return (
     <div className="w-64 bg-white border-r border-gray-200 flex flex-col">
