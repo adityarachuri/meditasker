@@ -26,9 +26,7 @@ export function usePaginatedData<T>(
     initialLoad = true,
     enableCaching = true,
     optimizeForLargeDatasets = true,
-    filters = {},
-    enableCaching = true,
-    optimizeForLargeDatasets = true
+    filters = {}
   } = options;
 
   const [data, setData] = useState<T[]>([]);

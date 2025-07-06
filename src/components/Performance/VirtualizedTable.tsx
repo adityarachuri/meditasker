@@ -36,8 +36,6 @@ export function VirtualizedTable<T extends { id: string }>({
   onLoadMore,
   hasMore = false,
   enableVirtualization = true,
-  optimizeForLargeDatasets = true,
-  enableVirtualization = true,
   optimizeForLargeDatasets = true
 }: VirtualizedTableProps<T>) {
   const totalWidth = useMemo(() => 
