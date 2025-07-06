@@ -3,6 +3,7 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { ErrorBoundary } from 'react-error-boundary';
 import { queryClient } from './services/api';
 import { AppProvider } from './context/AppContext';
+import { ProtectedRoute } from './components/Auth/ProtectedRoute';
 import { LazyLoadWrapper } from './components/Performance/LazyLoadWrapper';
 import { DataInitializer } from './components/Performance/DataInitializer';
 import { RealTimeUpdates, useRealTimeUpdates } from './components/Advanced/RealTimeUpdates';
@@ -150,29 +151,31 @@ function App() {
   return (
     <ErrorBoundary FallbackComponent={ErrorFallback}>
       <QueryClientProvider client={queryClient}>
-        <AppProvider>
-          <div className="min-h-screen bg-gray-50 flex">
-            <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />
-            <div className="flex-1 flex flex-col">
-              <Header
-                title={getPageTitle()}
-                showAddButton={activeTab === 'projects' || activeTab === 'tasks'}
-              />
-              <main className="flex-1 p-6">
-                {renderContent()}
-              </main>
-              
-              {/* Real-time updates indicator */}
-              <div className="fixed bottom-4 right-4 z-50">
-                <RealTimeUpdates
-                  onUpdate={handleUpdate}
-                  userId="current-user-id"
-                  className="bg-white rounded-lg shadow-lg border border-gray-200 p-3"
+        <ProtectedRoute>
+          <AppProvider>
+            <div className="min-h-screen bg-gray-50 flex">
+              <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />
+              <div className="flex-1 flex flex-col">
+                <Header
+                  title={getPageTitle()}
+                  showAddButton={activeTab === 'projects' || activeTab === 'tasks'}
                 />
+                <main className="flex-1 p-6">
+                  {renderContent()}
+                </main>
+                
+                {/* Real-time updates indicator */}
+                <div className="fixed bottom-4 right-4 z-50">
+                  <RealTimeUpdates
+                    onUpdate={handleUpdate}
+                    userId="current-user-id"
+                    className="bg-white rounded-lg shadow-lg border border-gray-200 p-3"
+                  />
+                </div>
               </div>
             </div>
-          </div>
-        </AppProvider>
+          </AppProvider>
+        </ProtectedRoute>
       </QueryClientProvider>
     </ErrorBoundary>
   );

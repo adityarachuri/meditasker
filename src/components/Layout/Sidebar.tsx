@@ -11,6 +11,7 @@ import {
   LogOut
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
+import { useAuth } from '../../hooks/useAuth';
 
 interface SidebarProps {
   activeTab: string;
@@ -29,8 +30,14 @@ const menuItems = [
 
 export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
   const { state } = useApp();
+  const { user, logout } = useAuth();
   const unreadNotifications = state.notifications.filter(n => !n.read).length;
 
+  const handleLogout = async () => {
+    if (confirm('Are you sure you want to log out?')) {
+      await logout();
+    }
+  };
   return (
     <div className="w-64 bg-white border-r border-gray-200 flex flex-col">
       <div className="p-6 border-b border-gray-200">
@@ -86,15 +93,19 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
       <div className="p-4 border-t border-gray-200">
         <div className="flex items-center">
           <img
-            src={state.currentUser?.avatar || 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=50&h=50&fit=crop'}
-            alt={state.currentUser?.name}
+            src={user?.avatar || 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=50&h=50&fit=crop'}
+            alt={user?.name}
             className="w-10 h-10 rounded-full"
           />
           <div className="ml-3 flex-1">
-            <p className="text-sm font-medium text-gray-900">{state.currentUser?.name}</p>
-            <p className="text-xs text-gray-500">{state.currentUser?.role}</p>
+            <p className="text-sm font-medium text-gray-900">{user?.name}</p>
+            <p className="text-xs text-gray-500">{user?.role}</p>
           </div>
-          <button className="p-2 text-gray-400 hover:text-gray-600">
+          <button 
+            onClick={handleLogout}
+            className="p-2 text-gray-400 hover:text-gray-600"
+            title="Logout"
+          >
             <LogOut className="w-4 h-4" />
           </button>
         </div>
