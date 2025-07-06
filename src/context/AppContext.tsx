@@ -12,7 +12,7 @@ interface AppState {
   activities: Activity[];
   settings: {
     theme: 'light' | 'dark' | 'system';
-    colorScheme: 'blue' | 'green' | 'purple' | 'orange';
+    colorScheme: 'blue' | 'green' | 'purple' | 'orange' | 'red' | 'pink' | 'indigo' | 'teal' | 'cyan' | 'amber' | 'lime' | 'emerald';
     fontSize: 'small' | 'medium' | 'large';
     compactMode: boolean;
     sidebarCollapsed: boolean;
