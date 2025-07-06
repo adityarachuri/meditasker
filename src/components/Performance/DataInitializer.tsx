@@ -17,7 +17,7 @@ import { TeamList } from '../Team/TeamList';
 import { NotificationList } from '../Notifications/NotificationList';
 import { ReportsDashboard } from '../Reports/ReportsDashboard';
 import { SettingsPage } from '../Settings/SettingsPage';
-import { usePerformanceMonitor } from './hooks/usePerformanceMonitor';
+import { usePerformanceMonitor } from '../../hooks/usePerformanceMonitor';
 
 // Error fallback component
 function ErrorFallback({ error, resetErrorBoundary }: { error: Error; resetErrorBoundary: () => void }) {
