@@ -4,7 +4,7 @@ export const mockUsers: User[] = [
   {
     id: '1',
     name: 'Sarah Johnson',
-    email: 'sarah.johnson@softique-health-insure.com',
+    email: 'sarah.johnson@meditasker.com',
     role: 'manager',
     department: 'Product Engineering',
     joinDate: '2023-01-15',
@@ -14,7 +14,7 @@ export const mockUsers: User[] = [
   {
     id: '2',
     name: 'Michael Chen',
-    email: 'michael.chen@softique-health-insure.com',
+    email: 'michael.chen@meditasker.com',
     role: 'developer',
     department: 'Product Engineering',
     joinDate: '2023-03-20',
@@ -24,7 +24,7 @@ export const mockUsers: User[] = [
   {
     id: '3',
     name: 'Emily Rodriguez',
-    email: 'emily.rodriguez@softique-health-insure.com',
+    email: 'emily.rodriguez@meditasker.com',
     role: 'designer',
     department: 'Product Engineering',
     joinDate: '2023-02-10',
@@ -34,7 +34,7 @@ export const mockUsers: User[] = [
   {
     id: '4',
     name: 'David Park',
-    email: 'david.park@softique-health-insure.com',
+    email: 'david.park@meditasker.com',
     role: 'qa',
     department: 'Quality Assurance',
     joinDate: '2023-04-05',
@@ -44,7 +44,7 @@ export const mockUsers: User[] = [
   {
     id: '5',
     name: 'Lisa Thompson',
-    email: 'lisa.thompson@softique-health-insure.com',
+    email: 'lisa.thompson@meditasker.com',
     role: 'admin',
     department: 'Administration',
     joinDate: '2022-11-30',
@@ -54,7 +54,7 @@ export const mockUsers: User[] = [
   {
     id: '6',
     name: 'Alex Rivera',
-    email: 'alex.rivera@softique-health-insure.com',
+    email: 'alex.rivera@meditasker.com',
     role: 'developer',
     department: 'Product Engineering',
     joinDate: '2023-05-15',
@@ -64,7 +64,7 @@ export const mockUsers: User[] = [
   {
     id: '7',
     name: 'Priya Patel',
-    email: 'priya.patel@softique-health-insure.com',
+    email: 'priya.patel@meditasker.com',
     role: 'qa',
     department: 'Quality Assurance',
     joinDate: '2023-06-01',
@@ -74,7 +74,7 @@ export const mockUsers: User[] = [
   {
     id: '8',
     name: 'James Wilson',
-    email: 'james.wilson@softique-health-insure.com',
+    email: 'james.wilson@meditasker.com',
     role: 'manager',
     department: 'Project Management',
     joinDate: '2022-09-12',
@@ -84,7 +84,7 @@ export const mockUsers: User[] = [
   {
     id: '9',
     name: 'Sophia Lee',
-    email: 'sophia.lee@softique-health-insure.com',
+    email: 'sophia.lee@meditasker.com',
     role: 'designer',
     department: 'Product Engineering',
     joinDate: '2023-07-20',
@@ -94,7 +94,7 @@ export const mockUsers: User[] = [
   {
     id: '10',
     name: 'Marcus Johnson',
-    email: 'marcus.johnson@softique-health-insure.com',
+    email: 'marcus.johnson@meditasker.com',
     role: 'developer',
     department: 'Product Engineering',
     joinDate: '2023-04-10',
@@ -104,7 +104,7 @@ export const mockUsers: User[] = [
   {
     id: '11',
     name: 'Olivia Martinez',
-    email: 'olivia.martinez@softique-health-insure.com',
+    email: 'olivia.martinez@meditasker.com',
     role: 'qa',
     department: 'Quality Assurance',
     joinDate: '2023-08-05',
@@ -114,7 +114,7 @@ export const mockUsers: User[] = [
   {
     id: '12',
     name: 'Daniel Kim',
-    email: 'daniel.kim@softique-health-insure.com',
+    email: 'daniel.kim@meditasker.com',
     role: 'developer',
     department: 'DevOps',
     joinDate: '2023-02-15',
@@ -124,7 +124,7 @@ export const mockUsers: User[] = [
   {
     id: '13',
     name: 'Emma Thompson',
-    email: 'emma.thompson@softique-health-insure.com',
+    email: 'emma.thompson@meditasker.com',
     role: 'manager',
     department: 'Project Management',
     joinDate: '2022-10-18',
@@ -134,7 +134,7 @@ export const mockUsers: User[] = [
   {
     id: '14',
     name: 'Ryan Garcia',
-    email: 'ryan.garcia@softique-health-insure.com',
+    email: 'ryan.garcia@meditasker.com',
     role: 'developer',
     department: 'Site Reliability Engineering',
     joinDate: '2023-01-20',
@@ -144,7 +144,7 @@ export const mockUsers: User[] = [
   {
     id: '15',
     name: 'Natalie Wong',
-    email: 'natalie.wong@softique-health-insure.com',
+    email: 'natalie.wong@meditasker.com',
     role: 'designer',
     department: 'Product Engineering',
     joinDate: '2023-09-01',
@@ -154,7 +154,7 @@ export const mockUsers: User[] = [
   {
     id: '16',
     name: 'Christopher Davis',
-    email: 'christopher.davis@softique-health-insure.com',
+    email: 'christopher.davis@meditasker.com',
     role: 'admin',
     department: 'Leadership',
     joinDate: '2022-08-10',
@@ -164,7 +164,7 @@ export const mockUsers: User[] = [
   {
     id: '17',
     name: 'Zoe Williams',
-    email: 'zoe.williams@softique-health-insure.com',
+    email: 'zoe.williams@meditasker.com',
     role: 'developer',
     department: 'Product Engineering',
     joinDate: '2023-03-15',
@@ -174,7 +174,7 @@ export const mockUsers: User[] = [
   {
     id: '18',
     name: 'Benjamin Taylor',
-    email: 'benjamin.taylor@softique-health-insure.com',
+    email: 'benjamin.taylor@meditasker.com',
     role: 'qa',
     department: 'Quality Assurance',
     joinDate: '2023-07-01',
@@ -184,7 +184,7 @@ export const mockUsers: User[] = [
   {
     id: '19',
     name: 'Amara Okafor',
-    email: 'amara.okafor@softique-health-insure.com',
+    email: 'amara.okafor@meditasker.com',
     role: 'developer',
     department: 'Research',
     joinDate: '2023-05-22',
@@ -194,7 +194,7 @@ export const mockUsers: User[] = [
   {
     id: '20',
     name: 'Hiroshi Tanaka',
-    email: 'hiroshi.tanaka@softique-health-insure.com',
+    email: 'hiroshi.tanaka@meditasker.com',
     role: 'developer',
     department: 'DevOps',
     joinDate: '2023-04-05',
@@ -204,7 +204,7 @@ export const mockUsers: User[] = [
   {
     id: '21',
     name: 'Isabella Rossi',
-    email: 'isabella.rossi@softique-health-insure.com',
+    email: 'isabella.rossi@meditasker.com',
     role: 'designer',
     department: 'Product Engineering',
     joinDate: '2023-08-15',
@@ -214,7 +214,7 @@ export const mockUsers: User[] = [
   {
     id: '22',
     name: 'Raj Patel',
-    email: 'raj.patel@softique-health-insure.com',
+    email: 'raj.patel@meditasker.com',
     role: 'developer',
     department: 'Site Reliability Engineering',
     joinDate: '2023-02-28',
@@ -224,7 +224,7 @@ export const mockUsers: User[] = [
   {
     id: '23',
     name: 'Grace Chen',
-    email: 'grace.chen@softique-health-insure.com',
+    email: 'grace.chen@meditasker.com',
     role: 'researcher',
     department: 'Research',
     joinDate: '2023-06-10',
@@ -234,7 +234,7 @@ export const mockUsers: User[] = [
   {
     id: '24',
     name: 'Lucas Fernandez',
-    email: 'lucas.fernandez@softique-health-insure.com',
+    email: 'lucas.fernandez@meditasker.com',
     role: 'manager',
     department: 'Project Management',
     joinDate: '2022-11-15',
@@ -244,7 +244,7 @@ export const mockUsers: User[] = [
   {
     id: '25',
     name: 'Aisha Mohammed',
-    email: 'aisha.mohammed@softique-health-insure.com',
+    email: 'aisha.mohammed@meditasker.com',
     role: 'developer',
     department: 'Product Engineering',
     joinDate: '2023-03-01',

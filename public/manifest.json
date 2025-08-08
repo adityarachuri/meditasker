@@ -1,7 +1,7 @@
 {
-  "name": "Softique Health Insure Project Management Suite",
-  "short_name": "Softique Health Insure",
-  "description": "Enterprise-grade project management for healthcare insurance operations",
+  "name": "MediTasker Project Management Suite",
+  "short_name": "MediTasker",
+  "description": "Enterprise-grade project management for healthcare operations",
   "version": "2.0.0",
   "start_url": "/",
   "display": "standalone",

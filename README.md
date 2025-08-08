@@ -1,6 +1,6 @@
-# Softique Health Insure - Project Management Suite
+# MediTasker - Project Management Suite
 
-A comprehensive, enterprise-grade project management platform specifically designed for healthcare insurance operations.
+A comprehensive, enterprise-grade project management platform specifically designed for healthcare operations.
 
 ## Core Features
 
@@ -162,4 +162,4 @@ npm run test
 
 ## License
 
-Proprietary - All rights reserved
+© MediTasker 2025. All rights reserved.

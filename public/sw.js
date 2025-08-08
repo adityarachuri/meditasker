@@ -1,4 +1,4 @@
-const CACHE_NAME = 'softique-health-insure-v2.0.0';
+const CACHE_NAME = 'meditasker-v2.0.0';
 const STATIC_CACHE = 'static-v2.0.0';
 const DYNAMIC_CACHE = 'dynamic-v2.0.0';
 
@@ -231,7 +231,7 @@ self.addEventListener('push', (event) => {
   console.log('Service Worker: Push notification received');
   
   const options = {
-    body: 'You have new updates in HealthInsure',
+    body: 'You have new updates in MediTasker',
     icon: '/icon-192x192.png',
     badge: '/badge-72x72.png',
     vibrate: [100, 50, 100],

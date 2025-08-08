@@ -8,7 +8,7 @@ const TOKEN_REFRESH_THRESHOLD = 5 * 60 * 1000; // 5 minutes before expiry
 const mockUsers: User[] = [
   {
     id: '1',
-    email: 'admin@softique-health-insure.com',
+    email: 'admin@meditasker.com',
     name: 'Admin User',
     role: 'admin',
     department: 'Administration',
@@ -18,7 +18,7 @@ const mockUsers: User[] = [
   },
   {
     id: '2',
-    email: 'manager@softique-health-insure.com',
+    email: 'manager@meditasker.com',
     name: 'Sarah Johnson',
     role: 'manager',
     department: 'Product Engineering',
@@ -28,7 +28,7 @@ const mockUsers: User[] = [
   },
   {
     id: '3',
-    email: 'developer@softique-health-insure.com',
+    email: 'developer@meditasker.com',
     name: 'Michael Chen',
     role: 'developer',
     department: 'Product Engineering',
@@ -38,7 +38,7 @@ const mockUsers: User[] = [
   },
   {
     id: '4',
-    email: 'designer@softique-health-insure.com',
+    email: 'designer@meditasker.com',
     name: 'Emily Rodriguez',
     role: 'designer',
     department: 'Product Engineering',
@@ -48,7 +48,7 @@ const mockUsers: User[] = [
   },
   {
     id: '5',
-    email: 'qa@softique-health-insure.com',
+    email: 'qa@meditasker.com',
     name: 'David Park',
     role: 'qa',
     department: 'Quality Assurance',
