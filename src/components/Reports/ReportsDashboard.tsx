@@ -65,7 +65,7 @@ export function ReportsDashboard() {
   const exportReport = () => {
     const doc = new jsPDF();
     const currentDate = new Date().toLocaleDateString();
-    const reportTitle = `Softique Health Insure Project Management Report`;
+    const reportTitle = `MediTasker Project Management Report`;
     
     // Header
     doc.setFontSize(20);
@@ -204,11 +204,11 @@ export function ReportsDashboard() {
       doc.setFontSize(8);
       doc.setTextColor(128, 128, 128);
       doc.text(`Page ${i} of ${pageCount}`, doc.internal.pageSize.width - 30, doc.internal.pageSize.height - 10);
-      doc.text('HealthInsure Project Management Suite', 20, doc.internal.pageSize.height - 10);
+      doc.text('MediTasker Project Management Suite', 20, doc.internal.pageSize.height - 10);
     }
     
     // Save the PDF
-    doc.save(`softique-health-insure-report-${new Date().toISOString().split('T')[0]}.pdf`);
+    doc.save(`meditasker-report-${new Date().toISOString().split('T')[0]}.pdf`);
   };
 
   return (

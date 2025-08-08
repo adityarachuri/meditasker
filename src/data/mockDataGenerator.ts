@@ -57,7 +57,7 @@ export class MockDataGenerator {
       batch.push({
         id: `user_${index}`,
         name: this.generateName(index),
-        email: `user${index}@softique-health-insure.com`,
+        email: `user${index}@meditasker.com`,
         role: this.roles[index % this.roles.length],
         department: this.departments[index % this.departments.length],
         joinDate: this.generateRandomDate(2020, 2024),

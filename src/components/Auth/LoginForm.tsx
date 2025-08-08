@@ -83,11 +83,11 @@ export function LoginForm() {
   };
 
   const demoCredentials = [
-    { email: 'admin@softique-health-insure.com', role: 'Admin' },
-    { email: 'manager@softique-health-insure.com', role: 'Manager' },
-    { email: 'developer@softique-health-insure.com', role: 'Developer' },
-    { email: 'designer@softique-health-insure.com', role: 'Designer' },
-    { email: 'qa@softique-health-insure.com', role: 'QA' },
+    { email: 'admin@meditasker.com', role: 'Admin' },
+    { email: 'manager@meditasker.com', role: 'Manager' },
+    { email: 'developer@meditasker.com', role: 'Developer' },
+    { email: 'designer@meditasker.com', role: 'Designer' },
+    { email: 'qa@meditasker.com', role: 'QA' },
   ];
 
   return (
@@ -96,13 +96,13 @@ export function LoginForm() {
         {/* Header */}
         <div className="text-center">
           <div className="mx-auto h-16 w-16 bg-blue-600 rounded-xl flex items-center justify-center mb-6">
-            <span className="text-white font-bold text-xl">SHI</span>
+            <span className="text-white font-bold text-xl">MT</span>
           </div>
           <h2 className="text-3xl font-bold text-gray-900 mb-2">
             Welcome back
           </h2>
           <p className="text-gray-600">
-            Sign in to your Softique Health Insure account
+            Sign in to your MediTasker account
           </p>
         </div>
 
@@ -227,7 +227,7 @@ export function LoginForm() {
         <div className="mt-6 pt-6 border-t border-gray-200 text-center text-xs text-gray-500">
           <p>By accessing this system, you agree to our terms of service and privacy policy.</p>
           <p>Unauthorized access is prohibited and may be subject to legal action.</p>
-          <p className="mt-2">© Copyrighted to Softique Pvt Ltd., 2025. All rights reserved.</p>
+          <p className="mt-2">© MediTasker 2025. All rights reserved.</p>
         </div>
 
         {/* Demo Credentials */}
@@ -262,7 +262,7 @@ export function LoginForm() {
         <div className="mt-6 pt-6 border-t border-gray-200 text-center text-xs text-gray-500">
           <p>By accessing this system, you agree to our terms of service and privacy policy.</p>
           <p>Unauthorized access is prohibited and may be subject to legal action.</p>
-          <p className="mt-2">© Copyrighted to Softique Pvt Ltd., 2025. All rights reserved.</p>
+          <p className="mt-2">© MediTasker 2025. All rights reserved.</p>
         </div>
       </div>
     </div>

@@ -143,13 +143,13 @@ export function DataExportImport() {
       case 'json':
         content = JSON.stringify(data, null, 2);
         mimeType = 'application/json';
-        filename = `softique-health-insure-export-${new Date().toISOString().split('T')[0]}.json`;
+        filename = `meditasker-export-${new Date().toISOString().split('T')[0]}.json`;
         break;
 
       case 'csv':
         content = convertToCSV(data);
         mimeType = 'text/csv';
-        filename = `softique-health-insure-export-${new Date().toISOString().split('T')[0]}.csv`;
+        filename = `meditasker-export-${new Date().toISOString().split('T')[0]}.csv`;
         break;
 
       case 'xlsx':
@@ -157,7 +157,7 @@ export function DataExportImport() {
         // For now, fall back to CSV
         content = convertToCSV(data);
         mimeType = 'text/csv';
-        filename = `softique-health-insure-export-${new Date().toISOString().split('T')[0]}.csv`;
+        filename = `meditasker-export-${new Date().toISOString().split('T')[0]}.csv`;
         break;
 
       default:

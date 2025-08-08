@@ -175,7 +175,7 @@ export function RealTimeUpdates({ onUpdate, userId, className = '' }: RealTimeUp
     
     // Show browser notification if permission granted
     if (showNotifications && 'Notification' in window && Notification.permission === 'granted') {
-      new Notification(`Softique Health Insure - ${update.type.replace('_', ' ')}`, {
+      new Notification(`MediTasker - ${update.type.replace('_', ' ')}`, {
         body: update.message,
         icon: '/favicon.ico',
         tag: update.id,
