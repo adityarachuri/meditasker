@@ -10,6 +10,7 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+coverage
 *.local
 
 # Editor directories and files
@@ -23,3 +24,7 @@ dist-ssr
 *.sln
 *.sw?
 .env
+.env.*
+
+# Vite temp config files (should never be committed)
+vite.config.*.timestamp-*

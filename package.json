@@ -1,7 +1,13 @@
 {
-  "name": "vite-react-typescript-starter",
-  "private": true,
-  "version": "0.0.0",
+  "name": "meditasker",
+  "description": "A demo project management suite for healthcare teams, built with React, TypeScript and Vite.",
+  "private": false,
+  "version": "0.1.0",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/adityarachuri/meditasker.git"
+  },
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -18,8 +24,8 @@
     "@tanstack/react-virtual": "^3.13.12",
     "date-fns": "^4.1.0",
     "immer": "^10.1.1",
-    "jspdf": "^3.0.1",
-    "jspdf-autotable": "^5.0.2",
+    "jspdf": "^4.2.1",
+    "jspdf-autotable": "^5.0.9",
     "lodash": "^4.17.21",
     "lucide-react": "^0.344.0",
     "react": "^18.3.1",
