@@ -6,6 +6,8 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
+# ...except production-readiness evidence logs, which are committed on purpose
+!docs/evidence/**/*.log
 
 node_modules
 dist
@@ -16,6 +18,7 @@ coverage
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
+!.vscode/settings.json
 .idea
 .DS_Store
 *.suo

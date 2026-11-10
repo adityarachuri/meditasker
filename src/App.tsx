@@ -486,7 +486,7 @@ document.querySelectorAll('img[data-src]').forEach(img => {
 // Code splitting and dynamic imports
 const loadModule = async (moduleName: string) => {
   try {
-    const module = await import(`./modules/${moduleName}`);
+    const module = await import(/* @vite-ignore */ `./modules/${moduleName}`);
     return module.default;
   } catch (error) {
     console.error(`Failed to load module ${moduleName}:`, error);

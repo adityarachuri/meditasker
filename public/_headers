@@ -1,0 +1,14 @@
+# Security headers for static hosts that honor a `_headers` file (Cloudflare
+# Pages/Workers, Netlify). Not yet wired to a deploy target for this project;
+# keep this in sync if a CDN/host is added. See README "Getting started".
+#
+# style-src needs 'unsafe-inline' because several components set the React
+# `style` prop directly rather than using Tailwind classes exclusively.
+
+/*
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: https://images.pexels.com; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; object-src 'none'; form-action 'self';
+  Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()

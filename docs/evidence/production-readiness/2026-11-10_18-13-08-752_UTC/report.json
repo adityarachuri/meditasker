@@ -1,0 +1,31 @@
+{
+  "runId": "2026-11-10_18-13-08-752_UTC",
+  "generatedAt": "2026-11-10T18:13:08.752Z",
+  "overallStatus": "fail",
+  "git": {
+    "branch": "main",
+    "commit": "aa5cd2e"
+  },
+  "checks": [
+    {
+      "id": "lint",
+      "command": "npm run lint",
+      "status": "fail",
+      "exitCode": 1,
+      "startedAt": "2026-11-10T18:13:08.759Z",
+      "endedAt": "2026-11-10T18:13:14.401Z",
+      "durationMs": 5642,
+      "logFile": "lint.log"
+    }
+  ],
+  "steps": {
+    "step1": "fail",
+    "step2": "fail",
+    "step3": "fail",
+    "step4": "fail"
+  },
+  "retention": {
+    "maxRuns": 20,
+    "prunedRunIds": []
+  }
+}

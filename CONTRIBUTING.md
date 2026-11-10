@@ -52,9 +52,15 @@ environment variables are required for local development.
 ## Pull request checklist
 
 - [ ] `npm run lint` run, no new errors introduced
+- [ ] `npm run type-check` run, no new errors introduced
 - [ ] `npm run test` run, no new failures introduced
 - [ ] Description explains the change and why it's needed
 - [ ] Screenshots included for UI changes
+
+CI (`.github/workflows/ci.yml`) runs the same lint/type-check/test/build gate
+plus `npm audit --audit-level=high` on every PR. It currently reports
+pre-existing failures (see README "Known Issues") — the bar for a PR is "no
+new failures," not "the whole gate goes green," until that debt is paid down.
 
 ## Opening an issue
 

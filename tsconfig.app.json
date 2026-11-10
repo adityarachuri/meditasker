@@ -14,6 +14,7 @@
     "noEmit": true,
     "jsx": "react-jsx",
     "esModuleInterop": true,
+    "types": ["jest", "node"],
 
     /* Linting */
     "strict": true,

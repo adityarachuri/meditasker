@@ -81,13 +81,18 @@ fully self-contained.
 ## Available scripts
 
 ```bash
-npm run dev       # start the Vite dev server
-npm run build     # production build
-npm run preview   # preview a production build locally
-npm run lint      # run ESLint
-npm run test      # run the Jest test suite
+npm run dev               # start the Vite dev server
+npm run build             # production build
+npm run preview           # preview a production build locally
+npm run lint              # run ESLint (--max-warnings 0)
+npm run type-check        # tsc --noEmit over both tsconfig projects
+npm run test              # run the Jest test suite
 npm run test:watch
 npm run test:coverage
+npm run audit             # npm audit --audit-level=high
+npm run production-readiness  # run lint/type-check/test/audit/build in
+                               # sequence and write timestamped evidence to
+                               # docs/evidence/production-readiness/
 ```
 
 ## Project structure
@@ -125,20 +130,32 @@ state:
   out of sync with the real service API (e.g. a mock missing
   `getSessionInfo`), plus a couple of brittle UI-text assertions in the
   Calendar suite. Fixing these is tracked as follow-up work.
-- **Lint:** `npm run lint` currently reports a large number of pre-existing
-  `@typescript-eslint/no-explicit-any` and unused-variable findings in the
-  `services/` and `store/` layers. Not a security issue, but worth cleaning
-  up incrementally.
-- **Type-check:** `npx tsc --noEmit` surfaces a few pre-existing issues,
-  notably in `src/services/databaseService.ts` (some query results typed as
-  possibly `undefined` being assigned to non-optional fields) and the Jest
-  type setup (`src/setupTests.ts`, `src/services/__tests__/sessionService.test.ts`
-  reference Jest globals without the test runner's type definitions wired
-  into `tsconfig.app.json`).
+- **Lint:** `npm run lint` currently reports 223 pre-existing problems (192
+  errors, 31 warnings), mostly `@typescript-eslint/no-explicit-any` and
+  unused-variable findings in the `services/` and `store/` layers. Not a
+  security issue, but worth cleaning up incrementally.
+- **Type-check:** `npm run type-check` currently reports ~150 pre-existing
+  errors — the bulk are unused imports/locals (`noUnusedLocals` /
+  `noUnusedParameters` are on in `tsconfig.app.json`), plus a few real bugs
+  worth fixing deliberately: a duplicate-key type in
+  `src/hooks/usePaginatedData.ts`, two incompatible `User` type definitions
+  (`src/context/AuthContext.tsx` vs `src/types/index.ts`), and
+  `src/services/databaseService.ts` assigning possibly-`undefined` query
+  results to non-optional fields.
 - **Demo auth is not real security.** Login accepts a fixed password for any
   listed demo account and stores a mock token in `localStorage`. This is
   intentional for a demo and should never be used as-is for real
   authentication.
+
+## CI/CD
+
+`.github/workflows/ci.yml` runs a quality gate (lint, type-check, test with
+coverage, build) and a separate security-audit job (`npm audit
+--audit-level=high`) on every push/PR to `main`. There is no deploy stage yet
+— this project isn't currently hosted anywhere. `npm run production-readiness`
+runs the same checks locally and writes timestamped evidence (logs + a
+markdown/JSON report) to `docs/evidence/production-readiness/`, for anyone
+who wants a dated record of what currently passes/fails.
 
 ## Security
 
@@ -146,6 +163,14 @@ See [SECURITY.md](SECURITY.md) for how to report vulnerabilities. In short:
 this is a frontend-only demo with no real backend or credentials, so the
 interesting surface is dependency vulnerabilities and client-side issues
 (XSS, etc.), not server-side auth/data bugs.
+
+`public/_headers` defines a baseline security-header policy (CSP, HSTS,
+`X-Frame-Options`, etc.) in the format read by static hosts like Cloudflare
+Pages/Workers and Netlify — it isn't wired to a live deploy yet since none
+exists, but it's ready for whichever host this ends up on.
+`.hintrc` enables [webhint](https://webhint.io)'s `development` ruleset
+(accessibility/performance/PWA/security/best-practices checks) for anyone
+running `npx hint http://localhost:4173` against a preview build.
 
 ## Contributing
 
