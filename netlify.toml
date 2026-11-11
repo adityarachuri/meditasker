@@ -1,0 +1,13 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# Single-page app: let the app's own router/state handle paths that don't
+# match a static asset.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
