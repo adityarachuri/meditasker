@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { TeamMemberCard } from './TeamMemberCard';
-import { User } from '../../types';
 
 export function TeamList() {
   const { state } = useApp();

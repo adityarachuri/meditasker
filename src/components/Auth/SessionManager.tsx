@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useSession } from '../../hooks/useSession';
 import { Clock, RefreshCw, LogOut } from 'lucide-react';
 

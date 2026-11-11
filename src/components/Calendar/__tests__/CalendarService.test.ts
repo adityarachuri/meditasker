@@ -34,7 +34,11 @@ describe('CalendarService', () => {
             createdBy: 'user1',
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
-            projectId: 'project1'
+            projectId: 'project1',
+            estimatedHours: 8,
+            actualHours: 0,
+            tags: [],
+            dependencies: []
           }
         ],
         total: 1,
@@ -53,7 +57,10 @@ describe('CalendarService', () => {
             status: 'active',
             managerId: 'user1',
             teamIds: ['user1', 'user2'],
-            color: '#3b82f6'
+            color: '#3b82f6',
+            progress: 0,
+            budget: 0,
+            spentBudget: 0
           }
         ],
         total: 1,
@@ -106,7 +113,7 @@ describe('CalendarService', () => {
       expect(event.updatedAt).toBeDefined();
     });
 
-    it('updates existing events', () => {
+    it('updates existing events', async () => {
       const eventData = {
         title: 'Test Event',
         description: 'Test Description',
@@ -121,6 +128,8 @@ describe('CalendarService', () => {
       };
 
       const event = calendarService.createEvent(eventData);
+      // Ensure a new millisecond ticks over so updatedAt is guaranteed to differ.
+      await new Promise(resolve => setTimeout(resolve, 2));
       const updatedEvent = calendarService.updateEvent(event.id, { title: 'Updated Title' });
 
       expect(updatedEvent?.title).toBe('Updated Title');

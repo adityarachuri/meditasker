@@ -45,6 +45,8 @@ describe('useAuth hooks', () => {
             name: 'Test User',
             role: 'developer' as const,
             department: 'Engineering',
+            joinDate: '2024-01-01',
+            isActive: true,
           },
           isAuthenticated: true,
           isLoading: false,
@@ -79,9 +81,7 @@ describe('useAuth hooks', () => {
 
       mockUseAuth.mockReturnValue(mockAuthContext);
 
-      const { result } = renderHook(() => useRequireAuth());
-
-      expect(result.error).toEqual(new Error('Authentication required'));
+      expect(() => renderHook(() => useRequireAuth())).toThrow('Authentication required');
     });
   });
 
@@ -95,6 +95,8 @@ describe('useAuth hooks', () => {
             name: 'Test User',
             role: 'manager' as const,
             department: 'Engineering',
+            joinDate: '2024-01-01',
+            isActive: true,
           },
           isAuthenticated: true,
           isLoading: false,
@@ -122,6 +124,8 @@ describe('useAuth hooks', () => {
             name: 'Admin User',
             role: 'admin' as const,
             department: 'Administration',
+            joinDate: '2024-01-01',
+            isActive: true,
           },
           isAuthenticated: true,
           isLoading: false,
@@ -149,6 +153,8 @@ describe('useAuth hooks', () => {
             name: 'Test User',
             role: 'developer' as const,
             department: 'Engineering',
+            joinDate: '2024-01-01',
+            isActive: true,
           },
           isAuthenticated: true,
           isLoading: false,
@@ -162,9 +168,7 @@ describe('useAuth hooks', () => {
 
       mockUseAuth.mockReturnValue(mockAuthContext);
 
-      const { result } = renderHook(() => useRequireRole('manager'));
-
-      expect(result.error).toEqual(new Error('Role manager required'));
+      expect(() => renderHook(() => useRequireRole('manager'))).toThrow('Role manager required');
     });
 
     it('throws error when user is not authenticated', () => {
@@ -183,9 +187,7 @@ describe('useAuth hooks', () => {
 
       mockUseAuth.mockReturnValue(mockAuthContext);
 
-      const { result } = renderHook(() => useRequireRole('manager'));
-
-      expect(result.error).toEqual(new Error('Authentication required'));
+      expect(() => renderHook(() => useRequireRole('manager'))).toThrow('Authentication required');
     });
   });
 });

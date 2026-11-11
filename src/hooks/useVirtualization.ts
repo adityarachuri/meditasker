@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 
 interface UseVirtualizationProps {

@@ -1,16 +1,13 @@
-import React from 'react';
 import { useApp } from '../../context/AppContext';
 import { MetricCard } from './MetricCard';
 import { ProjectProgress } from './ProjectProgress';
 import { TaskOverview } from './TaskOverview';
 import { RecentActivity } from './RecentActivity';
-import { 
-  FolderOpen, 
-  CheckSquare, 
-  Users, 
-  Calendar, 
-  DollarSign,
-  TrendingUp 
+import {
+  FolderOpen,
+  CheckSquare,
+  Users,
+  TrendingUp
 } from 'lucide-react';
 import { mockDashboardMetrics } from '../../data/mockData';
 

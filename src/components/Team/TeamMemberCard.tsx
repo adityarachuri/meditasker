@@ -1,4 +1,3 @@
-import React from 'react';
 import { User } from '../../types';
 import { useApp } from '../../context/AppContext';
 import { Mail, Calendar, CheckSquare, Clock } from 'lucide-react';

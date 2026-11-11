@@ -1,8 +1,10 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { Project } from '../../types';
 import { usePaginatedData } from '../../hooks/usePaginatedData';
+import { useInfiniteScroll } from '../../hooks/useInfiniteScroll';
 import { MemoizedVirtualizedTable } from '../Performance/VirtualizedTable';
-import { Calendar, Users, DollarSign, Search, Filter } from 'lucide-react';
+import { ProjectCard } from './ProjectCard';
+import { Calendar, Users, Search, Filter, List, LayoutGrid } from 'lucide-react';
 
 export function ProjectListVirtualized() {
   const [filters, setFilters] = useState({
@@ -10,6 +12,7 @@ export function ProjectListVirtualized() {
     priority: '',
     search: ''
   });
+  const [viewMode, setViewMode] = useState<'table' | 'cards'>('table');
 
   const {
     data: projects,
@@ -25,9 +28,18 @@ export function ProjectListVirtualized() {
     optimizeForLargeDatasets: true
   });
 
+  // Cards mode loads more as the sentinel at the bottom scrolls into view.
+  // The sentinel stays mounted in both view modes (just hidden in table mode)
+  // so the observer attaches once and keeps working across mode switches.
+  const { loadMoreRef } = useInfiniteScroll({
+    hasNextPage: hasMore,
+    isFetchingNextPage: loading,
+    fetchNextPage: loadMore,
+  });
+
   const columns = useMemo(() => [
     {
-      key: 'name' as keyof Project,
+      key: 'name' as const,
       header: 'Project Name',
       width: 250,
       render: (value: string, project: Project) => (
@@ -46,7 +58,7 @@ export function ProjectListVirtualized() {
       )
     },
     {
-      key: 'status' as keyof Project,
+      key: 'status' as const,
       header: 'Status',
       width: 120,
       render: (value: string) => (
@@ -62,7 +74,7 @@ export function ProjectListVirtualized() {
       )
     },
     {
-      key: 'priority' as keyof Project,
+      key: 'priority' as const,
       header: 'Priority',
       width: 100,
       render: (value: string) => (
@@ -77,7 +89,7 @@ export function ProjectListVirtualized() {
       )
     },
     {
-      key: 'progress' as keyof Project,
+      key: 'progress' as const,
       header: 'Progress',
       width: 120,
       render: (value: number) => (
@@ -93,7 +105,7 @@ export function ProjectListVirtualized() {
       )
     },
     {
-      key: 'endDate' as keyof Project,
+      key: 'endDate' as const,
       header: 'Due Date',
       width: 120,
       render: (value: string) => (
@@ -104,7 +116,7 @@ export function ProjectListVirtualized() {
       )
     },
     {
-      key: 'teamIds' as keyof Project,
+      key: 'teamIds' as const,
       header: 'Team Size',
       width: 100,
       render: (value: string[]) => (
@@ -115,7 +127,7 @@ export function ProjectListVirtualized() {
       )
     },
     {
-      key: 'budget' as keyof Project,
+      key: 'budget' as const,
       header: 'Budget',
       width: 120,
       render: (value: number, project: Project) => (
@@ -183,29 +195,64 @@ export function ProjectListVirtualized() {
           </select>
         </div>
 
-        <div className="text-sm text-gray-600">
-          {total.toLocaleString()} projects total
+        <div className="flex items-center space-x-3">
+          <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
+            <button
+              onClick={() => setViewMode('table')}
+              title="Table view"
+              className={`p-2 ${viewMode === 'table' ? 'bg-blue-50 text-blue-700' : 'text-gray-500 hover:bg-gray-50'}`}
+            >
+              <List className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setViewMode('cards')}
+              title="Card view"
+              className={`p-2 ${viewMode === 'cards' ? 'bg-blue-50 text-blue-700' : 'text-gray-500 hover:bg-gray-50'}`}
+            >
+              <LayoutGrid className="w-4 h-4" />
+            </button>
+          </div>
+          <div className="text-sm text-gray-600">
+            {total.toLocaleString()} projects total
+          </div>
         </div>
       </div>
 
-      {/* Virtualized table */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-        <MemoizedVirtualizedTable
-          data={projects}
-          columns={columns}
-          height={600}
-          rowHeight={80} 
-          loading={loading}
-          hasMore={hasMore}
-          enableVirtualization={true}
-          optimizeForLargeDatasets={true}
-          onLoadMore={loadMore}
-          onRowClick={(project) => {
-            console.log('Project clicked:', project.name);
-            // Handle project click - could open modal or navigate
-          }}
-        />
-      </div>
+      {viewMode === 'table' ? (
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+          <MemoizedVirtualizedTable
+            data={projects}
+            columns={columns}
+            height={600}
+            rowHeight={80}
+            loading={loading}
+            hasMore={hasMore}
+            enableVirtualization={true}
+            optimizeForLargeDatasets={true}
+            onLoadMore={loadMore}
+            onRowClick={(project) => {
+              console.log('Project clicked:', project.name);
+              // Handle project click - could open modal or navigate
+            }}
+          />
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {projects.map((project) => (
+            <ProjectCard key={project.id} project={project} onClick={() => console.log('Project clicked:', project.name)} />
+          ))}
+        </div>
+      )}
+
+      {/* Infinite-scroll trigger for card view; inert (zero-size, non-intersecting) in table mode. */}
+      <div ref={loadMoreRef} style={{ display: viewMode === 'cards' ? 'block' : 'none', height: 1 }} />
+
+      {viewMode === 'cards' && loading && (
+        <div className="flex items-center justify-center py-4">
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mr-2"></div>
+          <span className="text-sm text-gray-600">Loading more projects...</span>
+        </div>
+      )}
 
       {projects.length === 0 && !loading && (
         <div className="text-center py-12">
@@ -213,7 +260,7 @@ export function ProjectListVirtualized() {
           <p className="text-gray-500">No projects found matching your criteria from 1M+ records.</p>
         </div>
       )}
-      
+
     </div>
   );
 }

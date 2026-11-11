@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../hooks/useAuth';
 import { sessionService } from '../../services/sessionService';
 import { Eye, EyeOff, Lock, Mail, AlertCircle, Loader2 } from 'lucide-react';
 
@@ -48,7 +48,7 @@ export function LoginForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
@@ -68,7 +68,7 @@ export function LoginForm() {
 
     try {
       await login(formData.email, formData.password);
-    } catch (error) {
+    } catch {
       // Error is handled by the auth context
     }
   };
@@ -256,13 +256,6 @@ export function LoginForm() {
           <p className="text-xs text-gray-500 mt-4">
             Password for all demo accounts: <code className="bg-gray-100 px-1 rounded">password123</code>
           </p>
-        </div>
-
-        {/* Copyright and Disclaimer */}
-        <div className="mt-6 pt-6 border-t border-gray-200 text-center text-xs text-gray-500">
-          <p>By accessing this system, you agree to our terms of service and privacy policy.</p>
-          <p>Unauthorized access is prohibited and may be subject to legal action.</p>
-          <p className="mt-2">© MediTasker 2025. All rights reserved.</p>
         </div>
       </div>
     </div>

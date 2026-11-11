@@ -85,21 +85,21 @@ class ApiClient {
     return this.request<T>(endpoint, { method: 'GET' });
   }
 
-  async post<T>(endpoint: string, data: any): Promise<T> {
+  async post<T>(endpoint: string, data: Record<string, unknown>): Promise<T> {
     return this.request<T>(endpoint, {
       method: 'POST',
       body: JSON.stringify(data),
     });
   }
 
-  async put<T>(endpoint: string, data: any): Promise<T> {
+  async put<T>(endpoint: string, data: Record<string, unknown>): Promise<T> {
     return this.request<T>(endpoint, {
       method: 'PUT',
       body: JSON.stringify(data),
     });
   }
 
-  async patch<T>(endpoint: string, data: any): Promise<T> {
+  async patch<T>(endpoint: string, data: Record<string, unknown>): Promise<T> {
     return this.request<T>(endpoint, {
       method: 'PATCH',
       body: JSON.stringify(data),
@@ -111,7 +111,7 @@ class ApiClient {
   }
 
   // Batch operations
-  async batchUpdate<T>(endpoint: string, operations: Array<{ id: string; data: any }>): Promise<T> {
+  async batchUpdate<T>(endpoint: string, operations: Array<{ id: string; data: Record<string, unknown> }>): Promise<T> {
     return this.request<T>(`${endpoint}/batch`, {
       method: 'PATCH',
       body: JSON.stringify({ operations }),
@@ -123,7 +123,7 @@ class ApiClient {
     endpoint: string,
     file: File,
     onProgress?: (progress: number) => void
-  ): Promise<any> {
+  ): Promise<unknown> {
     return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
       const formData = new FormData();
@@ -228,50 +228,50 @@ export const API_ENDPOINTS = {
 export const userApi = {
   getAll: () => apiClient.get(API_ENDPOINTS.USERS),
   getById: (id: string) => apiClient.get(API_ENDPOINTS.USER_BY_ID(id)),
-  create: (data: any) => apiClient.post(API_ENDPOINTS.USERS, data),
-  update: (id: string, data: any) => apiClient.put(API_ENDPOINTS.USER_BY_ID(id), data),
+  create: (data: Record<string, unknown>) => apiClient.post(API_ENDPOINTS.USERS, data),
+  update: (id: string, data: Record<string, unknown>) => apiClient.put(API_ENDPOINTS.USER_BY_ID(id), data),
   delete: (id: string) => apiClient.delete(API_ENDPOINTS.USER_BY_ID(id)),
   getProfile: () => apiClient.get(API_ENDPOINTS.USER_PROFILE),
-  updateProfile: (data: any) => apiClient.patch(API_ENDPOINTS.USER_PROFILE, data),
+  updateProfile: (data: Record<string, unknown>) => apiClient.patch(API_ENDPOINTS.USER_PROFILE, data),
 };
 
 export const projectApi = {
-  getAll: (params?: any) => apiClient.get(`${API_ENDPOINTS.PROJECTS}${params ? `?${new URLSearchParams(params)}` : ''}`),
+  getAll: (params?: Record<string, string>) => apiClient.get(`${API_ENDPOINTS.PROJECTS}${params ? `?${new URLSearchParams(params)}` : ''}`),
   getById: (id: string) => apiClient.get(API_ENDPOINTS.PROJECT_BY_ID(id)),
-  create: (data: any) => apiClient.post(API_ENDPOINTS.PROJECTS, data),
-  update: (id: string, data: any) => apiClient.put(API_ENDPOINTS.PROJECT_BY_ID(id), data),
+  create: (data: Record<string, unknown>) => apiClient.post(API_ENDPOINTS.PROJECTS, data),
+  update: (id: string, data: Record<string, unknown>) => apiClient.put(API_ENDPOINTS.PROJECT_BY_ID(id), data),
   delete: (id: string) => apiClient.delete(API_ENDPOINTS.PROJECT_BY_ID(id)),
   getTasks: (id: string) => apiClient.get(API_ENDPOINTS.PROJECT_TASKS(id)),
   getMembers: (id: string) => apiClient.get(API_ENDPOINTS.PROJECT_MEMBERS(id)),
-  batchUpdate: (operations: Array<{ id: string; data: any }>) => 
+  batchUpdate: (operations: Array<{ id: string; data: Record<string, unknown> }>) => 
     apiClient.batchUpdate(API_ENDPOINTS.PROJECTS, operations),
 };
 
 export const taskApi = {
-  getAll: (params?: any) => apiClient.get(`${API_ENDPOINTS.TASKS}${params ? `?${new URLSearchParams(params)}` : ''}`),
+  getAll: (params?: Record<string, string>) => apiClient.get(`${API_ENDPOINTS.TASKS}${params ? `?${new URLSearchParams(params)}` : ''}`),
   getById: (id: string) => apiClient.get(API_ENDPOINTS.TASK_BY_ID(id)),
-  create: (data: any) => apiClient.post(API_ENDPOINTS.TASKS, data),
-  update: (id: string, data: any) => apiClient.put(API_ENDPOINTS.TASK_BY_ID(id), data),
+  create: (data: Record<string, unknown>) => apiClient.post(API_ENDPOINTS.TASKS, data),
+  update: (id: string, data: Record<string, unknown>) => apiClient.put(API_ENDPOINTS.TASK_BY_ID(id), data),
   delete: (id: string) => apiClient.delete(API_ENDPOINTS.TASK_BY_ID(id)),
   getComments: (id: string) => apiClient.get(API_ENDPOINTS.TASK_COMMENTS(id)),
-  addComment: (id: string, data: any) => apiClient.post(API_ENDPOINTS.TASK_COMMENTS(id), data),
+  addComment: (id: string, data: Record<string, unknown>) => apiClient.post(API_ENDPOINTS.TASK_COMMENTS(id), data),
   getAttachments: (id: string) => apiClient.get(API_ENDPOINTS.TASK_ATTACHMENTS(id)),
-  batchUpdate: (operations: Array<{ id: string; data: any }>) => 
+  batchUpdate: (operations: Array<{ id: string; data: Record<string, unknown> }>) => 
     apiClient.batchUpdate(API_ENDPOINTS.TASKS, operations),
 };
 
 export const searchApi = {
   global: (query: string) => apiClient.get(`${API_ENDPOINTS.SEARCH}?q=${encodeURIComponent(query)}`),
-  projects: (query: string, filters?: any) => 
+  projects: (query: string, filters?: Record<string, string>) => 
     apiClient.get(`${API_ENDPOINTS.SEARCH_PROJECTS}?q=${encodeURIComponent(query)}${filters ? `&${new URLSearchParams(filters)}` : ''}`),
-  tasks: (query: string, filters?: any) => 
+  tasks: (query: string, filters?: Record<string, string>) => 
     apiClient.get(`${API_ENDPOINTS.SEARCH_TASKS}?q=${encodeURIComponent(query)}${filters ? `&${new URLSearchParams(filters)}` : ''}`),
   users: (query: string) => apiClient.get(`${API_ENDPOINTS.SEARCH_USERS}?q=${encodeURIComponent(query)}`),
 };
 
 export const analyticsApi = {
   getDashboard: () => apiClient.get(API_ENDPOINTS.ANALYTICS_DASHBOARD),
-  getProjects: (params?: any) => apiClient.get(`${API_ENDPOINTS.ANALYTICS_PROJECTS}${params ? `?${new URLSearchParams(params)}` : ''}`),
-  getTasks: (params?: any) => apiClient.get(`${API_ENDPOINTS.ANALYTICS_TASKS}${params ? `?${new URLSearchParams(params)}` : ''}`),
-  getTeam: (params?: any) => apiClient.get(`${API_ENDPOINTS.ANALYTICS_TEAM}${params ? `?${new URLSearchParams(params)}` : ''}`),
+  getProjects: (params?: Record<string, string>) => apiClient.get(`${API_ENDPOINTS.ANALYTICS_PROJECTS}${params ? `?${new URLSearchParams(params)}` : ''}`),
+  getTasks: (params?: Record<string, string>) => apiClient.get(`${API_ENDPOINTS.ANALYTICS_TASKS}${params ? `?${new URLSearchParams(params)}` : ''}`),
+  getTeam: (params?: Record<string, string>) => apiClient.get(`${API_ENDPOINTS.ANALYTICS_TEAM}${params ? `?${new URLSearchParams(params)}` : ''}`),
 };

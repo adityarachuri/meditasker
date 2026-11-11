@@ -1,0 +1,98 @@
+
+> meditasker@0.1.0 test:coverage
+> jest --coverage
+
+------------------------------|---------|----------|---------|---------|---------------------------------------------------------------------
+File                          | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s                                                   
+------------------------------|---------|----------|---------|---------|---------------------------------------------------------------------
+All files                     |   44.38 |    33.59 |   39.72 |   44.82 |                                                                     
+ src                          |       0 |        0 |       0 |       0 |                                                                     
+  App.tsx                     |       0 |        0 |       0 |       0 | 1-547                                                               
+ src/components/Advanced      |       0 |        0 |       0 |       0 |                                                                     
+  AdvancedSearch.tsx          |       0 |        0 |       0 |       0 | 1-461                                                               
+  BulkOperations.tsx          |       0 |        0 |       0 |       0 | 1-256                                                               
+  DataExportImport.tsx        |       0 |        0 |       0 |       0 | 1-643                                                               
+  EnterpriseMonitoring.tsx    |       0 |        0 |       0 |       0 | 1-183                                                               
+  GlobalSearch.tsx            |       0 |        0 |       0 |       0 | 1-307                                                               
+  RealTimeUpdates.tsx         |       0 |        0 |       0 |       0 | 1-351                                                               
+ src/components/Auth          |     100 |      100 |   95.23 |     100 |                                                                     
+  LoginForm.tsx               |     100 |      100 |     100 |     100 |                                                                     
+  ProtectedRoute.tsx          |     100 |      100 |      50 |     100 |                                                                     
+  SessionManager.tsx          |     100 |      100 |     100 |     100 |                                                                     
+ src/components/Calendar      |   34.48 |    17.79 |   21.52 |      36 |                                                                     
+  Calendar.tsx                |   58.73 |    47.61 |   36.36 |   58.73 | 42-43,53-59,63-68,72-77,81,105-109,141,178-180                      
+  CalendarAgendaView.tsx      |    8.51 |        0 |       0 |    9.52 | 25-178                                                              
+  CalendarDayView.tsx         |    4.16 |        0 |       0 |    4.47 | 25-203                                                              
+  CalendarEventCard.tsx       |    7.89 |        0 |       0 |     8.1 | 24-114                                                              
+  CalendarHeader.tsx          |   76.19 |    55.55 |      80 |   76.19 | 26,41,47-49,118                                                     
+  CalendarMonthView.tsx       |    54.9 |       70 |   38.46 |    55.1 | 50-51,55-56,60-78,108-139                                           
+  CalendarSidebar.tsx         |   55.55 |    43.75 |      25 |   55.55 | 50-55,82,185-253                                                    
+  CalendarWeekView.tsx        |    42.3 |       50 |   29.16 |   41.33 | 54-70,74-75,79-80,84-102,119,154-161,174-202                        
+  EventModal.tsx              |   32.29 |    13.43 |   19.51 |    37.5 | 54-57,92-154,159-168,174-177,246-346,362,378,398-424,445-449        
+ src/components/Dashboard     |       0 |        0 |       0 |       0 |                                                                     
+  Dashboard.tsx               |       0 |        0 |       0 |       0 | 1-106                                                               
+  MetricCard.tsx              |       0 |        0 |       0 |       0 | 14-15                                                               
+  ProjectProgress.tsx         |       0 |        0 |       0 |       0 | 1-12                                                                
+  RecentActivity.tsx          |       0 |        0 |       0 |       0 | 1-30                                                                
+  TaskOverview.tsx            |       0 |      100 |       0 |       0 | 1-30                                                                
+ src/components/Layout        |    6.45 |        0 |    9.09 |    6.89 |                                                                     
+  Footer.tsx                  |     100 |      100 |     100 |     100 |                                                                     
+  Header.tsx                  |       0 |        0 |       0 |       0 | 1-83                                                                
+  Sidebar.tsx                 |       0 |        0 |       0 |       0 | 1-69                                                                
+ src/components/Notifications |       0 |        0 |       0 |       0 |                                                                     
+  NotificationList.tsx        |       0 |        0 |       0 |       0 | 1-95                                                                
+ src/components/Performance   |       0 |        0 |       0 |       0 |                                                                     
+  DataInitializer.tsx         |       0 |        0 |       0 |       0 | 1-190                                                               
+  LazyLoadWrapper.tsx         |       0 |        0 |       0 |       0 | 1-72                                                                
+  VirtualizedList.tsx         |       0 |        0 |       0 |       0 | 1-66                                                                
+  VirtualizedTable.tsx        |       0 |        0 |       0 |       0 | 1-134                                                               
+ src/components/Projects      |       0 |        0 |       0 |       0 |                                                                     
+  ProjectCard.tsx             |       0 |        0 |       0 |       0 | 2-98                                                                
+  ProjectList.tsx             |       0 |        0 |       0 |       0 | 1-62                                                                
+  ProjectListVirtualized.tsx  |       0 |        0 |       0 |       0 | 1-204                                                               
+  ProjectModal.tsx            |       0 |        0 |       0 |       0 | 1-287                                                               
+ src/components/Reports       |       0 |        0 |       0 |       0 |                                                                     
+  ReportsDashboard.tsx        |       0 |        0 |       0 |       0 | 1-419                                                               
+ src/components/Settings      |       0 |        0 |       0 |       0 |                                                                     
+  SettingsPage.tsx            |       0 |        0 |       0 |       0 | 1-1042                                                              
+ src/components/Tasks         |       0 |        0 |       0 |       0 |                                                                     
+  TaskCard.tsx                |       0 |        0 |       0 |       0 | 2-103                                                               
+  TaskList.tsx                |       0 |        0 |       0 |       0 | 1-73                                                                
+  TaskListVirtualized.tsx     |       0 |        0 |       0 |       0 | 1-265                                                               
+  TaskModal.tsx               |       0 |        0 |       0 |       0 | 1-284                                                               
+ src/components/Team          |       0 |        0 |       0 |       0 |                                                                     
+  TeamList.tsx                |       0 |        0 |       0 |       0 | 1-90                                                                
+  TeamMemberCard.tsx          |       0 |        0 |       0 |       0 | 2-100                                                               
+ src/context                  |   96.55 |       88 |     100 |   96.47 |                                                                     
+  AppContext.tsx              |     100 |    87.87 |     100 |     100 | 77-89,109-132                                                       
+  AuthContext.tsx             |   94.33 |    88.23 |     100 |   94.11 | 75,171-172                                                          
+ src/data                     |   98.68 |     91.3 |     100 |   98.57 |                                                                     
+  mockData.ts                 |     100 |      100 |     100 |     100 |                                                                     
+  mockDataGenerator.ts        |   98.62 |     91.3 |     100 |   98.49 | 91,147                                                              
+ src/hooks                    |   90.98 |    74.61 |     100 |   91.27 |                                                                     
+  useAuth.ts                  |     100 |      100 |     100 |     100 |                                                                     
+  useCalendar.ts              |   79.25 |    47.22 |     100 |   78.62 | 57,71-75,80-81,101-102,137-138,150-151,161-162,247-251,271-280      
+  useDebounce.ts              |     100 |      100 |     100 |     100 |                                                                     
+  useInfiniteScroll.ts        |     100 |    84.61 |     100 |     100 | 32-41                                                               
+  useLocalStorage.ts          |     100 |      100 |     100 |     100 |                                                                     
+  usePaginatedData.ts         |   95.69 |     85.1 |     100 |   97.77 | 106,131                                                             
+  usePerformanceMonitor.ts    |     100 |      100 |     100 |     100 |                                                                     
+  useSession.ts               |     100 |    73.68 |     100 |     100 | 23,52-87                                                            
+  useVirtualization.ts        |     100 |      100 |     100 |     100 |                                                                     
+ src/services                 |   93.67 |    79.19 |   96.11 |   94.08 |                                                                     
+  api.ts                      |    99.1 |    80.85 |     100 |   99.09 | 59                                                                  
+  authService.ts              |     100 |     92.3 |     100 |     100 | 68,110                                                              
+  calendarService.ts          |   85.71 |    69.64 |   87.87 |    86.7 | 280-281,295-299,317,393,397-400,404,412,414-416,422-423,425-428,439 
+  databaseService.ts          |   97.73 |    84.52 |     100 |   97.62 | 241-242,311-312,471,477                                             
+  sessionService.ts           |   88.34 |    73.91 |   89.65 |   89.69 | 101-102,133,181-191,255-256                                         
+ src/store                    |   95.72 |    75.55 |     100 |   98.03 |                                                                     
+  globalStore.ts              |   95.72 |    75.55 |     100 |   98.03 | 278,284                                                             
+ src/utils                    |      25 |       25 |   16.66 |   28.57 |                                                                     
+  bundleAnalyzer.ts           |      25 |       25 |   16.66 |   28.57 | 8-25                                                                
+------------------------------|---------|----------|---------|---------|---------------------------------------------------------------------
+
+Test Suites: 23 passed, 23 total
+Tests:       284 passed, 284 total
+Snapshots:   0 total
+Time:        31.538 s
+Ran all test suites.

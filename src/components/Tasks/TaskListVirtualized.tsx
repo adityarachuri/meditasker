@@ -1,8 +1,10 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { Task } from '../../types';
 import { usePaginatedData } from '../../hooks/usePaginatedData';
+import { useInfiniteScroll } from '../../hooks/useInfiniteScroll';
 import { MemoizedVirtualizedTable } from '../Performance/VirtualizedTable';
-import { Calendar, User, Clock, Search, Filter } from 'lucide-react';
+import { TaskCard } from './TaskCard';
+import { Calendar, User, Clock, Search, Filter, List, LayoutGrid } from 'lucide-react';
 import { databaseService } from '../../services/databaseService';
 
 export function TaskListVirtualized() {
@@ -12,6 +14,7 @@ export function TaskListVirtualized() {
     assigneeId: '',
     search: ''
   });
+  const [viewMode, setViewMode] = useState<'table' | 'cards'>('table');
 
   const {
     data: tasks,
@@ -27,9 +30,18 @@ export function TaskListVirtualized() {
     optimizeForLargeDatasets: true
   });
 
+  // Cards mode loads more as the sentinel at the bottom scrolls into view.
+  // The sentinel stays mounted in both view modes (just hidden in table mode)
+  // so the observer attaches once and keeps working across mode switches.
+  const { loadMoreRef } = useInfiniteScroll({
+    hasNextPage: hasMore,
+    isFetchingNextPage: loading,
+    fetchNextPage: loadMore,
+  });
+
   const columns = useMemo(() => [
     {
-      key: 'title' as keyof Task,
+      key: 'title' as const,
       header: 'Task',
       width: 300,
       render: (value: string, task: Task) => {
@@ -45,7 +57,7 @@ export function TaskListVirtualized() {
       }
     },
     {
-      key: 'status' as keyof Task,
+      key: 'status' as const,
       header: 'Status',
       width: 120,
       render: (value: string) => (
@@ -61,7 +73,7 @@ export function TaskListVirtualized() {
       )
     },
     {
-      key: 'priority' as keyof Task,
+      key: 'priority' as const,
       header: 'Priority',
       width: 100,
       render: (value: string) => (
@@ -79,7 +91,7 @@ export function TaskListVirtualized() {
       )
     },
     {
-      key: 'assigneeId' as keyof Task,
+      key: 'assigneeId' as const,
       header: 'Assignee',
       width: 150,
       render: (value: string | undefined) => {
@@ -96,7 +108,7 @@ export function TaskListVirtualized() {
       }
     },
     {
-      key: 'dueDate' as keyof Task,
+      key: 'dueDate' as const,
       header: 'Due Date',
       width: 120,
       render: (value: string | undefined) => {
@@ -121,7 +133,7 @@ export function TaskListVirtualized() {
       }
     },
     {
-      key: 'estimatedHours' as keyof Task,
+      key: 'estimatedHours' as const,
       header: 'Hours',
       width: 100,
       render: (value: number, task: Task) => (
@@ -142,7 +154,7 @@ export function TaskListVirtualized() {
       )
     },
     {
-      key: 'tags' as keyof Task,
+      key: 'tags' as const,
       header: 'Tags',
       width: 150,
       render: (value: string[]) => (
@@ -244,29 +256,64 @@ export function TaskListVirtualized() {
           </select>
         </div>
 
-        <div className="text-sm text-gray-600">
-          {total.toLocaleString()} tasks total
+        <div className="flex items-center space-x-3">
+          <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
+            <button
+              onClick={() => setViewMode('table')}
+              title="Table view"
+              className={`p-2 ${viewMode === 'table' ? 'bg-blue-50 text-blue-700' : 'text-gray-500 hover:bg-gray-50'}`}
+            >
+              <List className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setViewMode('cards')}
+              title="Card view"
+              className={`p-2 ${viewMode === 'cards' ? 'bg-blue-50 text-blue-700' : 'text-gray-500 hover:bg-gray-50'}`}
+            >
+              <LayoutGrid className="w-4 h-4" />
+            </button>
+          </div>
+          <div className="text-sm text-gray-600">
+            {total.toLocaleString()} tasks total
+          </div>
         </div>
       </div>
 
-      {/* Virtualized table */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-        <MemoizedVirtualizedTable
-          data={tasks}
-          columns={columns}
-          height={600}
-          rowHeight={70}
-          loading={loading}
-          enableVirtualization={true}
-          optimizeForLargeDatasets={true}
-          hasMore={hasMore}
-          onLoadMore={loadMore}
-          onRowClick={(task) => {
-            console.log('Task clicked:', task.title);
-            // Handle task click - could open modal or navigate
-          }}
-        />
-      </div>
+      {viewMode === 'table' ? (
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+          <MemoizedVirtualizedTable
+            data={tasks}
+            columns={columns}
+            height={600}
+            rowHeight={70}
+            loading={loading}
+            enableVirtualization={true}
+            optimizeForLargeDatasets={true}
+            hasMore={hasMore}
+            onLoadMore={loadMore}
+            onRowClick={(task) => {
+              console.log('Task clicked:', task.title);
+              // Handle task click - could open modal or navigate
+            }}
+          />
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {tasks.map((task) => (
+            <TaskCard key={task.id} task={task} onClick={() => console.log('Task clicked:', task.title)} />
+          ))}
+        </div>
+      )}
+
+      {/* Infinite-scroll trigger for card view; inert (zero-size, non-intersecting) in table mode. */}
+      <div ref={loadMoreRef} style={{ display: viewMode === 'cards' ? 'block' : 'none', height: 1 }} />
+
+      {viewMode === 'cards' && loading && (
+        <div className="flex items-center justify-center py-4">
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mr-2"></div>
+          <span className="text-sm text-gray-600">Loading more tasks...</span>
+        </div>
+      )}
 
       {tasks.length === 0 && !loading && (
         <div className="text-center py-12">
@@ -275,7 +322,7 @@ export function TaskListVirtualized() {
           <p className="text-xs text-gray-400 mt-2">Enterprise search optimized for large datasets</p>
         </div>
       )}
-      
+
     </div>
   );
 }

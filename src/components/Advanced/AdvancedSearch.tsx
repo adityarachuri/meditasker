@@ -1,15 +1,8 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { 
-  Search, 
-  Filter, 
-  X, 
-  Calendar, 
-  User, 
-  Tag, 
-  Star,
-  Clock,
-  AlertCircle,
-  ChevronDown,
+import { useState, useEffect, useMemo } from 'react';
+import {
+  Search,
+  Filter,
+  X,
   Save,
   History
 } from 'lucide-react';
@@ -19,7 +12,7 @@ import { useGlobalStore } from '../../store/globalStore';
 interface SearchFilter {
   field: string;
   operator: 'equals' | 'contains' | 'startsWith' | 'endsWith' | 'greaterThan' | 'lessThan' | 'between' | 'in';
-  value: any;
+  value: string | boolean;
   label: string;
 }
 
@@ -73,10 +66,15 @@ export function AdvancedSearch({
     onSearch(debouncedQuery, filters);
     
     // Add to search history if query is not empty
-    if (debouncedQuery.trim() && !searchHistory.includes(debouncedQuery)) {
-      const newHistory = [debouncedQuery, ...searchHistory.slice(0, 9)]; // Keep last 10
-      setSearchHistory(newHistory);
-      localStorage.setItem(`searchHistory_${type}`, JSON.stringify(newHistory));
+    if (debouncedQuery.trim()) {
+      setSearchHistory(prev => {
+        if (prev.includes(debouncedQuery)) {
+          return prev;
+        }
+        const newHistory = [debouncedQuery, ...prev.slice(0, 9)]; // Keep last 10
+        localStorage.setItem(`searchHistory_${type}`, JSON.stringify(newHistory));
+        return newHistory;
+      });
     }
   }, [debouncedQuery, filters, onSearch, type]);
 
@@ -177,8 +175,8 @@ export function AdvancedSearch({
     const option = filterOptions.find(opt => opt.field === filter.field);
     
     switch (option?.type) {
-      case 'select':
-        const selectOptions = filter.field === 'status' 
+      case 'select': {
+        const selectOptions = filter.field === 'status'
           ? (type === 'tasks' ? ['todo', 'in-progress', 'review', 'completed', 'blocked'] : ['planning', 'active', 'on-hold', 'completed', 'cancelled'])
           : filter.field === 'priority'
           ? ['low', 'medium', 'high', 'critical']
@@ -188,7 +186,7 @@ export function AdvancedSearch({
 
         return (
           <select
-            value={filter.value}
+            value={String(filter.value)}
             onChange={(e) => updateFilter(index, { value: e.target.value })}
             className="px-2 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           >
@@ -200,11 +198,12 @@ export function AdvancedSearch({
             ))}
           </select>
         );
+      }
 
       case 'user':
         return (
           <select
-            value={filter.value}
+            value={String(filter.value)}
             onChange={(e) => updateFilter(index, { value: e.target.value })}
             className="px-2 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           >
@@ -220,7 +219,7 @@ export function AdvancedSearch({
       case 'project':
         return (
           <select
-            value={filter.value}
+            value={String(filter.value)}
             onChange={(e) => updateFilter(index, { value: e.target.value })}
             className="px-2 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           >
@@ -237,7 +236,7 @@ export function AdvancedSearch({
         return (
           <input
             type="date"
-            value={filter.value}
+            value={String(filter.value)}
             onChange={(e) => updateFilter(index, { value: e.target.value })}
             className="px-2 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
@@ -247,7 +246,7 @@ export function AdvancedSearch({
         return (
           <input
             type="number"
-            value={filter.value}
+            value={String(filter.value)}
             onChange={(e) => updateFilter(index, { value: e.target.value })}
             className="px-2 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             placeholder="Enter number..."
@@ -257,7 +256,7 @@ export function AdvancedSearch({
       case 'boolean':
         return (
           <select
-            value={filter.value}
+            value={String(filter.value)}
             onChange={(e) => updateFilter(index, { value: e.target.value === 'true' })}
             className="px-2 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           >
@@ -271,7 +270,7 @@ export function AdvancedSearch({
         return (
           <input
             type="text"
-            value={filter.value}
+            value={String(filter.value)}
             onChange={(e) => updateFilter(index, { value: e.target.value })}
             className="px-2 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             placeholder="Enter value..."
@@ -398,7 +397,7 @@ export function AdvancedSearch({
                   
                   <select
                     value={filter.operator}
-                    onChange={(e) => updateFilter(index, { operator: e.target.value as any })}
+                    onChange={(e) => updateFilter(index, { operator: e.target.value as SearchFilter['operator'] })}
                     className="px-2 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   >
                     <option value="equals">equals</option>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useCalendar } from '../../hooks/useCalendar';
 import { CalendarHeader } from './CalendarHeader';
 import { CalendarMonthView } from './CalendarMonthView';
@@ -113,7 +113,11 @@ export function Calendar() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-96">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div
+          role="status"
+          aria-label="Loading calendar"
+          className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"
+        ></div>
       </div>
     );
   }

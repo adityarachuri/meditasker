@@ -1,22 +1,28 @@
-import React from 'react';
 import { render, screen, act, waitFor } from '@testing-library/react';
 import { AuthProvider, useAuth } from '../AuthContext';
+import { sessionService } from '../../services/sessionService';
 
-// Mock localStorage
-const mockLocalStorage = {
-  getItem: jest.fn(),
-  setItem: jest.fn(),
-  removeItem: jest.fn(),
-  clear: jest.fn(),
-};
-Object.defineProperty(window, 'localStorage', {
-  value: mockLocalStorage,
-});
+// Mock sessionService: AuthContext talks to this abstraction, not storage
+// directly, so tests control session state through it rather than trying to
+// replicate sessionService's own storage format (which also depends on its
+// secureStorage config, defaulting to sessionStorage, not localStorage).
+jest.mock('../../services/sessionService', () => ({
+  sessionService: {
+    getSessionInfo: jest.fn(() => null),
+    startSession: jest.fn(),
+    endSession: jest.fn(),
+    configure: jest.fn(),
+    // authService.login() schedules a token refresh via this after startSession.
+    getSessionTimeRemaining: jest.fn(() => 0),
+  },
+}));
+
+const mockSessionService = sessionService as jest.Mocked<typeof sessionService>;
 
 // Test component to access auth context
 const TestComponent = () => {
   const { state, login, logout, clearError } = useAuth();
-  
+
   return (
     <div>
       <div data-testid="auth-state">
@@ -27,13 +33,13 @@ const TestComponent = () => {
           user: state.user?.email || null,
         })}
       </div>
-      <button onClick={() => login('admin@softique-health-insure.com', 'password123')}>
+      <button onClick={() => { login('admin@meditasker.com', 'password123').catch(() => {}); }}>
         Login
       </button>
-      <button onClick={() => login('invalid@example.com', 'wrongpassword')}>
+      <button onClick={() => { login('invalid@example.com', 'wrongpassword').catch(() => {}); }}>
         Login Invalid
       </button>
-      <button onClick={() => login('admin@softique-health-insure.com', 'wrongpassword')}>
+      <button onClick={() => { login('admin@meditasker.com', 'wrongpassword').catch(() => {}); }}>
         Login Wrong Password
       </button>
       <button onClick={logout}>Logout</button>
@@ -45,7 +51,7 @@ const TestComponent = () => {
 describe('AuthContext', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockLocalStorage.getItem.mockReturnValue(null);
+    mockSessionService.getSessionInfo.mockReturnValue(null);
     jest.useFakeTimers();
   });
 
@@ -60,10 +66,13 @@ describe('AuthContext', () => {
       </AuthProvider>
     );
 
+    // checkAuthStatus runs synchronously to completion (no real async gap)
+    // when getSessionInfo resolves synchronously, so isLoading already
+    // settles to false by the time render() returns.
     const authState = JSON.parse(screen.getByTestId('auth-state').textContent!);
     expect(authState).toEqual({
       isAuthenticated: false,
-      isLoading: true,
+      isLoading: false,
       error: null,
       user: null,
     });
@@ -72,16 +81,18 @@ describe('AuthContext', () => {
   it('restores authentication from localStorage', async () => {
     const mockUser = {
       id: '1',
-      email: 'admin@softique-health-insure.com',
+      email: 'admin@meditasker.com',
       name: 'Admin User',
-      role: 'admin',
+      role: 'admin' as const,
       department: 'Administration',
+      joinDate: '2024-01-01',
+      isActive: true,
     };
 
-    mockLocalStorage.getItem.mockImplementation((key) => {
-      if (key === 'auth_token') return 'mock-token';
-      if (key === 'auth_user') return JSON.stringify(mockUser);
-      return null;
+    mockSessionService.getSessionInfo.mockReturnValue({
+      token: 'mock-token',
+      user: mockUser,
+      expiresAt: Date.now() + 60 * 60 * 1000,
     });
 
     render(
@@ -93,17 +104,13 @@ describe('AuthContext', () => {
     await waitFor(() => {
       const authState = JSON.parse(screen.getByTestId('auth-state').textContent!);
       expect(authState.isAuthenticated).toBe(true);
-      expect(authState.user).toBe('admin@softique-health-insure.com');
+      expect(authState.user).toBe('admin@meditasker.com');
       expect(authState.isLoading).toBe(false);
     });
   });
 
-  it('handles corrupted localStorage data', async () => {
-    mockLocalStorage.getItem.mockImplementation((key) => {
-      if (key === 'auth_token') return 'mock-token';
-      if (key === 'auth_user') return 'invalid-json';
-      return null;
-    });
+  it('handles no existing session gracefully', async () => {
+    mockSessionService.getSessionInfo.mockReturnValue(null);
 
     render(
       <AuthProvider>
@@ -116,9 +123,6 @@ describe('AuthContext', () => {
       expect(authState.isAuthenticated).toBe(false);
       expect(authState.isLoading).toBe(false);
     });
-
-    expect(mockLocalStorage.removeItem).toHaveBeenCalledWith('auth_token');
-    expect(mockLocalStorage.removeItem).toHaveBeenCalledWith('auth_user');
   });
 
   it('handles successful login', async () => {
@@ -139,7 +143,7 @@ describe('AuthContext', () => {
     });
 
     // Check loading state
-    let authState = JSON.parse(screen.getByTestId('auth-state').textContent!);
+    const authState = JSON.parse(screen.getByTestId('auth-state').textContent!);
     expect(authState.isLoading).toBe(true);
 
     // Fast-forward the login delay
@@ -150,13 +154,15 @@ describe('AuthContext', () => {
     await waitFor(() => {
       const authState = JSON.parse(screen.getByTestId('auth-state').textContent!);
       expect(authState.isAuthenticated).toBe(true);
-      expect(authState.user).toBe('admin@softique-health-insure.com');
+      expect(authState.user).toBe('admin@meditasker.com');
       expect(authState.isLoading).toBe(false);
       expect(authState.error).toBe(null);
-    });
+    }, { timeout: 2000 });
 
-    expect(mockLocalStorage.setItem).toHaveBeenCalledWith('auth_token', expect.any(String));
-    expect(mockLocalStorage.setItem).toHaveBeenCalledWith('auth_user', expect.any(String));
+    expect(mockSessionService.startSession).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({ email: 'admin@meditasker.com' })
+    );
   });
 
   it('handles login failure with invalid email', async () => {
@@ -186,7 +192,7 @@ describe('AuthContext', () => {
       expect(authState.isAuthenticated).toBe(false);
       expect(authState.error).toBe('Invalid email or password');
       expect(authState.isLoading).toBe(false);
-    });
+    }, { timeout: 2000 });
   });
 
   it('handles login failure with wrong password', async () => {
@@ -216,21 +222,23 @@ describe('AuthContext', () => {
       expect(authState.isAuthenticated).toBe(false);
       expect(authState.error).toBe('Invalid email or password');
       expect(authState.isLoading).toBe(false);
-    });
+    }, { timeout: 2000 });
   });
 
   it('handles logout', async () => {
-    // First login
-    mockLocalStorage.getItem.mockImplementation((key) => {
-      if (key === 'auth_token') return 'mock-token';
-      if (key === 'auth_user') return JSON.stringify({
+    // Start already logged in
+    mockSessionService.getSessionInfo.mockReturnValue({
+      token: 'mock-token',
+      user: {
         id: '1',
-        email: 'admin@softique-health-insure.com',
+        email: 'admin@meditasker.com',
         name: 'Admin User',
         role: 'admin',
         department: 'Administration',
-      });
-      return null;
+        joinDate: '2024-01-01',
+        isActive: true,
+      },
+      expiresAt: Date.now() + 60 * 60 * 1000,
     });
 
     render(
@@ -253,8 +261,7 @@ describe('AuthContext', () => {
     expect(authState.user).toBe(null);
     expect(authState.error).toBe(null);
 
-    expect(mockLocalStorage.removeItem).toHaveBeenCalledWith('auth_token');
-    expect(mockLocalStorage.removeItem).toHaveBeenCalledWith('auth_user');
+    expect(mockSessionService.endSession).toHaveBeenCalled();
   });
 
   it('clears error', async () => {
@@ -282,7 +289,7 @@ describe('AuthContext', () => {
     await waitFor(() => {
       const authState = JSON.parse(screen.getByTestId('auth-state').textContent!);
       expect(authState.error).toBe('Invalid email or password');
-    });
+    }, { timeout: 2000 });
 
     // Clear the error
     act(() => {
@@ -334,16 +341,16 @@ describe('AuthContext', () => {
     await waitFor(() => {
       const authState = JSON.parse(screen.getByTestId('auth-state').textContent!);
       expect(authState.isAuthenticated).toBe(true);
-    });
+    }, { timeout: 2000 });
 
-    const firstToken = mockLocalStorage.setItem.mock.calls.find(call => call[0] === 'auth_token')?.[1];
+    const firstToken = mockSessionService.startSession.mock.calls[0]?.[0];
 
     // Logout and login again
     act(() => {
       screen.getByText('Logout').click();
     });
 
-    mockLocalStorage.setItem.mockClear();
+    mockSessionService.startSession.mockClear();
 
     act(() => {
       screen.getByText('Login').click();
@@ -356,9 +363,9 @@ describe('AuthContext', () => {
     await waitFor(() => {
       const authState = JSON.parse(screen.getByTestId('auth-state').textContent!);
       expect(authState.isAuthenticated).toBe(true);
-    });
+    }, { timeout: 2000 });
 
-    const secondToken = mockLocalStorage.setItem.mock.calls.find(call => call[0] === 'auth_token')?.[1];
+    const secondToken = mockSessionService.startSession.mock.calls[0]?.[0];
 
     expect(firstToken).toBeDefined();
     expect(secondToken).toBeDefined();

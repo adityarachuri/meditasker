@@ -1,5 +1,4 @@
-import React from 'react';
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Plus } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { CalendarView } from '../../types/calendar';
 
 interface CalendarHeaderProps {
@@ -21,27 +20,27 @@ export function CalendarHeader({
 }: CalendarHeaderProps) {
   const formatTitle = () => {
     const { type, date } = view;
-    const options: Intl.DateTimeFormatOptions = {};
 
     switch (type) {
       case 'day':
-        return date.toLocaleDateString('en-US', { 
-          weekday: 'long', 
-          year: 'numeric', 
-          month: 'long', 
-          day: 'numeric' 
+        return date.toLocaleDateString('en-US', {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
         });
-      case 'week':
+      case 'week': {
         const weekStart = new Date(date);
         weekStart.setDate(date.getDate() - date.getDay());
         const weekEnd = new Date(weekStart);
         weekEnd.setDate(weekStart.getDate() + 6);
-        
+
         if (weekStart.getMonth() === weekEnd.getMonth()) {
           return `${weekStart.toLocaleDateString('en-US', { month: 'long' })} ${weekStart.getDate()}-${weekEnd.getDate()}, ${weekStart.getFullYear()}`;
         } else {
           return `${weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${weekEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}, ${weekStart.getFullYear()}`;
         }
+      }
       case 'month':
         return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long' });
       case 'agenda':

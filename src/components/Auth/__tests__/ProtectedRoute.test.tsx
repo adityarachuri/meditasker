@@ -1,7 +1,6 @@
-import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ProtectedRoute } from '../ProtectedRoute';
-import { AuthProvider, useAuth } from '../../../context/AuthContext';
+import { useAuth } from '../../../context/AuthContext';
 import { useSession } from '../../../hooks/useSession';
 
 // Mock the useAuth hook
@@ -19,14 +18,6 @@ const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>;
 const mockUseSession = useSession as jest.MockedFunction<typeof useSession>;
 
 const TestComponent = () => <div>Protected Content</div>;
-
-const renderWithAuth = (component: React.ReactElement) => {
-  return render(
-    <AuthProvider>
-      {component}
-    </AuthProvider>
-  );
-};
 
 describe('ProtectedRoute', () => {
   beforeEach(() => {
@@ -103,6 +94,8 @@ describe('ProtectedRoute', () => {
           name: 'Test User',
           role: 'developer',
           department: 'Engineering',
+          joinDate: '2024-01-01',
+          isActive: true,
         },
         isAuthenticated: true,
         isLoading: false,
@@ -164,6 +157,8 @@ describe('ProtectedRoute', () => {
           name: 'Test User',
           role: 'developer',
           department: 'Engineering',
+          joinDate: '2024-01-01',
+          isActive: true,
         },
         isAuthenticated: true,
         isLoading: false,
@@ -193,6 +188,8 @@ describe('ProtectedRoute', () => {
           name: 'Test User',
           role: 'manager',
           department: 'Engineering',
+          joinDate: '2024-01-01',
+          isActive: true,
         },
         isAuthenticated: true,
         isLoading: false,
@@ -222,6 +219,8 @@ describe('ProtectedRoute', () => {
           name: 'Admin User',
           role: 'admin',
           department: 'Administration',
+          joinDate: '2024-01-01',
+          isActive: true,
         },
         isAuthenticated: true,
         isLoading: false,
@@ -251,6 +250,8 @@ describe('ProtectedRoute', () => {
           name: 'Test User',
           role: 'developer',
           department: 'Engineering',
+          joinDate: '2024-01-01',
+          isActive: true,
         },
         isAuthenticated: true,
         isLoading: false,
@@ -269,8 +270,10 @@ describe('ProtectedRoute', () => {
     );
 
     expect(screen.getByText('Access Denied')).toBeInTheDocument();
-    expect(screen.getByText('Required role: manager')).toBeInTheDocument();
-    expect(screen.getByText('Your current role: developer')).toBeInTheDocument();
+    expect(screen.getByText((_, element) =>
+      element?.textContent === "You don't have permission to access this resource. Required role: manager"
+    )).toBeInTheDocument();
+    expect(screen.getByText((_, element) => element?.textContent === 'Your current role: developer')).toBeInTheDocument();
     expect(screen.queryByText('Protected Content')).not.toBeInTheDocument();
   });
 

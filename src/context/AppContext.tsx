@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useReducer, ReactNode } from 'react';
+import React, { createContext, useContext, useEffect, useReducer, ReactNode } from 'react';
 import { User, Project, Task, Sprint, Notification, Activity } from '../types';
 import { mockUsers, mockProjects, mockTasks, mockSprints, mockNotifications, mockActivities } from '../data/mockData';
+import { useLocalStorage } from '../hooks/useLocalStorage';
 
 interface AppState {
   currentUser: User | null;
@@ -183,7 +184,25 @@ const AppContext = createContext<{
 } | null>(null);
 
 export function AppProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useReducer(appReducer, initialState);
+  // Settings are the one slice of app state users expect to survive a
+  // reload (theme, sidebar state, etc.) - everything else reseeds from mock
+  // data. The reducer stays the single source of truth during the session;
+  // this just seeds its initial value from storage and mirrors changes back.
+  const [persistedSettings, setPersistedSettings] = useLocalStorage(
+    'app-settings',
+    initialState.settings
+  );
+  const [state, dispatch] = useReducer(appReducer, {
+    ...initialState,
+    settings: persistedSettings,
+  });
+
+  useEffect(() => {
+    setPersistedSettings(state.settings);
+    // setPersistedSettings is recreated each render by useLocalStorage, so it
+    // is intentionally left out of the deps to avoid re-running on every render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.settings]);
 
   return (
     <AppContext.Provider value={{ state, dispatch }}>
@@ -192,6 +211,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useApp() {
   const context = useContext(AppContext);
   if (!context) {

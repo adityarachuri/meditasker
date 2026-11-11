@@ -1,4 +1,10 @@
-import { User, Project, Task, Sprint, Notification, Activity } from '../types';
+import { User, Project, Task } from '../types';
+
+declare global {
+  interface Window {
+    gc?: () => void;
+  }
+}
 
 // Enterprise-grade data generation for massive datasets (1M+ records)
 export class MockDataGenerator {
@@ -40,7 +46,7 @@ export class MockDataGenerator {
         console.log(`Generated ${i + currentBatch} users...`);
         // Force garbage collection hint
         if (typeof window !== 'undefined' && 'gc' in window) {
-          (window as any).gc();
+          window.gc?.();
         }
       }
     }
@@ -82,7 +88,7 @@ export class MockDataGenerator {
         console.log(`Generated ${i + currentBatch} projects...`);
         // Force garbage collection hint
         if (typeof window !== 'undefined' && 'gc' in window) {
-          (window as any).gc();
+          window.gc?.();
         }
       }
     }
@@ -138,7 +144,7 @@ export class MockDataGenerator {
         console.log(`Generated ${i + currentBatch} tasks...`);
         // Force garbage collection hint
         if (typeof window !== 'undefined' && 'gc' in window) {
-          (window as any).gc();
+          window.gc?.();
         }
       }
     }
@@ -324,7 +330,7 @@ export class MockDataGenerator {
     
     // Force garbage collection hint
     if (typeof window !== 'undefined' && 'gc' in window) {
-      (window as any).gc();
+      window.gc?.();
     }
   }
 

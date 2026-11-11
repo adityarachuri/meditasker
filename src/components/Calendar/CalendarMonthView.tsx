@@ -42,7 +42,7 @@ export function CalendarMonthView({
     }
     
     return days;
-  }, [view.date]);
+  }, [view]);
 
   const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 

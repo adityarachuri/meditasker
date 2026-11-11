@@ -1,4 +1,3 @@
-import React from 'react';
 import { Task } from '../../types';
 import { useApp } from '../../context/AppContext';
 import { Calendar, User, Clock, AlertCircle } from 'lucide-react';

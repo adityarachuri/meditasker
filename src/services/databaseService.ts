@@ -18,12 +18,11 @@ export class DatabaseService {
   private projectsByStatus = new Map<string, Set<string>>();
   
   // Pagination cache
-  private paginationCache = new Map<string, { data: any[]; total: number; hasMore: boolean }>();
+  private paginationCache = new Map<string, { data: unknown[]; total: number; hasMore: boolean }>();
   private readonly CACHE_TTL = 10 * 60 * 1000; // 10 minutes for enterprise
   private cacheTimestamps = new Map<string, number>();
-  
+
   // Enterprise features
-  private queryOptimizer = new Map<string, any>();
   private performanceMetrics = new Map<string, number[]>();
   private readonly MAX_CACHE_SIZE = 1000; // Limit cache size
   private readonly BATCH_SIZE_MULTIPLIER = 2; // Larger batches for enterprise
@@ -171,7 +170,7 @@ export class DatabaseService {
     // Check cache
     if (this.isCacheValid(cacheKey)) {
       this.recordPerformanceMetric('user_query_cache_hit', performance.now() - startTime);
-      return this.paginationCache.get(cacheKey);
+      return this.paginationCache.get(cacheKey) as { data: User[]; total: number; hasMore: boolean };
     }
     
     let userIds: string[] = [];
@@ -240,7 +239,7 @@ export class DatabaseService {
     
     if (this.isCacheValid(cacheKey)) {
       this.recordPerformanceMetric('task_query_cache_hit', performance.now() - startTime);
-      return this.paginationCache.get(cacheKey);
+      return this.paginationCache.get(cacheKey) as { data: Task[]; total: number; hasMore: boolean };
     }
     
     let taskIds: string[] = [];
@@ -310,7 +309,7 @@ export class DatabaseService {
     
     if (this.isCacheValid(cacheKey)) {
       this.recordPerformanceMetric('project_query_cache_hit', performance.now() - startTime);
-      return this.paginationCache.get(cacheKey);
+      return this.paginationCache.get(cacheKey) as { data: Project[]; total: number; hasMore: boolean };
     }
     
     let projectIds: string[] = [];
@@ -469,7 +468,7 @@ export class DatabaseService {
   private optimizeMemory(): void {
     // Force garbage collection hint
     if (typeof window !== 'undefined' && 'gc' in window) {
-      (window as any).gc();
+      window.gc?.();
     }
     
     // Clear old performance metrics

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, Bell, Plus, Database } from 'lucide-react';
+import { Search, Bell, Plus } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { EnterpriseMonitoring } from '../Advanced/EnterpriseMonitoring';
 import { GlobalSearch } from '../Advanced/GlobalSearch';
@@ -9,7 +9,6 @@ interface HeaderProps {
   onSearch?: (query: string) => void;
   onAddNew?: () => void;
   showAddButton?: boolean;
-  sessionManager?: React.ReactNode;
   sessionManager?: React.ReactNode;
 }
 
@@ -51,9 +50,6 @@ export function Header({ title, onSearch, onAddNew, showAddButton = false, sessi
           <div className="hidden lg:block">
             <EnterpriseMonitoring />
           </div>
-
-          {/* Session Manager */}
-          {sessionManager}
 
           {/* Session Manager */}
           {sessionManager}

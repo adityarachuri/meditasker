@@ -12,9 +12,7 @@ interface UsePaginatedDataOptions {
   initialLoad?: boolean;
   enableCaching?: boolean;
   optimizeForLargeDatasets?: boolean;
-  filters?: Record<string, any>;
-  enableCaching?: boolean;
-  optimizeForLargeDatasets?: boolean;
+  filters?: Record<string, unknown>;
 }
 
 export function usePaginatedData<T>(
@@ -36,25 +34,35 @@ export function usePaginatedData<T>(
   const [total, setTotal] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
 
+  // filtersRef holds the *active* filters used for the next query, which
+  // search() also mutates directly (to add a search term) without going
+  // through the `filters` prop. propFiltersRef tracks only the caller-supplied
+  // `filters` prop, purely to detect when it actually changes - keeping it
+  // separate means search()'s mutation of filtersRef doesn't get mistaken for
+  // (and immediately reverted as) a prop change on the next render.
   const filtersRef = useRef(filters);
+  const propFiltersRef = useRef(filters);
   const abortControllerRef = useRef<AbortController | null>(null);
-  
+
   // Enterprise: Track performance metrics
   const queryTimeRef = useRef<number[]>([]);
 
-  // Reset data when filters change
+  // Reset data when the filters prop changes
   useEffect(() => {
-    if (JSON.stringify(filters) !== JSON.stringify(filtersRef.current)) {
+    if (JSON.stringify(filters) !== JSON.stringify(propFiltersRef.current)) {
+      propFiltersRef.current = filters;
       filtersRef.current = filters;
       setData([]);
       setCurrentPage(1);
       setHasMore(true);
       setTotal(0);
-      
+
       if (initialLoad) {
         loadPage(1, true);
       }
     }
+    // loadPage is declared below via useCallback with deps [dataType, pageSize, optimizeForLargeDatasets].
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters, initialLoad]);
 
   // Initial load
@@ -62,6 +70,7 @@ export function usePaginatedData<T>(
     if (initialLoad && data.length === 0) {
       loadPage(1, true);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialLoad]);
 
   const loadPage = useCallback(async (page: number, reset: boolean = false) => {
@@ -77,9 +86,6 @@ export function usePaginatedData<T>(
     setLoading(true);
     setError(null);
 
-    // Enterprise: Add performance timing
-    const startTime = performance.now();
-
     try {
       // Enterprise: Track query time
       const startTime = performance.now();
@@ -88,13 +94,13 @@ export function usePaginatedData<T>(
 
       switch (dataType) {
         case 'users':
-          result = await databaseService.getUsers(page, pageSize, filters) as PaginatedResult<T>;
+          result = await databaseService.getUsers(page, pageSize, filtersRef.current) as PaginatedResult<T>;
           break;
         case 'projects':
-          result = await databaseService.getProjects(page, pageSize, filters) as PaginatedResult<T>;
+          result = await databaseService.getProjects(page, pageSize, filtersRef.current) as PaginatedResult<T>;
           break;
         case 'tasks':
-          result = await databaseService.getTasks(page, pageSize, filters) as PaginatedResult<T>;
+          result = await databaseService.getTasks(page, pageSize, filtersRef.current) as PaginatedResult<T>;
           break;
         default:
           throw new Error(`Unsupported data type: ${dataType}`);
@@ -133,37 +139,35 @@ export function usePaginatedData<T>(
     } finally {
       setLoading(false);
     }
-  }, [dataType, pageSize, filters]);
+  }, [dataType, pageSize, optimizeForLargeDatasets]);
 
   const loadMore = useCallback(() => {
     // Enterprise: Throttle load more for large datasets
     if (!loading && hasMore && (!optimizeForLargeDatasets || data.length < 50000)) {
-    }
-    if (!loading && hasMore && (!optimizeForLargeDatasets || data.length < 50000)) {
       loadPage(currentPage + 1, false);
     }
-  }, [loading, hasMore, currentPage, loadPage]);
+  }, [loading, hasMore, currentPage, loadPage, data.length, optimizeForLargeDatasets]);
 
   const refresh = useCallback(() => {
     if (enableCaching) {
       databaseService.clearCache();
     }
-    setCurrentPage(1); 
+    setCurrentPage(1);
     // Enterprise: Reset performance metrics
     queryTimeRef.current = [];
     setData([]);
     setCurrentPage(1);
     setHasMore(true);
     loadPage(1, true);
-  }, [loadPage]);
+  }, [loadPage, enableCaching]);
 
   const search = useCallback((searchTerm: string) => {
     const newFilters = { ...filters, search: searchTerm };
     filtersRef.current = newFilters;
     setData([]);
     setCurrentPage(1);
-    setHasMore(true); 
-    
+    setHasMore(true);
+
     // Enterprise: Debounce search for large datasets
     if (optimizeForLargeDatasets) {
       setTimeout(() => {
@@ -172,16 +176,7 @@ export function usePaginatedData<T>(
     } else {
       loadPage(1, true);
     }
-    
-    // Enterprise: Debounce search for large datasets
-    if (optimizeForLargeDatasets) {
-      setTimeout(() => {
-        loadPage(1, true);
-      }, 300);
-    } else {
-      loadPage(1, true);
-    }
-  }, [filters, loadPage]);
+  }, [filters, loadPage, optimizeForLargeDatasets]);
 
   // Cleanup
   useEffect(() => {

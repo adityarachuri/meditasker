@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { CalendarEvent, CalendarView } from '../../types/calendar';
 import { CalendarEventCard } from './CalendarEventCard';
 import { Calendar, Clock } from 'lucide-react';
@@ -44,7 +44,7 @@ export function CalendarAgendaView({
     }
     
     return days;
-  }, [view.date, getEventsForDate]);
+  }, [view, getEventsForDate]);
 
   const groupEventsByTime = (events: CalendarEvent[]) => {
     const allDay = events.filter(event => event.allDay);
@@ -54,27 +54,6 @@ export function CalendarAgendaView({
     timed.sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
     
     return { allDay, timed };
-  };
-
-  const formatEventTime = (event: CalendarEvent) => {
-    if (event.allDay) return 'All day';
-    
-    const start = new Date(event.startDate);
-    const end = new Date(event.endDate);
-    
-    const startTime = start.toLocaleTimeString('en-US', { 
-      hour: 'numeric', 
-      minute: '2-digit',
-      hour12: true 
-    });
-    
-    const endTime = end.toLocaleTimeString('en-US', { 
-      hour: 'numeric', 
-      minute: '2-digit',
-      hour12: true 
-    });
-    
-    return `${startTime} - ${endTime}`;
   };
 
   const getEventDuration = (event: CalendarEvent) => {

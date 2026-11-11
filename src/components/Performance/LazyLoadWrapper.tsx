@@ -46,27 +46,31 @@ export function LazyLoadWrapper({
 }
 
 // HOC for lazy loading components
+// eslint-disable-next-line react-refresh/only-export-components
 export function withLazyLoading<P extends object>(
   Component: React.ComponentType<P>,
   fallback?: React.ReactNode
 ) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- ref type is genuinely generic across arbitrary wrapped components
   return React.forwardRef<any, P>((props, ref) => (
     <LazyLoadWrapper fallback={fallback}>
-      <Component {...props} ref={ref} />
+      <Component {...(props as P)} ref={ref} />
     </LazyLoadWrapper>
   ));
 }
 
 // Utility for creating lazy components with better error handling
+// eslint-disable-next-line react-refresh/only-export-components, @typescript-eslint/no-explicit-any -- React.ComponentProps<T> requires the `any`-bounded constraint to resolve the wrapped component's real prop type
 export function createLazyComponent<T extends React.ComponentType<any>>(
   importFn: () => Promise<{ default: T }>,
   fallback?: React.ReactNode
 ) {
-  const LazyComponent = lazy(importFn);
-  
+  const LazyComponent = lazy(importFn) as unknown as React.ComponentType<React.ComponentProps<T>>;
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- ref type is genuinely generic across arbitrary wrapped components
   return React.forwardRef<any, React.ComponentProps<T>>((props, ref) => (
     <LazyLoadWrapper fallback={fallback}>
-      <LazyComponent {...props} ref={ref} />
+      <LazyComponent {...(props as React.ComponentProps<T>)} ref={ref} />
     </LazyLoadWrapper>
   ));
 }

@@ -47,11 +47,13 @@ export function DataInitializer({ onInitialized }: DataInitializerProps) {
     },
   ]);
 
-  const [currentStepIndex, setCurrentStepIndex] = useState(0);
+  const [, setCurrentStepIndex] = useState(0);
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
     initializeData();
+    // Run exactly once on mount; initializeData reads only stable setters/singletons.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const updateStep = (stepId: string, updates: Partial<InitializationStep>) => {
@@ -136,7 +138,7 @@ export function DataInitializer({ onInitialized }: DataInitializerProps) {
 
         {/* Initialization Steps */}
         <div className="space-y-4">
-          {steps.map((step, index) => (
+          {steps.map((step) => (
             <div 
               key={step.id}
               className={`flex items-center p-3 rounded-lg transition-all duration-300 ${

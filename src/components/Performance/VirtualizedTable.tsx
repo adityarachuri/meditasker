@@ -1,13 +1,18 @@
 import React, { useMemo, useCallback } from 'react';
 import { FixedSizeList as List } from 'react-window';
-import { useVirtualization } from '../../hooks/useVirtualization';
 
-interface Column<T> {
-  key: keyof T;
-  header: string;
-  width: number;
-  render?: (value: any, item: T) => React.ReactNode;
-}
+// A distributive mapped type: for each key K of T, the matching Column shape
+// pairs `key: K` with a `render` whose `value` param is precisely `T[K]` (not
+// the union of every possible field type), so each column can declare a
+// narrow, specific render function instead of handling every possible type.
+type Column<T> = {
+  [K in keyof T]: {
+    key: K;
+    header: string;
+    width: number;
+    render?: (value: T[K], item: T) => React.ReactNode;
+  };
+}[keyof T];
 
 interface VirtualizedTableProps<T> {
   data: T[];
@@ -21,8 +26,6 @@ interface VirtualizedTableProps<T> {
   optimizeForLargeDatasets?: boolean;
   onLoadMore?: () => void;
   hasMore?: boolean;
-  enableVirtualization?: boolean;
-  optimizeForLargeDatasets?: boolean;
 }
 
 export function VirtualizedTable<T extends { id: string }>({
@@ -35,7 +38,7 @@ export function VirtualizedTable<T extends { id: string }>({
   loading = false,
   onLoadMore,
   hasMore = false,
-  enableVirtualization = true,
+  enableVirtualization: _enableVirtualization = true,
   optimizeForLargeDatasets = true
 }: VirtualizedTableProps<T>) {
   const totalWidth = useMemo(() => 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../hooks/useAuth';
 import { useSession } from '../../hooks/useSession';
 import { LoginForm } from './LoginForm';
 import { Loader2 } from 'lucide-react';

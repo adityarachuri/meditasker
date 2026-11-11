@@ -1,0 +1,61 @@
+{
+  "runId": "2026-11-11_17-22-46-440_UTC",
+  "generatedAt": "2026-11-11T17:22:46.440Z",
+  "overallStatus": "fail",
+  "git": {
+    "branch": "main",
+    "commit": "4acdb8a"
+  },
+  "checks": [
+    {
+      "id": "lint",
+      "command": "npm run lint",
+      "status": "pass",
+      "exitCode": 0,
+      "startedAt": "2026-11-11T17:22:46.452Z",
+      "endedAt": "2026-11-11T17:22:57.174Z",
+      "durationMs": 10722,
+      "logFile": "lint.log"
+    },
+    {
+      "id": "type-check",
+      "command": "npm run type-check",
+      "status": "pass",
+      "exitCode": 0,
+      "startedAt": "2026-11-11T17:22:57.176Z",
+      "endedAt": "2026-11-11T17:23:17.261Z",
+      "durationMs": 20085,
+      "logFile": "type-check.log"
+    },
+    {
+      "id": "test",
+      "command": "npm run test:coverage",
+      "status": "pass",
+      "exitCode": 0,
+      "startedAt": "2026-11-11T17:23:17.263Z",
+      "endedAt": "2026-11-11T17:23:51.130Z",
+      "durationMs": 33867,
+      "logFile": "test.log"
+    },
+    {
+      "id": "security-audit",
+      "command": "npm audit --audit-level=high",
+      "status": "fail",
+      "exitCode": 1,
+      "startedAt": "2026-11-11T17:23:51.132Z",
+      "endedAt": "2026-11-11T17:25:43.868Z",
+      "durationMs": 112736,
+      "logFile": "security-audit.log"
+    }
+  ],
+  "steps": {
+    "step1": "pass",
+    "step2": "pass",
+    "step3": "fail",
+    "step4": "fail"
+  },
+  "retention": {
+    "maxRuns": 20,
+    "prunedRunIds": []
+  }
+}

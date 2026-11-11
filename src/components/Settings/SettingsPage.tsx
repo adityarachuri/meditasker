@@ -1,33 +1,25 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useApp } from '../../context/AppContext';
-import { 
-  User, 
-  Bell, 
-  Shield, 
-  Palette, 
-  Globe, 
-  Database, 
-  Mail, 
-  Clock, 
+import { User as UserType } from '../../types';
+import {
+  User,
+  Bell,
+  Shield,
+  Palette,
+  Database,
   Download,
-  Upload,
   Trash2,
   Save,
   Eye,
   EyeOff,
-  Key,
   Smartphone,
   Monitor,
   Moon,
   Sun,
-  Volume2,
-  VolumeX,
   Lock,
-  Unlock,
   RefreshCw,
   AlertTriangle,
-  CheckCircle,
-  Info
+  CheckCircle
 } from 'lucide-react';
 
 interface SettingsState {
@@ -55,7 +47,7 @@ interface SettingsState {
   };
   appearance: {
     theme: 'light' | 'dark' | 'system';
-    colorScheme: 'blue' | 'green' | 'purple' | 'orange';
+    colorScheme: 'blue' | 'green' | 'purple' | 'orange' | 'red' | 'pink' | 'indigo' | 'teal' | 'cyan' | 'amber' | 'lime' | 'emerald';
     fontSize: 'small' | 'medium' | 'large';
     compactMode: boolean;
     sidebarCollapsed: boolean;
@@ -184,7 +176,7 @@ export function SettingsPage() {
             email: localSettings.profile.email,
             avatar: localSettings.profile.avatar,
             department: localSettings.profile.department,
-            role: localSettings.profile.role as any,
+            role: localSettings.profile.role as UserType['role'],
           },
         });
       }
@@ -200,7 +192,7 @@ export function SettingsPage() {
       
       setSaveStatus('saved');
       setTimeout(() => setSaveStatus('idle'), 2000);
-    } catch (error) {
+    } catch {
       setSaveStatus('error');
       setTimeout(() => setSaveStatus('idle'), 2000);
     }
@@ -246,7 +238,7 @@ export function SettingsPage() {
 
     // Force a repaint to ensure styles are applied
     root.style.display = 'none';
-    root.offsetHeight; // Trigger reflow
+    void root.offsetHeight; // Trigger reflow
     root.style.display = '';
   };
 
@@ -538,7 +530,7 @@ export function SettingsPage() {
                 onClick={() => {
                   const newSettings = {
                     ...localSettings,
-                    appearance: { ...localSettings.appearance, theme: theme.value as any }
+                    appearance: { ...localSettings.appearance, theme: theme.value as SettingsState['appearance']['theme'] }
                   };
                   setLocalSettings(newSettings);
                   // Apply theme immediately for preview
@@ -580,7 +572,7 @@ export function SettingsPage() {
               onClick={() => {
                 const newSettings = {
                   ...localSettings,
-                  appearance: { ...localSettings.appearance, colorScheme: color.value as any }
+                  appearance: { ...localSettings.appearance, colorScheme: color.value as SettingsState['appearance']['colorScheme'] }
                 };
                 setLocalSettings(newSettings);
                 // Apply color scheme immediately for preview
@@ -609,7 +601,7 @@ export function SettingsPage() {
               onChange={(e) => {
                 const newSettings = {
                   ...localSettings,
-                  appearance: { ...localSettings.appearance, fontSize: e.target.value as any }
+                  appearance: { ...localSettings.appearance, fontSize: e.target.value as SettingsState['appearance']['fontSize'] }
                 };
                 setLocalSettings(newSettings);
                 // Apply font size immediately for preview
@@ -777,7 +769,7 @@ export function SettingsPage() {
             value={localSettings.privacy.profileVisibility}
             onChange={(e) => setLocalSettings({
               ...localSettings,
-              privacy: { ...localSettings.privacy, profileVisibility: e.target.value as any }
+              privacy: { ...localSettings.privacy, profileVisibility: e.target.value as SettingsState['privacy']['profileVisibility'] }
             })}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           >
@@ -892,7 +884,7 @@ export function SettingsPage() {
               value={localSettings.system.backupFrequency}
               onChange={(e) => setLocalSettings({
                 ...localSettings,
-                system: { ...localSettings.system, backupFrequency: e.target.value as any }
+                system: { ...localSettings.system, backupFrequency: e.target.value as SettingsState['system']['backupFrequency'] }
               })}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
@@ -913,7 +905,7 @@ export function SettingsPage() {
               value={localSettings.system.defaultProjectView}
               onChange={(e) => setLocalSettings({
                 ...localSettings,
-                system: { ...localSettings.system, defaultProjectView: e.target.value as any }
+                system: { ...localSettings.system, defaultProjectView: e.target.value as SettingsState['system']['defaultProjectView'] }
               })}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
@@ -928,7 +920,7 @@ export function SettingsPage() {
               value={localSettings.system.taskSortOrder}
               onChange={(e) => setLocalSettings({
                 ...localSettings,
-                system: { ...localSettings.system, taskSortOrder: e.target.value as any }
+                system: { ...localSettings.system, taskSortOrder: e.target.value as SettingsState['system']['taskSortOrder'] }
               })}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
@@ -950,7 +942,7 @@ export function SettingsPage() {
               value={localSettings.system.dateFormat}
               onChange={(e) => setLocalSettings({
                 ...localSettings,
-                system: { ...localSettings.system, dateFormat: e.target.value as any }
+                system: { ...localSettings.system, dateFormat: e.target.value as SettingsState['system']['dateFormat'] }
               })}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
@@ -965,7 +957,7 @@ export function SettingsPage() {
               value={localSettings.system.timeFormat}
               onChange={(e) => setLocalSettings({
                 ...localSettings,
-                system: { ...localSettings.system, timeFormat: e.target.value as any }
+                system: { ...localSettings.system, timeFormat: e.target.value as SettingsState['system']['timeFormat'] }
               })}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
@@ -1002,7 +994,7 @@ export function SettingsPage() {
               value={localSettings.system.exportFormat}
               onChange={(e) => setLocalSettings({
                 ...localSettings,
-                system: { ...localSettings.system, exportFormat: e.target.value as any }
+                system: { ...localSettings.system, exportFormat: e.target.value as SettingsState['system']['exportFormat'] }
               })}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >

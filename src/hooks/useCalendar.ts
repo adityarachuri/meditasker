@@ -30,14 +30,22 @@ export function useCalendar(initialView: CalendarView = { type: 'month', date: n
     };
 
     initializeCalendar();
+    // Run exactly once on mount; loadEvents is recreated from view/filter below.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Load events when view or filter changes
+  // Load events when view or filter changes. Skip while there's an
+  // initialization error — otherwise this effect's success path (loadEvents
+  // calls setError(null)) immediately clears the error that initialization
+  // just set, since `loading` still flips to false on failure via `finally`.
   useEffect(() => {
-    if (!loading) {
+    if (!loading && !error) {
       loadEvents();
     }
-  }, [view, filter, loading]);
+    // loadEvents's own deps (view, filter) are already tracked here; adding it
+    // directly isn't possible without reordering since it's declared below.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [view, filter, loading, error]);
 
   const loadEvents = useCallback(() => {
     try {
@@ -173,6 +181,9 @@ export function useCalendar(initialView: CalendarView = { type: 'month', date: n
   // Statistics
   const statistics = useMemo(() => {
     return calendarService.getStatistics();
+    // calendarService's statistics are derived from events internally; recompute
+    // whenever events changes even though the callback itself reads no closure var.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [events]);
 
   // Get events for specific date

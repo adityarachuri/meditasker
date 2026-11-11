@@ -16,7 +16,21 @@ export default {
     '<rootDir>/src/**/*.{test,spec}.{ts,tsx}',
   ],
   transform: {
-    '^.+\\.(ts|tsx)$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.app.json' }],
+    '^.+\\.(ts|tsx)$': ['ts-jest', {
+      tsconfig: '<rootDir>/tsconfig.app.json',
+      astTransformers: {
+        before: [
+          {
+            path: 'ts-jest-mock-import-meta',
+            options: {
+              metaObjectReplacement: {
+                env: { DEV: true, PROD: false, VITE_API_BASE_URL: '', VITE_WS_URL: '' },
+              },
+            },
+          },
+        ],
+      },
+    }],
   },
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
   testPathIgnorePatterns: ['/node_modules/', '/dist/'],

@@ -1,4 +1,3 @@
-import React from 'react';
 import { renderHook, act } from '@testing-library/react';
 import { useSession } from '../useSession';
 import { sessionService } from '../../services/sessionService';

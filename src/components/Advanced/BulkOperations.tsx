@@ -1,16 +1,10 @@
-import React, { useState } from 'react';
-import { 
-  CheckSquare, 
-  Square, 
-  MoreHorizontal, 
-  Edit, 
-  Trash2, 
-  Archive, 
-  Tag, 
-  User, 
-  Calendar,
-  AlertTriangle,
-  CheckCircle
+import { useState } from 'react';
+import {
+  CheckSquare,
+  Square,
+  MoreHorizontal,
+  Trash2,
+  Archive
 } from 'lucide-react';
 import { useGlobalStore } from '../../store/globalStore';
 import { Task, Project } from '../../types';
@@ -18,12 +12,12 @@ import { Task, Project } from '../../types';
 interface BulkOperationsProps {
   type: 'tasks' | 'projects';
   items: (Task | Project)[];
-  onBulkUpdate: (updates: Array<{ id: string; updates: any }>) => Promise<void>;
+  onBulkUpdate: (updates: Array<{ id: string; updates: Record<string, unknown> }>) => Promise<void>;
   onBulkDelete: (ids: string[]) => Promise<void>;
 }
 
 export function BulkOperations({ type, items, onBulkUpdate, onBulkDelete }: BulkOperationsProps) {
-  const { selectedItems, selectItem, deselectItem, selectAll, clearSelection } = useGlobalStore();
+  const { selectedItems, selectAll, clearSelection } = useGlobalStore();
   const [isProcessing, setIsProcessing] = useState(false);
   const [showBulkMenu, setShowBulkMenu] = useState(false);
   const [bulkAction, setBulkAction] = useState<string | null>(null);
@@ -40,15 +34,7 @@ export function BulkOperations({ type, items, onBulkUpdate, onBulkDelete }: Bulk
     }
   };
 
-  const handleItemSelect = (id: string) => {
-    if (selectedItems.has(id)) {
-      deselectItem(id);
-    } else {
-      selectItem(id);
-    }
-  };
-
-  const handleBulkAction = async (action: string, value?: any) => {
+  const handleBulkAction = async (action: string, value?: string | boolean) => {
     if (selectedCount === 0) return;
 
     setIsProcessing(true);

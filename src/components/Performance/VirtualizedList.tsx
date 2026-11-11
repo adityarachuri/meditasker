@@ -1,7 +1,6 @@
-import React, { useRef, useMemo } from 'react';
-import { FixedSizeList as List } from 'react-window';
-import { useVirtualization } from '../../hooks/useVirtualization';
+import React, { useRef, useCallback } from 'react';
 import { usePerformanceMonitor } from '../../hooks/usePerformanceMonitor';
+import { useVirtualization } from '../../hooks/useVirtualization';
 
 interface VirtualizedListProps<T> {
   items: T[];
@@ -24,41 +23,43 @@ export function VirtualizedList<T>({
   className = '',
   onScroll,
 }: VirtualizedListProps<T>) {
-  const listRef = useRef<List>(null);
-  const { getAverageRenderTime } = usePerformanceMonitor('VirtualizedList');
+  usePerformanceMonitor('VirtualizedList');
 
-  const itemData = useMemo(() => ({
-    items,
-    renderItem,
-  }), [items, renderItem]);
+  const scrollElementRef = useRef<HTMLDivElement>(null);
+  const getScrollElement = useCallback(() => scrollElementRef.current, []);
+  const estimateSize = useCallback(() => itemHeight, [itemHeight]);
 
-  const Row = React.memo(({ index, style }: { index: number; style: React.CSSProperties }) => {
-    const item = items[index];
-    return (
-      <div style={style}>
-        {renderItem({ index, style, data: item })}
-      </div>
-    );
+  const { virtualItems, totalSize } = useVirtualization({
+    count: items.length,
+    getScrollElement,
+    estimateSize,
+    overscan,
   });
 
-  const handleScroll = ({ scrollTop }: { scrollTop: number }) => {
-    onScroll?.(scrollTop);
-  };
-
   return (
-    <div className={`virtualized-list ${className}`}>
-      <List
-        ref={listRef}
-        height={height}
-        width={width}
-        itemCount={items.length}
-        itemSize={itemHeight}
-        itemData={itemData}
-        overscanCount={overscan}
-        onScroll={handleScroll}
-      >
-        {Row}
-      </List>
+    <div
+      ref={scrollElementRef}
+      className={`virtualized-list ${className}`}
+      style={{ height, width, overflow: 'auto' }}
+      onScroll={(e) => onScroll?.(e.currentTarget.scrollTop)}
+    >
+      <div style={{ height: totalSize, width: '100%', position: 'relative' }}>
+        {virtualItems.map((virtualItem) => {
+          const style: React.CSSProperties = {
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: virtualItem.size,
+            transform: `translateY(${virtualItem.start}px)`,
+          };
+          return (
+            <div key={virtualItem.key} style={style}>
+              {renderItem({ index: virtualItem.index, style, data: items[virtualItem.index] })}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }

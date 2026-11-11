@@ -35,7 +35,7 @@ export function CalendarWeekView({
     }
     
     return days;
-  }, [view.date]);
+  }, [view]);
 
   const timeSlots = useMemo(() => {
     const slots: string[] = [];
@@ -166,7 +166,7 @@ export function CalendarWeekView({
               </div>
 
               {/* Hourly slots */}
-              {timeSlots.map((time, hour) => (
+              {timeSlots.map((_time, hour) => (
                 <div
                   key={hour}
                   className="h-16 border-b border-gray-100 relative cursor-pointer hover:bg-blue-50"

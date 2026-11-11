@@ -1,17 +1,14 @@
 import React, { useState, useRef } from 'react';
-import { 
-  Download, 
-  Upload, 
-  FileText, 
-  Database, 
-  CheckCircle, 
-  AlertTriangle, 
-  Clock,
-  X,
-  Settings,
-  Filter
+import {
+  Download,
+  Upload,
+  FileText,
+  CheckCircle,
+  AlertTriangle,
+  Clock
 } from 'lucide-react';
 import { useGlobalStore } from '../../store/globalStore';
+import { Project, Task, Activity } from '../../types';
 
 interface ExportOptions {
   format: 'json' | 'csv' | 'xlsx' | 'pdf';
@@ -35,6 +32,46 @@ interface ImportResult {
   imported: number;
   errors: string[];
   warnings: string[];
+}
+
+interface ExportedData {
+  metadata: {
+    exportedAt: string;
+    version: string;
+    options: ExportOptions;
+  };
+  projects?: Project[];
+  tasks?: Task[];
+  users?: Record<string, unknown>[];
+  activities?: Activity[];
+}
+
+interface CsvProjectRow {
+  id: string;
+  name: string;
+  status: string;
+  priority: string;
+  progress: number;
+  budget: number;
+  startDate: string;
+  endDate: string;
+}
+
+interface CsvTaskRow {
+  id: string;
+  title: string;
+  status: string;
+  priority: string;
+  projectId: string;
+  assigneeId?: string;
+  dueDate?: string;
+  estimatedHours: number;
+  actualHours: number;
+}
+
+interface ParsedImportData {
+  projects: CsvProjectRow[];
+  tasks: CsvTaskRow[];
 }
 
 export function DataExportImport() {
@@ -75,7 +112,7 @@ export function DataExportImport() {
       }, 200);
 
       // Prepare data based on options
-      const exportData: any = {
+      const exportData: ExportedData = {
         metadata: {
           exportedAt: new Date().toISOString(),
           version: '2.0.0',
@@ -122,11 +159,14 @@ export function DataExportImport() {
     }
   };
 
-  const filterDataByDateRange = (data: any[], dateRange: { start: string; end: string }) => {
+  const filterDataByDateRange = <T extends { createdAt?: string; startDate?: string; joinDate?: string },>(
+    data: T[],
+    dateRange: { start: string; end: string }
+  ): T[] => {
     if (!dateRange.start && !dateRange.end) return data;
 
     return data.filter(item => {
-      const itemDate = new Date(item.createdAt || item.startDate || item.joinDate);
+      const itemDate = new Date(item.createdAt || item.startDate || item.joinDate || 0);
       const start = dateRange.start ? new Date(dateRange.start) : new Date(0);
       const end = dateRange.end ? new Date(dateRange.end) : new Date();
       
@@ -134,7 +174,7 @@ export function DataExportImport() {
     });
   };
 
-  const downloadFile = async (data: any, format: string) => {
+  const downloadFile = async (data: ExportedData, format: string) => {
     let content: string;
     let mimeType: string;
     let filename: string;
@@ -173,14 +213,14 @@ export function DataExportImport() {
     URL.revokeObjectURL(url);
   };
 
-  const convertToCSV = (data: any) => {
+  const convertToCSV = (data: ExportedData) => {
     // Simple CSV conversion - in production, use a proper CSV library
     const csvRows: string[] = [];
-    
+
     // Add projects
     if (data.projects) {
       csvRows.push('Type,ID,Name,Status,Priority,Progress,Budget,Start Date,End Date');
-      data.projects.forEach((project: any) => {
+      data.projects.forEach((project) => {
         csvRows.push([
           'Project',
           project.id,
@@ -199,7 +239,7 @@ export function DataExportImport() {
     if (data.tasks) {
       if (csvRows.length > 0) csvRows.push(''); // Empty row separator
       csvRows.push('Type,ID,Title,Status,Priority,Project ID,Assignee ID,Due Date,Estimated Hours,Actual Hours');
-      data.tasks.forEach((task: any) => {
+      data.tasks.forEach((task) => {
         csvRows.push([
           'Task',
           task.id,
@@ -224,7 +264,7 @@ export function DataExportImport() {
 
     try {
       const content = await file.text();
-      let data: any;
+      let data: ParsedImportData;
 
       if (file.name.endsWith('.json')) {
         data = JSON.parse(content);
@@ -250,21 +290,17 @@ export function DataExportImport() {
     }
   };
 
-  const parseCSV = (content: string) => {
+  const parseCSV = (content: string): ParsedImportData => {
     // Simple CSV parser - in production, use a proper CSV library
     const lines = content.split('\n');
-    const result: any = { projects: [], tasks: [] };
-    
-    let currentSection = '';
-    let headers: string[] = [];
+    const result: ParsedImportData = { projects: [], tasks: [] };
 
     lines.forEach(line => {
       if (!line.trim()) return;
-      
+
       const values = line.split(',').map(v => v.replace(/"/g, ''));
-      
+
       if (values[0] === 'Type') {
-        headers = values;
         return;
       }
 
@@ -297,7 +333,7 @@ export function DataExportImport() {
     return result;
   };
 
-  const validateAndImportData = async (data: any): Promise<ImportResult> => {
+  const validateAndImportData = async (data: ParsedImportData): Promise<ImportResult> => {
     const errors: string[] = [];
     const warnings: string[] = [];
     let imported = 0;
@@ -414,7 +450,7 @@ export function DataExportImport() {
                 value={exportOptions.format}
                 onChange={(e) => setExportOptions({
                   ...exportOptions,
-                  format: e.target.value as any
+                  format: e.target.value as ExportOptions['format']
                 })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >

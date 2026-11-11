@@ -1,7 +1,13 @@
-import React from 'react';
 import { useApp } from '../../context/AppContext';
-import { Bell, CheckSquare, Calendar, AlertTriangle, Info } from 'lucide-react';
+import { Bell, CheckSquare, AlertTriangle, Info } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import { MemoizedVirtualizedList } from '../Performance/VirtualizedList';
+import { Notification } from '../../types';
+
+const NOTIFICATION_ROW_HEIGHT = 104;
+// Below this, a plain list reads better than a windowed one; above it,
+// virtualizing keeps a long notification history from slowing down the page.
+const VIRTUALIZATION_THRESHOLD = 15;
 
 export function NotificationList() {
   const { state, dispatch } = useApp();
@@ -60,6 +66,44 @@ export function NotificationList() {
 
   const unreadCount = state.notifications.filter(n => !n.read).length;
 
+  const renderNotification = (notification: Notification) => {
+    const Icon = getNotificationIcon(notification.type);
+    return (
+      <div
+        className={`p-4 rounded-lg border cursor-pointer transition-colors ${
+          notification.read
+            ? 'bg-white border-gray-200 hover:bg-gray-50'
+            : 'bg-blue-50 border-blue-200 hover:bg-blue-100'
+        }`}
+        onClick={() => !notification.read && markAsRead(notification.id)}
+      >
+        <div className="flex items-start">
+          <div className={`p-2 rounded-lg mr-3 ${getNotificationColor(notification.type)}`}>
+            <Icon className="w-4 h-4" />
+          </div>
+          <div className="flex-1">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-medium text-gray-900">
+                {notification.title}
+              </h3>
+              {!notification.read && (
+                <div className="w-2 h-2 bg-blue-500 rounded-full" />
+              )}
+            </div>
+            <p className={`text-sm mt-1 ${
+              notification.read ? 'text-gray-600' : 'text-gray-700'
+            }`}>
+              {notification.message}
+            </p>
+            <p className="text-xs text-gray-500 mt-2">
+              {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -82,48 +126,22 @@ export function NotificationList() {
         </div>
       )}
 
-      <div className="space-y-3">
-        {state.notifications.map((notification) => {
-          const Icon = getNotificationIcon(notification.type);
-          return (
-            <div
-              key={notification.id}
-              className={`p-4 rounded-lg border cursor-pointer transition-colors ${
-                notification.read
-                  ? 'bg-white border-gray-200 hover:bg-gray-50'
-                  : 'bg-blue-50 border-blue-200 hover:bg-blue-100'
-              }`}
-              onClick={() => !notification.read && markAsRead(notification.id)}
-            >
-              <div className="flex items-start">
-                <div className={`p-2 rounded-lg mr-3 ${getNotificationColor(notification.type)}`}>
-                  <Icon className="w-4 h-4" />
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center justify-between">
-                    <h3 className={`text-sm font-medium ${
-                      notification.read ? 'text-gray-900' : 'text-gray-900'
-                    }`}>
-                      {notification.title}
-                    </h3>
-                    {!notification.read && (
-                      <div className="w-2 h-2 bg-blue-500 rounded-full" />
-                    )}
-                  </div>
-                  <p className={`text-sm mt-1 ${
-                    notification.read ? 'text-gray-600' : 'text-gray-700'
-                  }`}>
-                    {notification.message}
-                  </p>
-                  <p className="text-xs text-gray-500 mt-2">
-                    {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
-                  </p>
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
+      {state.notifications.length > VIRTUALIZATION_THRESHOLD ? (
+        <MemoizedVirtualizedList
+          items={state.notifications}
+          itemHeight={NOTIFICATION_ROW_HEIGHT}
+          height={Math.min(state.notifications.length * NOTIFICATION_ROW_HEIGHT, 600)}
+          renderItem={({ data }) => (
+            <div className="pb-3">{renderNotification(data)}</div>
+          )}
+        />
+      ) : (
+        <div className="space-y-3">
+          {state.notifications.map((notification) => (
+            <div key={notification.id}>{renderNotification(notification)}</div>
+          ))}
+        </div>
+      )}
 
       {state.notifications.length === 0 && (
         <div className="text-center py-12">

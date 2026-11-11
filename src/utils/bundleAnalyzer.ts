@@ -5,9 +5,9 @@ export function analyzeBundleSize() {
   }
 
   // Analyze bundle size and report large chunks
-  const chunks = performance.getEntriesByType('resource')
-    .filter((resource: any) => resource.name.includes('.js'))
-    .map((resource: any) => ({
+  const chunks = (performance.getEntriesByType('resource') as PerformanceResourceTiming[])
+    .filter((resource) => resource.name.includes('.js'))
+    .map((resource) => ({
       name: resource.name,
       size: resource.transferSize,
       duration: resource.duration,

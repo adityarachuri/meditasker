@@ -1,16 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  Activity, 
-  Database, 
-  Zap, 
-  TrendingUp, 
-  AlertTriangle, 
-  CheckCircle, 
+import { useState, useEffect } from 'react';
+import {
+  Activity,
+  Zap,
+  AlertTriangle,
+  CheckCircle,
   Clock,
   BarChart3,
-  Monitor,
   Server,
-  Cpu,
   HardDrive
 } from 'lucide-react';
 import { databaseService } from '../../services/databaseService';
@@ -24,10 +20,12 @@ interface PerformanceMetrics {
   activeConnections: number;
 }
 
+type QueryPerformanceBreakdown = Record<string, { avg: number; min: number; max: number; count: number }>;
+
 export function EnterpriseMonitoring() {
   const [metrics, setMetrics] = useState<PerformanceMetrics | null>(null);
   const [healthStatus, setHealthStatus] = useState<'healthy' | 'warning' | 'critical'>('healthy');
-  const [performanceData, setPerformanceData] = useState<any>({});
+  const [performanceData, setPerformanceData] = useState<QueryPerformanceBreakdown>({});
   const [isExpanded, setIsExpanded] = useState(false);
 
   useEffect(() => {
@@ -181,7 +179,7 @@ export function EnterpriseMonitoring() {
             <h4 className="text-sm font-medium text-gray-900">Performance Breakdown</h4>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {Object.entries(performanceData).map(([metric, data]: [string, any]) => (
+              {Object.entries(performanceData).map(([metric, data]) => (
                 <div key={metric} className="border border-gray-200 rounded-lg p-3">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-xs font-medium text-gray-700 capitalize">

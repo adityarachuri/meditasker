@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { X, Calendar, Users, DollarSign, CheckSquare, Clock } from 'lucide-react';
 import { Project } from '../../types';
 import { useApp } from '../../context/AppContext';

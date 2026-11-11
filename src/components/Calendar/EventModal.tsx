@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { X, Calendar, Clock, MapPin, Users, AlertCircle, Trash2, Save } from 'lucide-react';
+import { X, Trash2, Save } from 'lucide-react';
 import { CalendarEvent } from '../../types/calendar';
 import { databaseService } from '../../services/databaseService';
+import { User } from '../../types';
 
 interface EventModalProps {
   event?: CalendarEvent | null;
   defaultDate?: Date | null;
-  onSave: (eventData: any) => Promise<CalendarEvent | null>;
+  onSave(
+    eventDataOrId: Omit<CalendarEvent, 'id' | 'createdAt' | 'updatedAt'> | string,
+    updates?: Partial<CalendarEvent>
+  ): Promise<unknown>;
   onDelete?: (id: string) => Promise<boolean>;
   onClose: () => void;
 }
@@ -35,7 +39,7 @@ export function EventModal({ event, defaultDate, onSave, onDelete, onClose }: Ev
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [availableUsers, setAvailableUsers] = useState<any[]>([]);
+  const [availableUsers, setAvailableUsers] = useState<User[]>([]);
 
   useEffect(() => {
     // Load available users for attendees
@@ -132,7 +136,7 @@ export function EventModal({ event, defaultDate, onSave, onDelete, onClose }: Ev
         attendees: formData.attendees,
         color: formData.color,
         recurrence: formData.recurrence.type !== 'none' ? {
-          type: formData.recurrence.type as any,
+          type: formData.recurrence.type,
           interval: formData.recurrence.interval,
           endDate: formData.recurrence.endDate ? new Date(formData.recurrence.endDate).toISOString() : undefined
         } : undefined,
@@ -339,7 +343,7 @@ export function EventModal({ event, defaultDate, onSave, onDelete, onClose }: Ev
                 </label>
                 <select
                   value={formData.type}
-                  onChange={(e) => setFormData(prev => ({ ...prev, type: e.target.value as any }))}
+                  onChange={(e) => setFormData(prev => ({ ...prev, type: e.target.value as CalendarEvent['type'] }))}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 >
                   {eventTypes.map(type => (
@@ -355,7 +359,7 @@ export function EventModal({ event, defaultDate, onSave, onDelete, onClose }: Ev
                 </label>
                 <select
                   value={formData.priority}
-                  onChange={(e) => setFormData(prev => ({ ...prev, priority: e.target.value as any }))}
+                  onChange={(e) => setFormData(prev => ({ ...prev, priority: e.target.value as CalendarEvent['priority'] }))}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 >
                   {priorities.map(priority => (
@@ -371,7 +375,7 @@ export function EventModal({ event, defaultDate, onSave, onDelete, onClose }: Ev
                 </label>
                 <select
                   value={formData.status}
-                  onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.value as any }))}
+                  onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.value as CalendarEvent['status'] }))}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 >
                   {statuses.map(status => (
@@ -419,7 +423,7 @@ export function EventModal({ event, defaultDate, onSave, onDelete, onClose }: Ev
                 value={formData.recurrence.type}
                 onChange={(e) => setFormData(prev => ({
                   ...prev,
-                  recurrence: { ...prev.recurrence, type: e.target.value as any }
+                  recurrence: { ...prev.recurrence, type: e.target.value as 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly' }
                 }))}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >

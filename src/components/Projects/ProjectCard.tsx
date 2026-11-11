@@ -1,4 +1,3 @@
-import React from 'react';
 import { Project } from '../../types';
 import { useApp } from '../../context/AppContext';
 import { Calendar, Users, DollarSign } from 'lucide-react';

@@ -1,5 +1,4 @@
-import { CalendarEvent, CalendarFilter, CalendarView } from '../types/calendar';
-import { Task, Project } from '../types';
+import { CalendarEvent, CalendarFilter } from '../types/calendar';
 import { databaseService } from './databaseService';
 
 export class CalendarService {
@@ -8,6 +7,29 @@ export class CalendarService {
   private eventsByDate: Map<string, Set<string>> = new Map();
   private eventsByType: Map<string, Set<string>> = new Map();
   private eventsByProject: Map<string, Set<string>> = new Map();
+
+  // Date keys (toDateString()) for every day an event spans, start through end
+  // inclusive, so multi-day events are findable via getEventsForDate on any
+  // day they cover, not just their start day. Capped to avoid pathological
+  // ranges from indexing an unbounded number of days.
+  private static readonly MAX_SPAN_DAYS = 366;
+
+  private getDateKeysForSpan(startDate: string, endDate: string): string[] {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const keys: string[] = [];
+    const cursor = new Date(start);
+    cursor.setHours(0, 0, 0, 0);
+    const endDay = new Date(end);
+    endDay.setHours(0, 0, 0, 0);
+
+    for (let i = 0; i <= CalendarService.MAX_SPAN_DAYS && cursor <= endDay; i++) {
+      keys.push(cursor.toDateString());
+      cursor.setDate(cursor.getDate() + 1);
+    }
+
+    return keys.length > 0 ? keys : [start.toDateString()];
+  }
 
   static getInstance(): CalendarService {
     if (!CalendarService.instance) {
@@ -166,13 +188,14 @@ export class CalendarService {
 
   private addEvent(event: CalendarEvent): void {
     this.events.set(event.id, event);
-    
-    // Index by date
-    const dateKey = new Date(event.startDate).toDateString();
-    if (!this.eventsByDate.has(dateKey)) {
-      this.eventsByDate.set(dateKey, new Set());
+
+    // Index by every day the event spans
+    for (const dateKey of this.getDateKeysForSpan(event.startDate, event.endDate)) {
+      if (!this.eventsByDate.has(dateKey)) {
+        this.eventsByDate.set(dateKey, new Set());
+      }
+      this.eventsByDate.get(dateKey)!.add(event.id);
     }
-    this.eventsByDate.get(dateKey)!.add(event.id);
 
     // Index by type
     if (!this.eventsByType.has(event.type)) {
@@ -249,10 +272,14 @@ export class CalendarService {
     const event = this.events.get(id);
     if (!event) return null;
 
-    // Remove from old date index if date changed
-    if (updates.startDate && updates.startDate !== event.startDate) {
-      const oldDateKey = new Date(event.startDate).toDateString();
-      this.eventsByDate.get(oldDateKey)?.delete(id);
+    const dateChanged = (updates.startDate && updates.startDate !== event.startDate) ||
+      (updates.endDate && updates.endDate !== event.endDate);
+
+    // Remove from every old date-span index entry if the span changed
+    if (dateChanged) {
+      for (const oldDateKey of this.getDateKeysForSpan(event.startDate, event.endDate)) {
+        this.eventsByDate.get(oldDateKey)?.delete(id);
+      }
     }
 
     const updatedEvent: CalendarEvent = {
@@ -263,13 +290,14 @@ export class CalendarService {
 
     this.events.set(id, updatedEvent);
 
-    // Re-index if date changed
-    if (updates.startDate) {
-      const newDateKey = new Date(updatedEvent.startDate).toDateString();
-      if (!this.eventsByDate.has(newDateKey)) {
-        this.eventsByDate.set(newDateKey, new Set());
+    // Re-index across the new span
+    if (dateChanged) {
+      for (const newDateKey of this.getDateKeysForSpan(updatedEvent.startDate, updatedEvent.endDate)) {
+        if (!this.eventsByDate.has(newDateKey)) {
+          this.eventsByDate.set(newDateKey, new Set());
+        }
+        this.eventsByDate.get(newDateKey)!.add(id);
       }
-      this.eventsByDate.get(newDateKey)!.add(id);
     }
 
     return updatedEvent;
@@ -281,8 +309,9 @@ export class CalendarService {
     if (!event) return false;
 
     // Remove from indexes
-    const dateKey = new Date(event.startDate).toDateString();
-    this.eventsByDate.get(dateKey)?.delete(id);
+    for (const dateKey of this.getDateKeysForSpan(event.startDate, event.endDate)) {
+      this.eventsByDate.get(dateKey)?.delete(id);
+    }
     this.eventsByType.get(event.type)?.delete(id);
     if (event.projectId) {
       this.eventsByProject.get(event.projectId)?.delete(id);

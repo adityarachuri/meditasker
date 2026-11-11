@@ -1,4 +1,4 @@
-import { sessionService, SessionInfo } from '../sessionService';
+import { sessionService } from '../sessionService';
 import { User } from '../../types';
 
 // Mock localStorage and sessionStorage
@@ -192,7 +192,7 @@ describe('SessionService', () => {
       const listener2 = jest.fn();
       
       const removeListener1 = sessionService.addListener(listener1);
-      const removeListener2 = sessionService.addListener(listener2);
+      sessionService.addListener(listener2);
       
       sessionService.startSession(mockToken, mockUser);
       

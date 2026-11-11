@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { X, Calendar, User, Clock, AlertCircle, Edit, Save, Ambulance as Cancel } from 'lucide-react';
+import { useState } from 'react';
+import { X, Calendar, User, Clock, Edit, Save, Ambulance as Cancel } from 'lucide-react';
 import { Task } from '../../types';
 import { useApp } from '../../context/AppContext';
 
@@ -235,7 +235,7 @@ export function TaskModal({ task, onClose }: TaskModalProps) {
                   {isEditing ? (
                     <select
                       value={editedTask.status}
-                      onChange={(e) => setEditedTask({ ...editedTask, status: e.target.value as any })}
+                      onChange={(e) => setEditedTask({ ...editedTask, status: e.target.value as Task['status'] })}
                       className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     >
                       {statusOptions.map((option) => (
@@ -255,7 +255,7 @@ export function TaskModal({ task, onClose }: TaskModalProps) {
                   {isEditing ? (
                     <select
                       value={editedTask.priority}
-                      onChange={(e) => setEditedTask({ ...editedTask, priority: e.target.value as any })}
+                      onChange={(e) => setEditedTask({ ...editedTask, priority: e.target.value as Task['priority'] })}
                       className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     >
                       {priorityOptions.map((option) => (

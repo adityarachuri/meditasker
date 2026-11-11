@@ -1,12 +1,17 @@
-import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
 import { databaseService } from './services/databaseService';
 
+declare global {
+  interface Window {
+    databaseService: typeof databaseService;
+  }
+}
+
 // Enterprise performance monitoring
 if (typeof window !== 'undefined') {
-  (window as any).databaseService = databaseService;
+  window.databaseService = databaseService;
   
   // Enterprise memory monitoring
   setInterval(() => {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Search, X, Clock, User, FolderOpen, CheckSquare, Filter } from 'lucide-react';
 import { useDebounce } from '../../hooks/useDebounce';
 import { databaseService } from '../../services/databaseService';
@@ -119,7 +119,7 @@ export function GlobalSearch({ onClose, className = '' }: GlobalSearchProps) {
           {['all', 'users', 'projects', 'tasks'].map((category) => (
             <button
               key={category}
-              onClick={() => setSelectedCategory(category as any)}
+              onClick={() => setSelectedCategory(category as 'all' | 'users' | 'projects' | 'tasks')}
               className={`px-3 py-1 text-sm rounded-full transition-colors ${
                 selectedCategory === category
                   ? 'bg-blue-100 text-blue-700'

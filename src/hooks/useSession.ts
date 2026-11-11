@@ -40,7 +40,7 @@ export function useSession(options: UseSessionOptions = {}) {
       removeListener();
       clearInterval(timer);
     };
-  }, [options.onExpire]);
+  }, [options]);
 
   // Auto-renew session if enabled
   useEffect(() => {
@@ -58,8 +58,10 @@ export function useSession(options: UseSessionOptions = {}) {
     };
     
     const interval = setInterval(checkAndRenew, 60 * 1000); // Check every minute
-    
+
     return () => clearInterval(interval);
+    // renewSession is declared below via useCallback with a stable (empty) dep array.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isActive, timeRemaining, options.autoRenew, options.onRenew]);
 
   const startSession = useCallback((token: string, user: User) => {

@@ -13,14 +13,18 @@ import { Sidebar } from './components/Layout/Sidebar';
 import { Header } from './components/Layout/Header';
 import { Dashboard } from './components/Dashboard/Dashboard';
 import { ProjectListVirtualized } from './components/Projects/ProjectListVirtualized';
+import { ProjectList } from './components/Projects/ProjectList';
 import { Footer } from './components/Layout/Footer';
 import { TaskListVirtualized } from './components/Tasks/TaskListVirtualized';
+import { TaskList } from './components/Tasks/TaskList';
+import { Database, LayoutGrid } from 'lucide-react';
 import { Calendar } from './components/Calendar/Calendar';
 import { TeamList } from './components/Team/TeamList';
 import { NotificationList } from './components/Notifications/NotificationList';
 import { ReportsDashboard } from './components/Reports/ReportsDashboard';
 import { SettingsPage } from './components/Settings/SettingsPage';
 import { usePerformanceMonitor } from './hooks/usePerformanceMonitor';
+import { featureFlags } from './config/featureFlags';
 
 // Error fallback component
 function ErrorFallback({ error, resetErrorBoundary }: { error: Error; resetErrorBoundary: () => void }) {
@@ -45,12 +49,53 @@ function ErrorFallback({ error, resetErrorBoundary }: { error: Error; resetError
   );
 }
 
+// Switches between the enterprise (big-data, read-only) and manage (create/edit/
+// bulk-update) views on the Projects and Tasks pages.
+function DataViewModeToggle({
+  mode,
+  onChange,
+}: {
+  mode: 'enterprise' | 'manage';
+  onChange: (mode: 'enterprise' | 'manage') => void;
+}) {
+  return (
+    <div className="flex items-center space-x-2 mb-4">
+      <button
+        onClick={() => onChange('enterprise')}
+        className={`flex items-center px-3 py-1.5 text-sm rounded-lg border transition-colors ${
+          mode === 'enterprise'
+            ? 'border-blue-500 bg-blue-50 text-blue-700'
+            : 'border-gray-300 text-gray-600 hover:bg-gray-50'
+        }`}
+      >
+        <Database className="w-4 h-4 mr-1.5" />
+        Enterprise (1M+ records)
+      </button>
+      <button
+        onClick={() => onChange('manage')}
+        className={`flex items-center px-3 py-1.5 text-sm rounded-lg border transition-colors ${
+          mode === 'manage'
+            ? 'border-blue-500 bg-blue-50 text-blue-700'
+            : 'border-gray-300 text-gray-600 hover:bg-gray-50'
+        }`}
+      >
+        <LayoutGrid className="w-4 h-4 mr-1.5" />
+        Manage
+      </button>
+    </div>
+  );
+}
+
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
+  // 'enterprise' explores the full simulated 1M+ record dataset (read-only,
+  // virtualized/paginated); 'manage' is the AppContext-backed view that
+  // actually supports creating, editing, and bulk-updating projects/tasks.
+  const [dataViewMode, setDataViewMode] = useState<'enterprise' | 'manage'>('enterprise');
   const [isDataInitialized, setIsDataInitialized] = useState(false);
-  const [showSessionManager, setShowSessionManager] = useState(true);
-  const { getAverageRenderTime } = usePerformanceMonitor('App');
-  const { updates, handleUpdate } = useRealTimeUpdates('current-user-id');
+  const [showSessionManager] = useState(true);
+  usePerformanceMonitor('App');
+  const { handleUpdate } = useRealTimeUpdates('current-user-id');
 
   // Set mock authentication token for WebSocket connection
   useEffect(() => {
@@ -93,13 +138,15 @@ function App() {
       case 'projects':
         return (
           <LazyLoadWrapper>
-            <ProjectListVirtualized />
+            <DataViewModeToggle mode={dataViewMode} onChange={setDataViewMode} />
+            {dataViewMode === 'enterprise' ? <ProjectListVirtualized /> : <ProjectList />}
           </LazyLoadWrapper>
         );
       case 'tasks':
         return (
           <LazyLoadWrapper>
-            <TaskListVirtualized />
+            <DataViewModeToggle mode={dataViewMode} onChange={setDataViewMode} />
+            {dataViewMode === 'enterprise' ? <TaskListVirtualized /> : <TaskList />}
           </LazyLoadWrapper>
         );
       case 'team':
@@ -212,6 +259,10 @@ if ('serviceWorker' in navigator && import.meta.env.PROD) {
 }
 
 // Performance observer for monitoring
+interface LayoutShiftEntry extends PerformanceEntry {
+  value: number;
+}
+
 if ('PerformanceObserver' in window) {
   const observer = new PerformanceObserver((list) => {
     for (const entry of list.getEntries()) {
@@ -219,10 +270,11 @@ if ('PerformanceObserver' in window) {
         console.log('LCP:', entry.startTime);
       }
       if (entry.entryType === 'first-input') {
-        console.log('FID:', entry.processingStart - entry.startTime);
+        const eventEntry = entry as PerformanceEventTiming;
+        console.log('FID:', eventEntry.processingStart - eventEntry.startTime);
       }
       if (entry.entryType === 'layout-shift') {
-        console.log('CLS:', entry.value);
+        console.log('CLS:', (entry as LayoutShiftEntry).value);
       }
     }
   });
@@ -231,9 +283,17 @@ if ('PerformanceObserver' in window) {
 }
 
 // Memory usage monitoring
+interface PerformanceWithMemory extends Performance {
+  memory: {
+    usedJSHeapSize: number;
+    totalJSHeapSize: number;
+    jsHeapSizeLimit: number;
+  };
+}
+
 if ('memory' in performance) {
   setInterval(() => {
-    const memory = (performance as any).memory;
+    const memory = (performance as PerformanceWithMemory).memory;
     if (memory.usedJSHeapSize > memory.jsHeapSizeLimit * 0.9) {
       console.warn('High memory usage detected:', {
         used: memory.usedJSHeapSize,
@@ -274,8 +334,8 @@ window.addEventListener('unhandledrejection', (event) => {
 // Resource timing monitoring
 window.addEventListener('load', () => {
   setTimeout(() => {
-    const resources = performance.getEntriesByType('resource');
-    const slowResources = resources.filter((resource: any) => resource.duration > 1000);
+    const resources = performance.getEntriesByType('resource') as PerformanceResourceTiming[];
+    const slowResources = resources.filter((resource) => resource.duration > 1000);
     if (slowResources.length > 0) {
       console.warn('Slow resources detected:', slowResources);
     }
@@ -365,17 +425,20 @@ function resetUserActivityTimer() {
 // Initialize activity timer
 resetUserActivityTimer();
 
-// Feature flag system
-const featureFlags = {
-  enableAdvancedSearch: true,
-  enableRealTimeUpdates: true,
-  enableBulkOperations: true,
-  enableDataExport: true,
-  enablePerformanceMonitoring: true,
-};
+declare global {
+  interface Window {
+    featureFlags: typeof featureFlags;
+    abTests: { newDashboardLayout: string; improvedTaskView: string };
+    trackEvent: (eventName: string, properties?: Record<string, unknown>) => void;
+    loadModule: (moduleName: string) => Promise<unknown>;
+    __REACT_DEVTOOLS_GLOBAL_HOOK__?: unknown;
+    startProfiling?: () => void;
+    endProfiling?: () => void;
+  }
+}
 
 // Make feature flags globally available
-(window as any).featureFlags = featureFlags;
+window.featureFlags = featureFlags;
 
 // A/B testing framework
 const abTests = {
@@ -383,17 +446,17 @@ const abTests = {
   improvedTaskView: Math.random() > 0.5 ? 'variant' : 'control',
 };
 
-(window as any).abTests = abTests;
+window.abTests = abTests;
 
 // Analytics tracking
-function trackEvent(eventName: string, properties: Record<string, any> = {}) {
+function trackEvent(eventName: string, properties: Record<string, unknown> = {}) {
   if (import.meta.env.PROD) {
     // Send to analytics service
     console.log('Analytics:', eventName, properties);
   }
 }
 
-(window as any).trackEvent = trackEvent;
+window.trackEvent = trackEvent;
 
 // Performance budget monitoring
 const performanceBudget = {
@@ -415,11 +478,8 @@ function checkPerformanceBudget() {
 window.addEventListener('load', checkPerformanceBudget);
 
 // Progressive Web App features
-let deferredPrompt: any;
-
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
-  deferredPrompt = e;
   // Show install button
   console.log('PWA install prompt available');
 });
@@ -430,10 +490,14 @@ window.addEventListener('appinstalled', () => {
 });
 
 // Background sync for offline operations
+interface ServiceWorkerRegistrationWithSync extends ServiceWorkerRegistration {
+  sync: { register(tag: string): Promise<void> };
+}
+
 if ('serviceWorker' in navigator && 'sync' in window.ServiceWorkerRegistration.prototype) {
   navigator.serviceWorker.ready.then(registration => {
     // Register for background sync
-    return registration.sync.register('background-sync');
+    return (registration as ServiceWorkerRegistrationWithSync).sync.register('background-sync');
   }).catch(err => {
     console.log('Background sync registration failed:', err);
   });
@@ -494,19 +558,7 @@ const loadModule = async (moduleName: string) => {
   }
 };
 
-(window as any).loadModule = loadModule;
-
-// Memory leak detection
-let componentCount = 0;
-const originalCreateElement = React.createElement;
-
-React.createElement = function(...args) {
-  componentCount++;
-  if (componentCount % 1000 === 0) {
-    console.log(`Component count: ${componentCount}`);
-  }
-  return originalCreateElement.apply(this, args);
-};
+window.loadModule = loadModule;
 
 // Cleanup on page unload
 window.addEventListener('beforeunload', () => {
@@ -519,20 +571,17 @@ window.addEventListener('beforeunload', () => {
 // Development tools
 if (import.meta.env.DEV) {
   // React DevTools
-  (window as any).__REACT_DEVTOOLS_GLOBAL_HOOK__ = (window as any).__REACT_DEVTOOLS_GLOBAL_HOOK__ || {};
-  
+  window.__REACT_DEVTOOLS_GLOBAL_HOOK__ = window.__REACT_DEVTOOLS_GLOBAL_HOOK__ || {};
+
   // Performance profiling
-  (window as any).startProfiling = () => {
+  window.startProfiling = () => {
     performance.mark('profiling-start');
   };
-  
-  (window as any).endProfiling = () => {
+
+  window.endProfiling = () => {
     performance.mark('profiling-end');
     performance.measure('profiling', 'profiling-start', 'profiling-end');
     const measure = performance.getEntriesByName('profiling')[0];
     console.log(`Profiling duration: ${measure.duration}ms`);
   };
 }
-
-// Export for testing
-export { featureFlags, abTests, trackEvent };

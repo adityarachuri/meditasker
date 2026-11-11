@@ -1,7 +1,12 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
+
+// jspdf-autotable attaches this at runtime but doesn't type it on jsPDF itself.
+interface JsPDFWithAutoTable extends jsPDF {
+  lastAutoTable: { finalY: number };
+}
 
 import { 
   BarChart, 
@@ -18,11 +23,14 @@ import {
   Line,
   Legend
 } from 'recharts';
-import { Download, Calendar, TrendingUp, Users, CheckSquare } from 'lucide-react';
+import { Download, Calendar, TrendingUp, Users, CheckSquare, Database } from 'lucide-react';
+import { DataExportImport } from '../Advanced/DataExportImport';
+import { featureFlags } from '../../config/featureFlags';
 
 export function ReportsDashboard() {
   const { state } = useApp();
   const [selectedPeriod, setSelectedPeriod] = useState('month');
+  const [showDataTools, setShowDataTools] = useState(false);
 
   // Task completion data
   const taskCompletionData = [
@@ -106,7 +114,7 @@ export function ReportsDashboard() {
     });
     
     // Project Status Section
-    let yPosition = (doc as any).lastAutoTable.finalY + 20;
+    let yPosition = (doc as JsPDFWithAutoTable).lastAutoTable.finalY + 20;
     doc.setFontSize(16);
     doc.setTextColor(37, 99, 235);
     doc.text('Project Status Overview', 20, yPosition);
@@ -137,7 +145,7 @@ export function ReportsDashboard() {
     });
     
     // Team Productivity Section
-    yPosition = (doc as any).lastAutoTable.finalY + 20;
+    yPosition = (doc as JsPDFWithAutoTable).lastAutoTable.finalY + 20;
     
     // Check if we need a new page
     if (yPosition > 250) {
@@ -167,7 +175,7 @@ export function ReportsDashboard() {
     });
     
     // Task Status Section
-    yPosition = (doc as any).lastAutoTable.finalY + 20;
+    yPosition = (doc as JsPDFWithAutoTable).lastAutoTable.finalY + 20;
     
     // Check if we need a new page
     if (yPosition > 220) {
@@ -226,14 +234,35 @@ export function ReportsDashboard() {
             <option value="year">This Year</option>
           </select>
         </div>
-        <button
-          onClick={exportReport}
-          className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-        >
-          <Download className="w-4 h-4 mr-2" />
-          Export Report
-        </button>
+        <div className="flex items-center space-x-2">
+          {featureFlags.enableDataExport && (
+            <button
+              onClick={() => setShowDataTools(!showDataTools)}
+              className={`flex items-center px-4 py-2 border rounded-lg transition-colors ${
+                showDataTools
+                  ? 'border-blue-500 bg-blue-50 text-blue-700'
+                  : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              <Database className="w-4 h-4 mr-2" />
+              Data Export / Import
+            </button>
+          )}
+          <button
+            onClick={exportReport}
+            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            <Download className="w-4 h-4 mr-2" />
+            Export Report
+          </button>
+        </div>
       </div>
+
+      {showDataTools && featureFlags.enableDataExport && (
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <DataExportImport />
+        </div>
+      )}
 
       {/* Key Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">

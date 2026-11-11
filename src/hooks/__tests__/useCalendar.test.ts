@@ -263,6 +263,13 @@ describe('useCalendar Hook', () => {
   it('handles errors gracefully', async () => {
     const { result } = renderHook(() => useCalendar());
 
+    // Let mount-time initialization (initialize + loadEvents) fully settle first,
+    // otherwise its later setError(null) on success can race with and clobber
+    // the error we're about to trigger below.
+    await act(async () => {
+      await new Promise(resolve => setTimeout(resolve, 0));
+    });
+
     mockCalendarService.createEvent.mockImplementation(() => {
       throw new Error('Creation failed');
     });

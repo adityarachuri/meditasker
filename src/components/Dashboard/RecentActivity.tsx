@@ -1,4 +1,3 @@
-import React from 'react';
 import { useApp } from '../../context/AppContext';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -28,7 +27,6 @@ export function RecentActivity() {
       <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
       <div className="space-y-3">
         {recentActivities.map((activity) => {
-          const user = state.users.find(u => u.id === activity.userId);
           return (
             <div key={activity.id} className="flex items-start space-x-3">
               <div className="text-lg">{getActivityIcon(activity.type)}</div>

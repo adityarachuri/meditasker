@@ -1,8 +1,8 @@
-import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { Calendar } from '../Calendar';
 import { calendarService } from '../../../services/calendarService';
 import { databaseService } from '../../../services/databaseService';
+import { CalendarEvent } from '../../../types/calendar';
 
 // Mock services
 jest.mock('../../../services/calendarService');
@@ -99,48 +99,57 @@ describe('Calendar Component', () => {
     });
 
     fireEvent.click(screen.getByText('Create Event'));
-    
-    expect(screen.getByText('Create Event')).toBeInTheDocument();
+
+    expect(screen.getByRole('heading', { name: 'Create Event' })).toBeInTheDocument();
+
   });
 
   it('handles date clicks', async () => {
     mockCalendarService.getEventsForDate.mockReturnValue([]);
     
     render(<Calendar />);
-    
+
     await waitFor(() => {
-      const dateCell = screen.getAllByText('1')[0];
-      fireEvent.click(dateCell);
+      expect(screen.getAllByText('1')[0]).toBeInTheDocument();
     });
+    fireEvent.click(screen.getAllByText('1')[0]);
 
     // Should open event modal for the clicked date
-    expect(screen.getByText('Create Event')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: 'Create Event' })).toBeInTheDocument();
+    });
+
   });
 
   it('displays error state when initialization fails', async () => {
     mockCalendarService.initialize.mockRejectedValue(new Error('Failed to initialize'));
-    
+
     render(<Calendar />);
-    
+
     await waitFor(() => {
       expect(screen.getByText('Error loading calendar')).toBeInTheDocument();
     });
   });
 
   it('filters events correctly', async () => {
-    const mockEvents = [
+    const mockEvents: CalendarEvent[] = [
       {
         id: '1',
         title: 'Test Event',
         startDate: new Date().toISOString(),
         endDate: new Date().toISOString(),
+        allDay: false,
         type: 'meeting',
         priority: 'high',
-        status: 'scheduled'
+        status: 'scheduled',
+        color: '#3b82f6',
+        createdBy: 'test-user',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
       }
     ];
 
-    mockCalendarService.getEventsInRange.mockReturnValue(mockEvents as any);
+    mockCalendarService.getEventsInRange.mockReturnValue(mockEvents);
     
     render(<Calendar />);
     
@@ -160,6 +169,6 @@ describe('Calendar Component', () => {
       fireEvent.change(searchInput, { target: { value: 'test' } });
     });
 
-    expect(mockCalendarService.searchEvents).toHaveBeenCalledWith('test');
+    expect(mockCalendarService.searchEvents).toHaveBeenCalledWith('test', expect.any(Object));
   });
 });

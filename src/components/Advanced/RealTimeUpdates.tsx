@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { Wifi, WifiOff, AlertCircle, CheckCircle, Clock } from 'lucide-react';
+import { useEffect, useState, useRef } from 'react';
+import { Wifi, WifiOff, AlertCircle, Clock } from 'lucide-react';
 
 interface RealTimeUpdate {
   id: string;
@@ -10,7 +10,7 @@ interface RealTimeUpdate {
   userId: string;
   userName: string;
   timestamp: string;
-  data?: any;
+  data?: Record<string, unknown>;
 }
 
 interface RealTimeUpdatesProps {
@@ -99,7 +99,7 @@ export function RealTimeUpdates({ onUpdate, userId, className = '' }: RealTimeUp
         }
       };
 
-      ws.onerror = (error) => {
+      ws.onerror = (_error) => {
         console.warn('WebSocket connection failed - this is expected in development without a WebSocket server');
         setConnectionStatus('error');
         // Don't attempt reconnection on initial connection failure
@@ -108,7 +108,7 @@ export function RealTimeUpdates({ onUpdate, userId, className = '' }: RealTimeUp
         }
       };
 
-    } catch (error) {
+    } catch {
       console.warn('Failed to create WebSocket connection - this is expected in development');
       setConnectionStatus('error');
       // Don't schedule reconnect on initial failure
@@ -235,6 +235,9 @@ export function RealTimeUpdates({ onUpdate, userId, className = '' }: RealTimeUp
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
     };
+    // Intentionally re-run only when userId changes; connect/disconnect/startHeartbeat
+    // read the latest state/refs via closure and would cause reconnect loops if added here.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId]);
 
   const getStatusIcon = () => {
@@ -332,9 +335,10 @@ export function RealTimeUpdates({ onUpdate, userId, className = '' }: RealTimeUp
 }
 
 // Hook for using real-time updates
-export function useRealTimeUpdates(userId: string) {
+// eslint-disable-next-line react-refresh/only-export-components
+export function useRealTimeUpdates(_userId: string) {
   const [updates, setUpdates] = useState<RealTimeUpdate[]>([]);
-  const [isConnected, setIsConnected] = useState(false);
+  const [isConnected] = useState(false);
 
   const handleUpdate = (update: RealTimeUpdate) => {
     setUpdates(prev => [update, ...prev.slice(0, 49)]); // Keep last 50 updates

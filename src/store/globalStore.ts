@@ -1,7 +1,13 @@
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import { subscribeWithSelector } from 'zustand/middleware';
+import { enableMapSet } from 'immer';
 import { User, Project, Task, Notification, Activity } from '../types';
+
+// State below includes Map/Set fields (selectedItems, cache, lastUpdated)
+// mutated inside immer's produce(); without this, every action that touches
+// them throws "[Immer] The plugin for 'MapSet' has not been loaded".
+enableMapSet();
 
 interface GlobalState {
   // Data
@@ -28,7 +34,7 @@ interface GlobalState {
   };
   
   // Performance
-  cache: Map<string, any>;
+  cache: Map<string, unknown>;
   lastUpdated: Map<string, number>;
   
   // Actions
@@ -60,8 +66,8 @@ interface GlobalState {
   clearFilters: () => void;
   
   // Cache
-  setCache: (key: string, value: any) => void;
-  getCache: (key: string) => any;
+  setCache: (key: string, value: unknown) => void;
+  getCache: (key: string) => unknown;
   clearCache: () => void;
   
   // Computed selectors
@@ -275,7 +281,7 @@ useGlobalStore.subscribe(
     
     // Force garbage collection hint
     if (typeof window !== 'undefined' && 'gc' in window) {
-      (window as any).gc();
+      window.gc?.();
     }
   }
 );

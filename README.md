@@ -5,9 +5,10 @@ TypeScript, and Vite. It's a **frontend-only** showcase: there is no backend,
 database, or real user data — everything runs in the browser against mocked
 services.
 
-> **Status:** personal/portfolio project, not production software. See
-> [Known Issues](#known-issues) before relying on the test suite or build
-> commands in CI.
+> **Status:** personal/portfolio project, not production software. The
+> quality gate (lint, type-check, test, security-audit, build) is green — see
+> [Known Issues](#known-issues) for the couple of things worth knowing about
+> before you treat this as more than a demo.
 
 ## Table of contents
 
@@ -20,6 +21,7 @@ services.
 - [Testing](#testing)
 - [Known issues](#known-issues)
 - [Security](#security)
+- [Changelog](#changelog)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -42,22 +44,31 @@ without a proper backend, authentication, and data-protection layer.
   productivity, KPIs, charts.
 - **Team management** — role-based profiles, department organization,
   activity tracking.
-- **Project management** — lifecycle tracking, budgets, team assignment,
-  status workflows.
-- **Task management** — priorities, statuses, time tracking, dependencies,
-  tags.
+- **Project & task management**, each with two view modes:
+  - **Enterprise** — a virtualized, paginated table (or card) view over the
+    simulated large dataset, with infinite scroll.
+  - **Manage** — a search/filter/bulk-edit view backed by live app state,
+    for actually creating, editing, and bulk-updating projects and tasks.
+- **Advanced search** — per-field filters (status, priority, assignee, dates,
+  etc.) with saved searches and recent-search history.
+- **Bulk operations** — multi-select with bulk status/priority/tag updates,
+  archiving, and deletion.
+- **Data export/import** — JSON/CSV export and import, available from the
+  Reports page.
 - **Calendar** — unified view of tasks/meetings/milestones across multiple
   view modes.
 - **Reporting** — PDF export (via jsPDF) and multi-format data export.
-- **Search** — filtering and search across the mock dataset.
+- **Collapsible sidebar** — preference persists across reloads.
+- **Notifications** — switches to a virtualized list once the history grows
+  past a handful of entries.
 
 ## Technology stack
 
-**Core:** React 18, TypeScript 5, Vite 5
+**Core:** React 18, TypeScript 5, Vite 8
 **UI:** Tailwind CSS, Lucide icons
 **State:** Zustand, React Context, Immer
-**Data:** TanStack React Query, a custom in-memory database service with
-indexing/virtualization for large mock datasets
+**Data:** TanStack React Query, TanStack Virtual, a custom in-memory database
+service with indexing/virtualization for large mock datasets
 **Forms:** React Hook Form, Yup
 **Charts:** Recharts
 **PDF export:** jsPDF, jsPDF-AutoTable
@@ -113,39 +124,38 @@ src/
 
 ```bash
 npm run test
+npm run test:coverage
 ```
 
-Tests use Jest + React Testing Library against jsdom. See
-[Known Issues](#known-issues) — a subset of suites currently fail due to
-pre-existing drift between service mocks and the services they mock, not due
-to anything related to publishing this repository.
+Tests use Jest + React Testing Library against jsdom. As of the latest
+`npm run production-readiness` run: **25 suites / 292 tests, all passing**,
+with statement coverage around 45% — concentrated in the services, hooks,
+store, and context layers (several are at or near 100%), since that's where
+the actual business logic and the highest-value bugs live. Most presentational
+components are intentionally lower-priority for coverage; see
+`docs/evidence/production-readiness/latest.md` for the current numbers.
 
 ## Known issues
 
 Documented here deliberately, rather than overstating the project's current
 state:
 
-- **Test suite:** of 12 suites / 119 tests, 9 suites currently fail (26
-  tests), mostly because test mocks for `sessionService`/`AuthContext` are
-  out of sync with the real service API (e.g. a mock missing
-  `getSessionInfo`), plus a couple of brittle UI-text assertions in the
-  Calendar suite. Fixing these is tracked as follow-up work.
-- **Lint:** `npm run lint` currently reports 223 pre-existing problems (192
-  errors, 31 warnings), mostly `@typescript-eslint/no-explicit-any` and
-  unused-variable findings in the `services/` and `store/` layers. Not a
-  security issue, but worth cleaning up incrementally.
-- **Type-check:** `npm run type-check` currently reports ~150 pre-existing
-  errors — the bulk are unused imports/locals (`noUnusedLocals` /
-  `noUnusedParameters` are on in `tsconfig.app.json`), plus a few real bugs
-  worth fixing deliberately: a duplicate-key type in
-  `src/hooks/usePaginatedData.ts`, two incompatible `User` type definitions
-  (`src/context/AuthContext.tsx` vs `src/types/index.ts`), and
-  `src/services/databaseService.ts` assigning possibly-`undefined` query
-  results to non-optional fields.
+- **Dependency vulnerabilities:** `npm audit --audit-level=high` passes (0
+  high/critical). There are still ~14 low/moderate advisories, all in
+  dev-only build tooling (`@typescript-eslint/*`'s `minimatch`, mostly) with
+  no fix available yet that doesn't force a breaking change; tracked for a
+  future dependency bump.
+- **Large main chunk:** the production build emits one ~1.2MB JS chunk
+  (Vite warns about this at build time). Code-splitting via dynamic
+  `import()` would improve this; not done yet since this is a demo app
+  without a real deploy/CDN story.
 - **Demo auth is not real security.** Login accepts a fixed password for any
   listed demo account and stores a mock token in `localStorage`. This is
   intentional for a demo and should never be used as-is for real
   authentication.
+- **No real backend.** The "Enterprise (1M+ records)" view is simulated: it's
+  actually seeded with 50 users / 25 projects / 100 tasks
+  (`src/components/Performance/DataInitializer.tsx`), not a live database.
 
 ## CI/CD
 
@@ -171,6 +181,10 @@ exists, but it's ready for whichever host this ends up on.
 `.hintrc` enables [webhint](https://webhint.io)'s `development` ruleset
 (accessibility/performance/PWA/security/best-practices checks) for anyone
 running `npx hint http://localhost:4173` against a preview build.
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for release notes.
 
 ## Contributing
 

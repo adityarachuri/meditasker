@@ -44,23 +44,23 @@ environment variables are required for local development.
   npm run test
   ```
 
-  Note: the suite currently has known pre-existing failures unrelated to most
-  changes (see the README's "Known Issues" section). Please make sure your
-  change doesn't introduce *new* failures, and feel free to fix existing ones
-  in a focused PR.
+  The suite is currently green (all suites passing) — please keep it that
+  way: a PR that introduces a failure should fix it before merging, not
+  defer it.
 
 ## Pull request checklist
 
-- [ ] `npm run lint` run, no new errors introduced
-- [ ] `npm run type-check` run, no new errors introduced
-- [ ] `npm run test` run, no new failures introduced
+- [ ] `npm run lint` passes clean (`--max-warnings 0`)
+- [ ] `npm run type-check` passes clean
+- [ ] `npm run test` passes clean
 - [ ] Description explains the change and why it's needed
 - [ ] Screenshots included for UI changes
 
 CI (`.github/workflows/ci.yml`) runs the same lint/type-check/test/build gate
-plus `npm audit --audit-level=high` on every PR. It currently reports
-pre-existing failures (see README "Known Issues") — the bar for a PR is "no
-new failures," not "the whole gate goes green," until that debt is paid down.
+plus `npm audit --audit-level=high` on every PR, and all of it is expected to
+pass — see [Known Issues](README.md#known-issues) in the README for the small
+set of things that are intentionally out of scope (dev-only dependency
+advisories, bundle size, demo auth).
 
 ## Opening an issue
 

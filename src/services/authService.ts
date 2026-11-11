@@ -169,7 +169,7 @@ class AuthService {
     return `mock_token_${user.id}_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
   }
 
-  private setupTokenRefresh(user: User): void {
+  private setupTokenRefresh(_user: User): void {
     // Clear any existing timeout
     if (this.refreshTokenTimeout) {
       clearTimeout(this.refreshTokenTimeout);
