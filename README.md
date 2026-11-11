@@ -18,6 +18,7 @@ services.
 - [Getting started](#getting-started)
 - [Available scripts](#available-scripts)
 - [Project structure](#project-structure)
+- [Architecture](#architecture)
 - [Testing](#testing)
 - [Known issues](#known-issues)
 - [Security](#security)
@@ -119,6 +120,12 @@ src/
   types/        # shared TypeScript types
   utils/        # utilities
 ```
+
+## Architecture
+
+For how the pieces fit together — state management, the two parallel mock
+data layers, services, and testing strategy — see
+[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Testing
 
