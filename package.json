@@ -21,10 +21,18 @@
     "audit": "npm audit --audit-level=high",
     "production-readiness": "node scripts/production-readiness.mjs"
   },
+  "overrides": {
+    "jest": "^29.7.0",
+    "typescript-eslint": {
+      "@typescript-eslint/typescript-estree": {
+        "minimatch": "^11.0.1"
+      }
+    }
+  },
   "dependencies": {
     "@hookform/resolvers": "^5.1.1",
     "@tanstack/react-query": "^5.81.5",
-    "@tanstack/react-virtual": "^3.13.12",
+    "@tanstack/react-virtual": "3.13.12",
     "date-fns": "^4.1.0",
     "immer": "^10.1.1",
     "jspdf": "^4.2.1",

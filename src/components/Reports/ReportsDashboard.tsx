@@ -386,7 +386,7 @@ export function ReportsDashboard() {
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" />
               <YAxis />
-              <Tooltip formatter={(value, name) => [name === 'budget' || name === 'spent' ? `$${value.toLocaleString()}` : `${value}%`, name]} />
+              <Tooltip formatter={(value, name) => [name === 'budget' || name === 'spent' ? `$${(value ?? 0).toLocaleString()}` : `${value}%`, name]} />
               <Legend />
               <Bar dataKey="budget" fill="#e5e7eb" />
               <Bar dataKey="spent" fill="#3b82f6" />

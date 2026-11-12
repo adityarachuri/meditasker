@@ -1,5 +1,5 @@
 import React, { Suspense, lazy } from 'react';
-import { ErrorBoundary } from 'react-error-boundary';
+import { ErrorBoundary, type FallbackProps } from 'react-error-boundary';
 
 interface LazyLoadWrapperProps {
   children: React.ReactNode;
@@ -36,8 +36,18 @@ export function LazyLoadWrapper({
   fallback = <DefaultFallback />,
   errorFallback = DefaultErrorFallback,
 }: LazyLoadWrapperProps) {
+  const FallbackAdapter = ({ error, resetErrorBoundary }: FallbackProps) => {
+    const ErrorFallbackComponent = errorFallback;
+    return (
+      <ErrorFallbackComponent
+        error={error instanceof Error ? error : new Error(String(error))}
+        resetErrorBoundary={resetErrorBoundary}
+      />
+    );
+  };
+
   return (
-    <ErrorBoundary FallbackComponent={errorFallback}>
+    <ErrorBoundary FallbackComponent={FallbackAdapter}>
       <Suspense fallback={fallback}>
         {children}
       </Suspense>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { QueryClientProvider } from '@tanstack/react-query';
-import { ErrorBoundary } from 'react-error-boundary';
+import { ErrorBoundary, type FallbackProps } from 'react-error-boundary';
 import { queryClient } from './services/api';
 import { AuthProvider } from './context/AuthContext';
 import { AppProvider } from './context/AppContext';
@@ -27,7 +27,8 @@ import { usePerformanceMonitor } from './hooks/usePerformanceMonitor';
 import { featureFlags } from './config/featureFlags';
 
 // Error fallback component
-export function ErrorFallback({ error, resetErrorBoundary }: { error: Error; resetErrorBoundary: () => void }) {
+export function ErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
+  const message = error instanceof Error ? error.message : String(error);
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-6 text-center">
@@ -37,7 +38,7 @@ export function ErrorFallback({ error, resetErrorBoundary }: { error: Error; res
           </svg>
         </div>
         <h2 className="text-xl font-bold text-gray-900 mb-2">Something went wrong</h2>
-        <p className="text-gray-600 mb-4">{error.message}</p>
+        <p className="text-gray-600 mb-4">{message}</p>
         <button
           onClick={resetErrorBoundary}
           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
