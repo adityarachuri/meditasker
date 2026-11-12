@@ -35,13 +35,48 @@ describe('CalendarService', () => {
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
             projectId: 'project1',
+            assigneeId: 'user1',
             estimatedHours: 8,
             actualHours: 0,
             tags: [],
             dependencies: []
+          },
+          // No dueDate: generateEventsFromTasks must skip this task entirely.
+          {
+            id: '2',
+            title: 'No Due Date Task',
+            description: 'Should be skipped',
+            priority: 'low',
+            status: 'todo',
+            createdBy: 'user1',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            projectId: 'project1',
+            estimatedHours: 2,
+            actualHours: 0,
+            tags: [],
+            dependencies: []
+          },
+          // Completed, with no assignee: covers the completed-status and
+          // no-attendees branches of the task->event mapping.
+          {
+            id: '3',
+            title: 'Completed Unassigned Task',
+            description: 'Done, nobody assigned',
+            dueDate: new Date().toISOString(),
+            priority: 'medium',
+            status: 'completed',
+            createdBy: 'user1',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            projectId: 'project1',
+            estimatedHours: 4,
+            actualHours: 4,
+            tags: [],
+            dependencies: []
           }
         ],
-        total: 1,
+        total: 3,
         hasMore: false
       });
 
@@ -61,9 +96,26 @@ describe('CalendarService', () => {
             progress: 0,
             budget: 0,
             spentBudget: 0
+          },
+          // Completed project: covers the completed-status branch of the
+          // project->end-event mapping.
+          {
+            id: 'project2',
+            name: 'Finished Project',
+            description: 'Already done',
+            startDate: new Date().toISOString(),
+            endDate: new Date().toISOString(),
+            priority: 'low',
+            status: 'completed',
+            managerId: 'user1',
+            teamIds: ['user1'],
+            color: '#10b981',
+            progress: 100,
+            budget: 0,
+            spentBudget: 0
           }
         ],
-        total: 1,
+        total: 2,
         hasMore: false
       });
 
@@ -87,6 +139,34 @@ describe('CalendarService', () => {
 
       const stats = calendarService.getStatistics();
       expect(stats.totalEvents).toBeGreaterThan(0);
+      // Task #2 (no dueDate) must not have produced an event.
+      expect(calendarService.getEventById('task_2')).toBeUndefined();
+      expect(calendarService.getEventById('task_1')?.attendees).toEqual(['user1']);
+      expect(calendarService.getEventById('task_3')?.status).toBe('completed');
+      expect(calendarService.getEventById('task_3')?.attendees).toEqual([]);
+      expect(calendarService.getEventById('project_end_project2')?.status).toBe('completed');
+    });
+  });
+
+  describe('date-span edge case', () => {
+    it('falls back to the start date when the span produces no keys (end before start)', () => {
+      const start = new Date();
+      const end = new Date(start);
+      end.setDate(start.getDate() - 3); // end before start
+
+      const event = calendarService.createEvent({
+        title: 'Backwards Span Event',
+        startDate: start.toISOString(),
+        endDate: end.toISOString(),
+        allDay: true,
+        type: 'meeting',
+        priority: 'medium',
+        status: 'scheduled',
+        color: '#3b82f6',
+        createdBy: 'user1',
+      });
+
+      expect(calendarService.getEventsForDate(start)).toEqual([event]);
     });
   });
 
@@ -394,6 +474,257 @@ describe('CalendarService', () => {
 
       const events = calendarService.getEventsForDate(middleDate);
       expect(events).toHaveLength(1);
+    });
+  });
+
+  describe('re-indexing on date changes', () => {
+    it('re-indexes an event when its span changes, removing it from old dates and adding it to new ones', () => {
+      const oldDate = new Date();
+      const newDate = new Date(oldDate);
+      newDate.setDate(oldDate.getDate() + 5);
+
+      const event = calendarService.createEvent({
+        title: 'Movable Event',
+        startDate: oldDate.toISOString(),
+        endDate: oldDate.toISOString(),
+        allDay: true,
+        type: 'meeting',
+        priority: 'medium',
+        status: 'scheduled',
+        color: '#3b82f6',
+        createdBy: 'user1',
+      });
+
+      expect(calendarService.getEventsForDate(oldDate)).toHaveLength(1);
+
+      calendarService.updateEvent(event.id, {
+        startDate: newDate.toISOString(),
+        endDate: newDate.toISOString(),
+      });
+
+      expect(calendarService.getEventsForDate(oldDate)).toHaveLength(0);
+      expect(calendarService.getEventsForDate(newDate)).toHaveLength(1);
+    });
+
+    it('does not re-index when an update leaves dates unchanged', () => {
+      const date = new Date();
+      const event = calendarService.createEvent({
+        title: 'Static Event',
+        startDate: date.toISOString(),
+        endDate: date.toISOString(),
+        allDay: true,
+        type: 'meeting',
+        priority: 'medium',
+        status: 'scheduled',
+        color: '#3b82f6',
+        createdBy: 'user1',
+      });
+
+      calendarService.updateEvent(event.id, {
+        startDate: event.startDate,
+        endDate: event.endDate,
+        title: 'Still Static',
+      });
+
+      expect(calendarService.getEventsForDate(date)).toHaveLength(1);
+    });
+  });
+
+  describe('deleting an event tied to a project', () => {
+    it('removes the event from the project index on delete', () => {
+      const event = calendarService.createEvent({
+        title: 'Project Kickoff',
+        startDate: new Date().toISOString(),
+        endDate: new Date().toISOString(),
+        allDay: true,
+        type: 'milestone',
+        priority: 'medium',
+        status: 'scheduled',
+        color: '#3b82f6',
+        createdBy: 'user1',
+        projectId: 'project-1',
+      });
+
+      expect(calendarService.deleteEvent(event.id)).toBe(true);
+      expect(calendarService.getEventById(event.id)).toBeUndefined();
+    });
+  });
+
+  describe('additional filter criteria', () => {
+    beforeEach(() => {
+      calendarService.createEvent({
+        title: 'Scheduled with attendee',
+        startDate: new Date().toISOString(),
+        endDate: new Date().toISOString(),
+        allDay: true,
+        type: 'meeting',
+        priority: 'medium',
+        status: 'scheduled',
+        color: '#3b82f6',
+        createdBy: 'user1',
+        attendees: ['user-a', 'user-b'],
+        projectId: 'project-1',
+      });
+      calendarService.createEvent({
+        title: 'Completed, no attendees',
+        startDate: new Date().toISOString(),
+        endDate: new Date().toISOString(),
+        allDay: true,
+        type: 'meeting',
+        priority: 'medium',
+        status: 'completed',
+        color: '#3b82f6',
+        createdBy: 'user1',
+      });
+      calendarService.createEvent({
+        title: 'Different project',
+        startDate: new Date().toISOString(),
+        endDate: new Date().toISOString(),
+        allDay: true,
+        type: 'meeting',
+        priority: 'medium',
+        status: 'scheduled',
+        color: '#3b82f6',
+        createdBy: 'user1',
+        projectId: 'project-2',
+      });
+    });
+
+    it('filters by status', () => {
+      const today = new Date();
+      const nextWeek = new Date(today);
+      nextWeek.setDate(today.getDate() + 7);
+
+      const events = calendarService.getEventsInRange(today, nextWeek, {
+        types: [],
+        priorities: [],
+        statuses: ['completed'],
+        attendees: [],
+        projects: [],
+      });
+
+      expect(events.map(e => e.title)).toEqual(['Completed, no attendees']);
+    });
+
+    it('filters by attendee, excluding events without a matching attendee', () => {
+      const today = new Date();
+      const nextWeek = new Date(today);
+      nextWeek.setDate(today.getDate() + 7);
+
+      const events = calendarService.getEventsInRange(today, nextWeek, {
+        types: [],
+        priorities: [],
+        statuses: [],
+        attendees: ['user-a'],
+        projects: [],
+      });
+
+      expect(events.map(e => e.title)).toEqual(['Scheduled with attendee']);
+    });
+
+    it('filters out events whose projectId is not in the list, but passes through events with no projectId at all', () => {
+      const today = new Date();
+      const nextWeek = new Date(today);
+      nextWeek.setDate(today.getDate() + 7);
+
+      const events = calendarService.getEventsInRange(today, nextWeek, {
+        types: [],
+        priorities: [],
+        statuses: [],
+        attendees: [],
+        projects: ['project-1'],
+      });
+
+      // "Different project" (project-2) is excluded; "Completed, no
+      // attendees" has no projectId at all, so the project filter doesn't
+      // apply to it and it passes through alongside the matching project-1 event.
+      expect(events.map(e => e.title).sort()).toEqual(
+        ['Completed, no attendees', 'Scheduled with attendee'].sort()
+      );
+    });
+  });
+
+  describe('color assignment during initialization', () => {
+    it('assigns a color per task priority when generating events from tasks', async () => {
+      const makeTask = (id: string, priority: 'low' | 'medium' | 'high' | 'critical') => ({
+        id,
+        title: `Task ${id}`,
+        description: 'desc',
+        dueDate: new Date().toISOString(),
+        priority,
+        status: 'todo' as const,
+        createdBy: 'user1',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        projectId: 'project1',
+        estimatedHours: 1,
+        actualHours: 0,
+        tags: [],
+        dependencies: [],
+      });
+
+      mockDatabaseService.getTasks.mockResolvedValue({
+        data: [
+          makeTask('low-1', 'low'),
+          makeTask('medium-1', 'medium'),
+          makeTask('high-1', 'high'),
+          makeTask('critical-1', 'critical'),
+        ],
+        total: 4,
+        hasMore: false,
+      });
+      mockDatabaseService.getProjects.mockResolvedValue({ data: [], total: 0, hasMore: false });
+      mockDatabaseService.getUsers.mockResolvedValue({
+        data: [
+          {
+            id: 'user1',
+            name: 'Test User',
+            email: 'test@example.com',
+            role: 'developer',
+            department: 'Engineering',
+            joinDate: new Date().toISOString(),
+            isActive: true,
+          },
+        ],
+        total: 1,
+        hasMore: false,
+      });
+
+      await calendarService.initialize();
+
+      expect(calendarService.getEventById('task_low-1')?.color).toBe('#22c55e');
+      expect(calendarService.getEventById('task_medium-1')?.color).toBe('#eab308');
+      expect(calendarService.getEventById('task_high-1')?.color).toBe('#f97316');
+      expect(calendarService.getEventById('task_critical-1')?.color).toBe('#ef4444');
+    });
+  });
+
+  describe('getAllEvents', () => {
+    it('returns every stored event', () => {
+      calendarService.createEvent({
+        title: 'Event A',
+        startDate: new Date().toISOString(),
+        endDate: new Date().toISOString(),
+        allDay: true,
+        type: 'meeting',
+        priority: 'medium',
+        status: 'scheduled',
+        color: '#3b82f6',
+        createdBy: 'user1',
+      });
+      calendarService.createEvent({
+        title: 'Event B',
+        startDate: new Date().toISOString(),
+        endDate: new Date().toISOString(),
+        allDay: true,
+        type: 'task',
+        priority: 'low',
+        status: 'scheduled',
+        color: '#10b981',
+        createdBy: 'user1',
+      });
+
+      expect(calendarService.getAllEvents()).toHaveLength(2);
     });
   });
 });

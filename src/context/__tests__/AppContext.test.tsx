@@ -93,6 +93,43 @@ describe('AppContext', () => {
     expect(result.current.state.currentUser?.name).toBe('Renamed User');
   });
 
+  it('updates a user in the list without touching currentUser if it does not match', () => {
+    const { result } = renderHook(() => useApp(), { wrapper });
+    const currentUserBefore = result.current.state.currentUser;
+    const updatedUser = { ...mockUsers[1], name: 'Someone Else' };
+
+    act(() => {
+      result.current.dispatch({ type: 'UPDATE_USER', payload: updatedUser });
+    });
+
+    expect(result.current.state.users.find(u => u.id === updatedUser.id)?.name).toBe('Someone Else');
+    expect(result.current.state.currentUser).toBe(currentUserBefore);
+  });
+
+  it('falls back to an empty userId and omits the actor name when there is no current user', () => {
+    const { result } = renderHook(() => useApp(), { wrapper });
+
+    act(() => {
+      result.current.dispatch({ type: 'SET_CURRENT_USER', payload: null });
+    });
+
+    act(() => {
+      result.current.dispatch({ type: 'ADD_TASK', payload: makeTask() });
+    });
+    expect(result.current.state.activities[0].userId).toBe('');
+
+    act(() => {
+      const existing = result.current.state.tasks[0];
+      result.current.dispatch({ type: 'UPDATE_TASK', payload: { ...existing, title: 'Changed' } });
+    });
+    expect(result.current.state.activities[0].userId).toBe('');
+
+    act(() => {
+      result.current.dispatch({ type: 'ADD_PROJECT', payload: makeProject() });
+    });
+    expect(result.current.state.activities[0].userId).toBe('');
+  });
+
   it('adds a task and records an activity for it', () => {
     const { result } = renderHook(() => useApp(), { wrapper });
     const newTask = makeTask();

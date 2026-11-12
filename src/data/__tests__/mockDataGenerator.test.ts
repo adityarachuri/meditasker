@@ -92,6 +92,16 @@ describe('MockDataGenerator', () => {
 
       expect(second.map(p => p.description)).toEqual(first.map(p => p.description));
     });
+
+    it('invokes the window.gc hint when available', () => {
+      const gcSpy = jest.fn();
+      (window as unknown as { gc: () => void }).gc = gcSpy;
+
+      generator.generateProjects(3);
+
+      expect(gcSpy).toHaveBeenCalled();
+      delete (window as unknown as { gc?: () => void }).gc;
+    });
   });
 
   describe('generateTasks', () => {
@@ -133,6 +143,16 @@ describe('MockDataGenerator', () => {
       const withDueDate = tasks.filter(t => typeof t.dueDate === 'string');
 
       expect(withoutDueDate.length + withDueDate.length).toBe(50);
+    });
+
+    it('invokes the window.gc hint when available', () => {
+      const gcSpy = jest.fn();
+      (window as unknown as { gc: () => void }).gc = gcSpy;
+
+      generator.generateTasks(3);
+
+      expect(gcSpy).toHaveBeenCalled();
+      delete (window as unknown as { gc?: () => void }).gc;
     });
   });
 

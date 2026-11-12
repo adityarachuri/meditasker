@@ -83,6 +83,7 @@ export function CalendarSidebar({
       <div className="w-16 bg-white border-r border-gray-200 flex flex-col items-center py-4">
         <button
           onClick={onToggle}
+          aria-label="Expand sidebar"
           className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg"
         >
           <ChevronRight className="w-5 h-5" />
@@ -116,6 +117,7 @@ export function CalendarSidebar({
           <h2 className="text-lg font-semibold text-gray-900">Calendar</h2>
           <button
             onClick={onToggle}
+            aria-label="Collapse sidebar"
             className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg"
           >
             <ChevronLeft className="w-5 h-5" />

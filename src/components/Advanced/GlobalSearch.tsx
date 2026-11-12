@@ -34,11 +34,17 @@ export function GlobalSearch({ onClose, className = '' }: GlobalSearchProps) {
 
   const saveRecentSearch = useCallback((searchQuery: string) => {
     if (!searchQuery.trim()) return;
-    
-    const updated = [searchQuery, ...recentSearches.filter(s => s !== searchQuery)].slice(0, 10);
-    setRecentSearches(updated);
-    localStorage.setItem('recent_searches', JSON.stringify(updated));
-  }, [recentSearches]);
+
+    // Functional update, so this callback doesn't need recentSearches in its
+    // own deps - reading it directly there would make this (and performSearch,
+    // and the debouncedQuery effect below) a new reference on every saved
+    // search, triggering a redundant duplicate search each time.
+    setRecentSearches(prev => {
+      const updated = [searchQuery, ...prev.filter(s => s !== searchQuery)].slice(0, 10);
+      localStorage.setItem('recent_searches', JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
 
   const performSearch = useCallback(async (searchQuery: string) => {
     if (!searchQuery.trim()) {

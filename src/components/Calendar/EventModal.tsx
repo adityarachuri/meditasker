@@ -220,6 +220,7 @@ export function EventModal({ event, defaultDate, onSave, onDelete, onClose }: Ev
           </h2>
           <button
             onClick={onClose}
+            aria-label="Close"
             className="p-2 text-gray-400 hover:text-gray-600"
           >
             <X className="w-6 h-6" />
@@ -237,10 +238,11 @@ export function EventModal({ event, defaultDate, onSave, onDelete, onClose }: Ev
           <div className="space-y-4">
             {/* Title */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="event-title" className="block text-sm font-medium text-gray-700 mb-1">
                 Title *
               </label>
               <input
+                id="event-title"
                 type="text"
                 value={formData.title}
                 onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
@@ -252,10 +254,11 @@ export function EventModal({ event, defaultDate, onSave, onDelete, onClose }: Ev
 
             {/* Description */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="event-description" className="block text-sm font-medium text-gray-700 mb-1">
                 Description
               </label>
               <textarea
+                id="event-description"
                 value={formData.description}
                 onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -281,10 +284,11 @@ export function EventModal({ event, defaultDate, onSave, onDelete, onClose }: Ev
             {/* Date and Time */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="event-start-date" className="block text-sm font-medium text-gray-700 mb-1">
                   Start Date *
                 </label>
                 <input
+                  id="event-start-date"
                   type="date"
                   value={formData.startDate}
                   onChange={(e) => setFormData(prev => ({ ...prev, startDate: e.target.value }))}
@@ -293,10 +297,11 @@ export function EventModal({ event, defaultDate, onSave, onDelete, onClose }: Ev
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="event-end-date" className="block text-sm font-medium text-gray-700 mb-1">
                   End Date *
                 </label>
                 <input
+                  id="event-end-date"
                   type="date"
                   value={formData.endDate}
                   onChange={(e) => setFormData(prev => ({ ...prev, endDate: e.target.value }))}
@@ -309,10 +314,11 @@ export function EventModal({ event, defaultDate, onSave, onDelete, onClose }: Ev
             {!formData.allDay && (
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="event-start-time" className="block text-sm font-medium text-gray-700 mb-1">
                     Start Time *
                   </label>
                   <input
+                    id="event-start-time"
                     type="time"
                     value={formData.startTime}
                     onChange={(e) => setFormData(prev => ({ ...prev, startTime: e.target.value }))}
@@ -321,10 +327,11 @@ export function EventModal({ event, defaultDate, onSave, onDelete, onClose }: Ev
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="event-end-time" className="block text-sm font-medium text-gray-700 mb-1">
                     End Time *
                   </label>
                   <input
+                    id="event-end-time"
                     type="time"
                     value={formData.endTime}
                     onChange={(e) => setFormData(prev => ({ ...prev, endTime: e.target.value }))}
@@ -338,10 +345,11 @@ export function EventModal({ event, defaultDate, onSave, onDelete, onClose }: Ev
             {/* Type, Priority, Status */}
             <div className="grid grid-cols-3 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="event-type" className="block text-sm font-medium text-gray-700 mb-1">
                   Type
                 </label>
                 <select
+                  id="event-type"
                   value={formData.type}
                   onChange={(e) => setFormData(prev => ({ ...prev, type: e.target.value as CalendarEvent['type'] }))}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -354,10 +362,11 @@ export function EventModal({ event, defaultDate, onSave, onDelete, onClose }: Ev
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="event-priority" className="block text-sm font-medium text-gray-700 mb-1">
                   Priority
                 </label>
                 <select
+                  id="event-priority"
                   value={formData.priority}
                   onChange={(e) => setFormData(prev => ({ ...prev, priority: e.target.value as CalendarEvent['priority'] }))}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -370,10 +379,11 @@ export function EventModal({ event, defaultDate, onSave, onDelete, onClose }: Ev
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="event-status" className="block text-sm font-medium text-gray-700 mb-1">
                   Status
                 </label>
                 <select
+                  id="event-status"
                   value={formData.status}
                   onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.value as CalendarEvent['status'] }))}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -389,10 +399,11 @@ export function EventModal({ event, defaultDate, onSave, onDelete, onClose }: Ev
 
             {/* Location */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="event-location" className="block text-sm font-medium text-gray-700 mb-1">
                 Location
               </label>
               <input
+                id="event-location"
                 type="text"
                 value={formData.location}
                 onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
@@ -403,10 +414,11 @@ export function EventModal({ event, defaultDate, onSave, onDelete, onClose }: Ev
 
             {/* Color */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="event-color" className="block text-sm font-medium text-gray-700 mb-1">
                 Color
               </label>
               <input
+                id="event-color"
                 type="color"
                 value={formData.color}
                 onChange={(e) => setFormData(prev => ({ ...prev, color: e.target.value }))}
@@ -416,10 +428,11 @@ export function EventModal({ event, defaultDate, onSave, onDelete, onClose }: Ev
 
             {/* Recurrence */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="event-repeat" className="block text-sm font-medium text-gray-700 mb-1">
                 Repeat
               </label>
               <select
+                id="event-repeat"
                 value={formData.recurrence.type}
                 onChange={(e) => setFormData(prev => ({
                   ...prev,

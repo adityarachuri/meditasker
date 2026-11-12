@@ -218,6 +218,12 @@ describe('useGlobalStore', () => {
       expect(filtered.map(p => p.id)).toEqual(['p1']);
     });
 
+    it('filters projects by priority', () => {
+      useGlobalStore.getState().updateProjectFilters({ priority: ['high'] });
+      const filtered = useGlobalStore.getState().getFilteredProjects();
+      expect(filtered.map(p => p.id)).toEqual(['p1']);
+    });
+
     it('filters projects by search term across name and description', () => {
       useGlobalStore.getState().updateProjectFilters({ search: 'alpha' });
       const filtered = useGlobalStore.getState().getFilteredProjects();
@@ -226,6 +232,18 @@ describe('useGlobalStore', () => {
 
     it('filters tasks by status, priority, and assignee', () => {
       useGlobalStore.getState().updateTaskFilters({ assignee: ['u1'] });
+      const filtered = useGlobalStore.getState().getFilteredTasks();
+      expect(filtered.map(t => t.id)).toEqual(['t1']);
+    });
+
+    it('filters tasks by status', () => {
+      useGlobalStore.getState().updateTaskFilters({ status: ['todo'] });
+      const filtered = useGlobalStore.getState().getFilteredTasks();
+      expect(filtered.map(t => t.id)).toEqual(['t1']);
+    });
+
+    it('filters tasks by priority', () => {
+      useGlobalStore.getState().updateTaskFilters({ priority: ['high'] });
       const filtered = useGlobalStore.getState().getFilteredTasks();
       expect(filtered.map(t => t.id)).toEqual(['t1']);
     });
@@ -242,6 +260,35 @@ describe('useGlobalStore', () => {
 
     it('returns all tasks assigned to a given user', () => {
       expect(useGlobalStore.getState().getUserTasks('u2').map(t => t.id)).toEqual(['t2']);
+    });
+  });
+
+  describe('lastUpdated subscriber (module-level performance monitor)', () => {
+    it('invokes the window.gc hint when available', () => {
+      const gcSpy = jest.fn();
+      (window as unknown as { gc: () => void }).gc = gcSpy;
+
+      useGlobalStore.getState().addUser(makeUser());
+
+      expect(gcSpy).toHaveBeenCalled();
+      delete (window as unknown as { gc?: () => void }).gc;
+    });
+
+    it('logs when a lastUpdated entry is stale by more than 5 seconds', () => {
+      const logSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
+      const nowSpy = jest.spyOn(Date, 'now');
+      let current = 1_000_000;
+      nowSpy.mockImplementation(() => current);
+
+      useGlobalStore.getState().addUser(makeUser());
+      current += 6000; // jump forward so the next action's subscriber sees a stale prior entry
+
+      useGlobalStore.getState().addProject(makeProject());
+
+      expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('was last updated'));
+
+      nowSpy.mockRestore();
+      logSpy.mockRestore();
     });
   });
 });

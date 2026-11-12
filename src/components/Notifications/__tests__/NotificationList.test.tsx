@@ -73,6 +73,13 @@ describe('NotificationList', () => {
   });
 
   it('switches to the virtualized list once notifications exceed the threshold', async () => {
+    // jsdom performs no real layout, so offsetHeight/offsetWidth are always
+    // 0, and @tanstack/react-virtual reads exactly those (not
+    // getBoundingClientRect) synchronously on mount to size its viewport -
+    // it would otherwise compute zero visible rows.
+    const heightSpy = jest.spyOn(HTMLElement.prototype, 'offsetHeight', 'get').mockReturnValue(600);
+    const widthSpy = jest.spyOn(HTMLElement.prototype, 'offsetWidth', 'get').mockReturnValue(500);
+
     const user = userEvent.setup();
     render(
       <AppProvider>
@@ -88,5 +95,45 @@ describe('NotificationList', () => {
     // The virtualized list renders inside a scrollable container; its presence
     // (rather than the plain `space-y-3` wrapper) confirms the switch happened.
     expect(document.querySelector('.virtualized-list')).toBeInTheDocument();
+    // The virtualizer actually renders row content (via renderItem), not just the container.
+    expect(screen.getAllByText('A notification').length).toBeGreaterThan(0);
+
+    heightSpy.mockRestore();
+    widthSpy.mockRestore();
+  });
+});
+
+describe('NotificationList notification type coverage', () => {
+  const SeedSpecificNotifications = () => {
+    const { dispatch } = useApp();
+    return (
+      <button
+        data-testid="seed-types"
+        onClick={() => {
+          dispatch({ type: 'ADD_NOTIFICATION', payload: makeNotification({ id: 'n-project', type: 'project_updated', title: 'Project Updated' }) });
+          dispatch({ type: 'ADD_NOTIFICATION', payload: makeNotification({ id: 'n-system', type: 'system', title: 'System Notice' }) });
+          // @ts-expect-error intentionally exercising the default-case fallback for an unrecognized type
+          dispatch({ type: 'ADD_NOTIFICATION', payload: makeNotification({ id: 'n-unknown', type: 'unknown_type', title: 'Unknown Type' }) });
+        }}
+      >
+        seed types
+      </button>
+    );
+  };
+
+  it('falls through to the default icon/color for project_updated, system, and unrecognized types', async () => {
+    const user = userEvent.setup();
+    render(
+      <AppProvider>
+        <SeedSpecificNotifications />
+        <NotificationList />
+      </AppProvider>
+    );
+
+    await user.click(screen.getByTestId('seed-types'));
+
+    expect(screen.getByText('Project Updated')).toBeInTheDocument();
+    expect(screen.getByText('System Notice')).toBeInTheDocument();
+    expect(screen.getByText('Unknown Type')).toBeInTheDocument();
   });
 });

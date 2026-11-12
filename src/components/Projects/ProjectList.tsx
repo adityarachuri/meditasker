@@ -17,6 +17,10 @@ interface SearchFilter {
 
 function matchesAdvancedFilter(project: Project, filter: SearchFilter): boolean {
   const value = project[filter.field as keyof Project];
+  /* istanbul ignore next -- every field offered by AdvancedSearch's filter
+     picker for projects (status, priority, dates, managerId, teamIds,
+     budget, progress) is a required Project field, so this can never
+     actually be undefined/null at runtime. */
   if (value === undefined || value === null) return filter.value === '';
 
   switch (filter.operator) {

@@ -315,4 +315,285 @@ describe('useCalendar Hook', () => {
 
     expect(mockCalendarService.getEventsInRange).toHaveBeenCalled();
   });
+
+  it('sets an error when loadEvents itself throws (e.g. on refresh)', async () => {
+    const { result } = renderHook(() => useCalendar());
+
+    await act(async () => {
+      await new Promise(resolve => setTimeout(resolve, 0));
+    });
+
+    mockCalendarService.getEventsInRange.mockImplementation(() => {
+      throw new Error('Range query failed');
+    });
+
+    await act(async () => {
+      result.current.refresh();
+    });
+
+    expect(result.current.error).toBe('Range query failed');
+  });
+
+  it('navigates to the previous period for the day view', () => {
+    const { result } = renderHook(() => useCalendar());
+
+    act(() => {
+      result.current.changeViewType('day');
+    });
+    const initialDate = new Date(result.current.view.date);
+
+    act(() => {
+      result.current.navigatePrevious();
+    });
+
+    expect(result.current.view.date.getDate()).toBe(initialDate.getDate() - 1);
+  });
+
+  it('navigates to the previous period for the week view', () => {
+    const { result } = renderHook(() => useCalendar());
+
+    act(() => {
+      result.current.changeViewType('week');
+    });
+    const initialDate = new Date(result.current.view.date);
+
+    act(() => {
+      result.current.navigatePrevious();
+    });
+
+    expect(result.current.view.date.getDate()).toBe(initialDate.getDate() - 7);
+  });
+
+  it('navigates previous/next for the agenda view', () => {
+    const { result } = renderHook(() => useCalendar());
+
+    act(() => {
+      result.current.changeViewType('agenda');
+    });
+    const initialDate = new Date(result.current.view.date);
+
+    act(() => {
+      result.current.navigatePrevious();
+    });
+    expect(result.current.view.date.getDate()).toBe(initialDate.getDate() - 7);
+
+    act(() => {
+      result.current.navigateToDate(initialDate);
+      result.current.navigateNext();
+    });
+    expect(result.current.view.date.getDate()).toBe(initialDate.getDate() + 7);
+  });
+
+  it('computes a date range for every view type, including an unrecognized one', async () => {
+    const { result } = renderHook(() => useCalendar());
+
+    await act(async () => {
+      await new Promise(resolve => setTimeout(resolve, 0));
+    });
+
+    for (const type of ['day', 'week', 'month', 'agenda'] as const) {
+      mockCalendarService.getEventsInRange.mockClear();
+
+      await act(async () => {
+        result.current.changeViewType(type);
+        await new Promise(resolve => setTimeout(resolve, 0));
+      });
+
+      expect(mockCalendarService.getEventsInRange).toHaveBeenCalled();
+      const calls = mockCalendarService.getEventsInRange.mock.calls;
+      const [startDate, endDate] = calls[calls.length - 1];
+      expect(startDate.getTime()).toBeLessThanOrEqual(endDate.getTime());
+    }
+
+    // An unrecognized view type isn't reachable through the public CalendarView
+    // type, but getDateRange has a defensive default branch for it - exercise
+    // it directly via an unsafe cast rather than leaving it untested.
+    mockCalendarService.getEventsInRange.mockClear();
+    await act(async () => {
+      result.current.changeViewType('unknown' as unknown as 'day');
+      await new Promise(resolve => setTimeout(resolve, 0));
+    });
+    expect(mockCalendarService.getEventsInRange).toHaveBeenCalled();
+  });
+
+  it('sets an error when updateEvent throws', async () => {
+    const { result } = renderHook(() => useCalendar());
+
+    await act(async () => {
+      await new Promise(resolve => setTimeout(resolve, 0));
+    });
+
+    mockCalendarService.updateEvent.mockImplementation(() => {
+      throw new Error('Update failed');
+    });
+
+    await act(async () => {
+      const updated = result.current.updateEvent('1', { title: 'x' });
+      expect(updated).toBeNull();
+    });
+
+    expect(result.current.error).toBe('Update failed');
+  });
+
+  it('sets an error when deleteEvent throws', async () => {
+    const { result } = renderHook(() => useCalendar());
+
+    await act(async () => {
+      await new Promise(resolve => setTimeout(resolve, 0));
+    });
+
+    mockCalendarService.deleteEvent.mockImplementation(() => {
+      throw new Error('Delete failed');
+    });
+
+    await act(async () => {
+      const success = result.current.deleteEvent('1');
+      expect(success).toBe(false);
+    });
+
+    expect(result.current.error).toBe('Delete failed');
+  });
+
+  it('sets an error when searchEvents throws', async () => {
+    const { result } = renderHook(() => useCalendar());
+
+    await act(async () => {
+      await new Promise(resolve => setTimeout(resolve, 0));
+    });
+
+    mockCalendarService.searchEvents.mockImplementation(() => {
+      throw new Error('Search failed');
+    });
+
+    act(() => {
+      const results = result.current.searchEvents('test');
+      expect(results).toEqual([]);
+    });
+
+    expect(result.current.error).toBe('Search failed');
+  });
+
+  it('does not update an event or reload events when the service reports no match', async () => {
+    const { result } = renderHook(() => useCalendar());
+
+    await act(async () => {
+      await new Promise(resolve => setTimeout(resolve, 0));
+    });
+
+    mockCalendarService.updateEvent.mockReturnValue(null);
+
+    await act(async () => {
+      const updated = result.current.updateEvent('missing', { title: 'x' });
+      expect(updated).toBeNull();
+    });
+
+    expect(result.current.error).toBeNull();
+  });
+
+  it('does not reload events when deleteEvent reports failure', async () => {
+    const { result } = renderHook(() => useCalendar());
+
+    await act(async () => {
+      await new Promise(resolve => setTimeout(resolve, 0));
+    });
+
+    mockCalendarService.deleteEvent.mockReturnValue(false);
+
+    await act(async () => {
+      const success = result.current.deleteEvent('missing');
+      expect(success).toBe(false);
+    });
+
+    expect(result.current.error).toBeNull();
+  });
+
+  it('returns events for a specific date via getEventsForDate', () => {
+    const { result } = renderHook(() => useCalendar());
+    const fixture = [{ id: 'e1' } as unknown as ReturnType<typeof mockCalendarService.getEventsForDate>[number]];
+    mockCalendarService.getEventsForDate.mockReturnValue(fixture);
+
+    const date = new Date('2024-03-01');
+    const events = result.current.getEventsForDate(date);
+
+    expect(mockCalendarService.getEventsForDate).toHaveBeenCalledWith(date, result.current.filter);
+    expect(events).toBe(fixture);
+  });
+
+  it('surfaces an initialization error from calendarService.initialize', async () => {
+    mockCalendarService.initialize.mockRejectedValue(new Error('Init failed'));
+
+    const { result } = renderHook(() => useCalendar());
+
+    await act(async () => {
+      await new Promise(resolve => setTimeout(resolve, 0));
+    });
+
+    expect(result.current.error).toBe('Init failed');
+    expect(result.current.loading).toBe(false);
+  });
+
+  it('falls back to a generic message when initialize rejects with a non-Error value', async () => {
+    mockCalendarService.initialize.mockRejectedValue('nope');
+
+    const { result } = renderHook(() => useCalendar());
+
+    await act(async () => {
+      await new Promise(resolve => setTimeout(resolve, 0));
+    });
+
+    expect(result.current.error).toBe('Failed to initialize calendar');
+  });
+
+  it('falls back to generic messages when the service throws non-Error values', async () => {
+    const { result } = renderHook(() => useCalendar());
+
+    await act(async () => {
+      await new Promise(resolve => setTimeout(resolve, 0));
+    });
+
+    mockCalendarService.getEventsInRange.mockImplementation(() => { throw 'nope'; });
+    await act(async () => {
+      result.current.refresh();
+    });
+    expect(result.current.error).toBe('Failed to load events');
+
+    mockCalendarService.getEventsInRange.mockReturnValue([]);
+    mockCalendarService.createEvent.mockImplementation(() => { throw 'nope'; });
+    await act(async () => {
+      const event = result.current.createEvent({
+        title: 'x',
+        startDate: new Date().toISOString(),
+        endDate: new Date().toISOString(),
+        allDay: false,
+        type: 'meeting',
+        priority: 'medium',
+        status: 'scheduled',
+        color: '#3b82f6',
+        createdBy: 'user1'
+      });
+      expect(event).toBeNull();
+    });
+    expect(result.current.error).toBe('Failed to create event');
+
+    mockCalendarService.updateEvent.mockImplementation(() => { throw 'nope'; });
+    await act(async () => {
+      const updated = result.current.updateEvent('1', { title: 'x' });
+      expect(updated).toBeNull();
+    });
+    expect(result.current.error).toBe('Failed to update event');
+
+    mockCalendarService.deleteEvent.mockImplementation(() => { throw 'nope'; });
+    await act(async () => {
+      const success = result.current.deleteEvent('1');
+      expect(success).toBe(false);
+    });
+    expect(result.current.error).toBe('Failed to delete event');
+
+    mockCalendarService.searchEvents.mockImplementation(() => { throw 'nope'; });
+    act(() => {
+      const results = result.current.searchEvents('test');
+      expect(results).toEqual([]);
+    });
+    expect(result.current.error).toBe('Failed to search events');
+  });
 });

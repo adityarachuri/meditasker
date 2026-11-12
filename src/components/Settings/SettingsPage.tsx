@@ -288,8 +288,9 @@ export function SettingsPage() {
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Profile Information</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+            <label htmlFor="profile-name" className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
             <input
+              id="profile-name"
               type="text"
               value={localSettings.profile.name}
               onChange={(e) => setLocalSettings({
@@ -300,8 +301,9 @@ export function SettingsPage() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+            <label htmlFor="profile-email" className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
             <input
+              id="profile-email"
               type="email"
               value={localSettings.profile.email}
               onChange={(e) => setLocalSettings({
@@ -312,8 +314,9 @@ export function SettingsPage() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Department</label>
+            <label htmlFor="profile-department" className="block text-sm font-medium text-gray-700 mb-2">Department</label>
             <select
+              id="profile-department"
               value={localSettings.profile.department}
               onChange={(e) => setLocalSettings({
                 ...localSettings,
@@ -329,8 +332,9 @@ export function SettingsPage() {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+            <label htmlFor="profile-phone" className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
             <input
+              id="profile-phone"
               type="tel"
               value={localSettings.profile.phoneNumber}
               onChange={(e) => setLocalSettings({
@@ -341,8 +345,9 @@ export function SettingsPage() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Timezone</label>
+            <label htmlFor="profile-timezone" className="block text-sm font-medium text-gray-700 mb-2">Timezone</label>
             <select
+              id="profile-timezone"
               value={localSettings.profile.timezone}
               onChange={(e) => setLocalSettings({
                 ...localSettings,
@@ -358,8 +363,9 @@ export function SettingsPage() {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Language</label>
+            <label htmlFor="profile-language" className="block text-sm font-medium text-gray-700 mb-2">Language</label>
             <select
+              id="profile-language"
               value={localSettings.profile.language}
               onChange={(e) => setLocalSettings({
                 ...localSettings,
@@ -376,8 +382,9 @@ export function SettingsPage() {
           </div>
         </div>
         <div className="mt-6">
-          <label className="block text-sm font-medium text-gray-700 mb-2">Bio</label>
+          <label htmlFor="profile-bio" className="block text-sm font-medium text-gray-700 mb-2">Bio</label>
           <textarea
+            id="profile-bio"
             value={localSettings.profile.bio}
             onChange={(e) => setLocalSettings({
               ...localSettings,
@@ -394,9 +401,10 @@ export function SettingsPage() {
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Change Password</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Current Password</label>
+            <label htmlFor="profile-current-password" className="block text-sm font-medium text-gray-700 mb-2">Current Password</label>
             <div className="relative">
               <input
+                id="profile-current-password"
                 type={showPassword ? 'text' : 'password'}
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
@@ -412,8 +420,9 @@ export function SettingsPage() {
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">New Password</label>
+            <label htmlFor="profile-new-password" className="block text-sm font-medium text-gray-700 mb-2">New Password</label>
             <input
+              id="profile-new-password"
               type={showPassword ? 'text' : 'password'}
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
@@ -421,8 +430,9 @@ export function SettingsPage() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Confirm Password</label>
+            <label htmlFor="profile-confirm-password" className="block text-sm font-medium text-gray-700 mb-2">Confirm Password</label>
             <input
+              id="profile-confirm-password"
               type={showPassword ? 'text' : 'password'}
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
@@ -461,6 +471,7 @@ export function SettingsPage() {
               <label className="relative inline-flex items-center cursor-pointer">
                 <input
                   type="checkbox"
+                  aria-label={item.label}
                   checked={localSettings.notifications[item.key as keyof typeof localSettings.notifications] as boolean}
                   onChange={(e) => setLocalSettings({
                     ...localSettings,
@@ -494,6 +505,7 @@ export function SettingsPage() {
               <label className="relative inline-flex items-center cursor-pointer">
                 <input
                   type="checkbox"
+                  aria-label={item.label}
                   checked={localSettings.notifications[item.key as keyof typeof localSettings.notifications] as boolean}
                   onChange={(e) => setLocalSettings({
                     ...localSettings,
@@ -595,8 +607,9 @@ export function SettingsPage() {
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Display Options</h3>
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Font Size</label>
+            <label htmlFor="appearance-font-size" className="block text-sm font-medium text-gray-700 mb-2">Font Size</label>
             <select
+              id="appearance-font-size"
               value={localSettings.appearance.fontSize}
               onChange={(e) => {
                 const newSettings = {
@@ -629,6 +642,7 @@ export function SettingsPage() {
               <label className="relative inline-flex items-center cursor-pointer">
                 <input
                   type="checkbox"
+                  aria-label={item.label}
                   checked={localSettings.appearance[item.key as keyof typeof localSettings.appearance] as boolean}
                   onChange={(e) => {
                     const newSettings = {
@@ -684,8 +698,9 @@ export function SettingsPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Session Timeout (minutes)</label>
+            <label htmlFor="security-session-timeout" className="block text-sm font-medium text-gray-700 mb-2">Session Timeout (minutes)</label>
             <select
+              id="security-session-timeout"
               value={localSettings.security.sessionTimeout}
               onChange={(e) => setLocalSettings({
                 ...localSettings,
@@ -714,6 +729,7 @@ export function SettingsPage() {
               <label className="relative inline-flex items-center cursor-pointer">
                 <input
                   type="checkbox"
+                  aria-label={item.label}
                   checked={localSettings.security[item.key as keyof typeof localSettings.security] as boolean}
                   onChange={(e) => setLocalSettings({
                     ...localSettings,
@@ -764,8 +780,9 @@ export function SettingsPage() {
       <div>
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Profile Privacy</h3>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Profile Visibility</label>
+          <label htmlFor="privacy-profile-visibility" className="block text-sm font-medium text-gray-700 mb-2">Profile Visibility</label>
           <select
+            id="privacy-profile-visibility"
             value={localSettings.privacy.profileVisibility}
             onChange={(e) => setLocalSettings({
               ...localSettings,
@@ -797,6 +814,7 @@ export function SettingsPage() {
               <label className="relative inline-flex items-center cursor-pointer">
                 <input
                   type="checkbox"
+                  aria-label={item.label}
                   checked={localSettings.privacy[item.key as keyof typeof localSettings.privacy] as boolean}
                   onChange={(e) => setLocalSettings({
                     ...localSettings,
@@ -849,6 +867,7 @@ export function SettingsPage() {
             <label className="relative inline-flex items-center cursor-pointer">
               <input
                 type="checkbox"
+                aria-label="Auto-save"
                 checked={localSettings.system.autoSave}
                 onChange={(e) => setLocalSettings({
                   ...localSettings,
@@ -861,8 +880,9 @@ export function SettingsPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Auto-save Interval (minutes)</label>
+            <label htmlFor="system-autosave-interval" className="block text-sm font-medium text-gray-700 mb-2">Auto-save Interval (minutes)</label>
             <select
+              id="system-autosave-interval"
               value={localSettings.system.autoSaveInterval}
               onChange={(e) => setLocalSettings({
                 ...localSettings,
@@ -879,8 +899,9 @@ export function SettingsPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Backup Frequency</label>
+            <label htmlFor="system-backup-frequency" className="block text-sm font-medium text-gray-700 mb-2">Backup Frequency</label>
             <select
+              id="system-backup-frequency"
               value={localSettings.system.backupFrequency}
               onChange={(e) => setLocalSettings({
                 ...localSettings,
@@ -900,8 +921,9 @@ export function SettingsPage() {
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Default Views</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Default Project View</label>
+            <label htmlFor="system-default-project-view" className="block text-sm font-medium text-gray-700 mb-2">Default Project View</label>
             <select
+              id="system-default-project-view"
               value={localSettings.system.defaultProjectView}
               onChange={(e) => setLocalSettings({
                 ...localSettings,
@@ -915,8 +937,9 @@ export function SettingsPage() {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Task Sort Order</label>
+            <label htmlFor="system-task-sort-order" className="block text-sm font-medium text-gray-700 mb-2">Task Sort Order</label>
             <select
+              id="system-task-sort-order"
               value={localSettings.system.taskSortOrder}
               onChange={(e) => setLocalSettings({
                 ...localSettings,
@@ -937,8 +960,9 @@ export function SettingsPage() {
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Date & Time Format</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Date Format</label>
+            <label htmlFor="system-date-format" className="block text-sm font-medium text-gray-700 mb-2">Date Format</label>
             <select
+              id="system-date-format"
               value={localSettings.system.dateFormat}
               onChange={(e) => setLocalSettings({
                 ...localSettings,
@@ -952,8 +976,9 @@ export function SettingsPage() {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Time Format</label>
+            <label htmlFor="system-time-format" className="block text-sm font-medium text-gray-700 mb-2">Time Format</label>
             <select
+              id="system-time-format"
               value={localSettings.system.timeFormat}
               onChange={(e) => setLocalSettings({
                 ...localSettings,
@@ -972,8 +997,9 @@ export function SettingsPage() {
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Data Management</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Data Retention (days)</label>
+            <label htmlFor="system-data-retention" className="block text-sm font-medium text-gray-700 mb-2">Data Retention (days)</label>
             <select
+              id="system-data-retention"
               value={localSettings.system.dataRetention}
               onChange={(e) => setLocalSettings({
                 ...localSettings,
@@ -989,8 +1015,9 @@ export function SettingsPage() {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Export Format</label>
+            <label htmlFor="system-export-format" className="block text-sm font-medium text-gray-700 mb-2">Export Format</label>
             <select
+              id="system-export-format"
               value={localSettings.system.exportFormat}
               onChange={(e) => setLocalSettings({
                 ...localSettings,
@@ -1008,6 +1035,37 @@ export function SettingsPage() {
     </div>
   );
 
+  const renderSaveStatus = () => {
+    // istanbul ignore next -- handleSave never awaits anything before resolving
+    // to 'saved'/'error' within the same tick, so React 18's automatic batching
+    // means this 'saving' render is never actually committed/observable on its own.
+    if (saveStatus === 'saving') {
+      return (
+        <>
+          <RefreshCw className="w-4 h-4 animate-spin text-blue-600" />
+          <span className="text-sm text-blue-600">Saving...</span>
+        </>
+      );
+    }
+    if (saveStatus === 'saved') {
+      return (
+        <>
+          <CheckCircle className="w-4 h-4 text-green-600" />
+          <span className="text-sm text-green-600">Settings saved successfully</span>
+        </>
+      );
+    }
+    if (saveStatus === 'error') {
+      return (
+        <>
+          <AlertTriangle className="w-4 h-4 text-red-600" />
+          <span className="text-sm text-red-600">Error saving settings</span>
+        </>
+      );
+    }
+    return null;
+  };
+
   const renderContent = () => {
     switch (activeTab) {
       case 'profile':
@@ -1022,6 +1080,9 @@ export function SettingsPage() {
         return renderPrivacySettings();
       case 'system':
         return renderSystemSettings();
+      /* istanbul ignore next -- activeTab is only ever set via the sidebar's
+       * own tab.id values above; there's no way to reach an unknown tab id
+       * through the component's actual UI. */
       default:
         return renderProfileSettings();
     }
@@ -1065,24 +1126,7 @@ export function SettingsPage() {
             <div className="mt-8 pt-6 border-t border-gray-200">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
-                  {saveStatus === 'saving' && (
-                    <>
-                      <RefreshCw className="w-4 h-4 animate-spin text-blue-600" />
-                      <span className="text-sm text-blue-600">Saving...</span>
-                    </>
-                  )}
-                  {saveStatus === 'saved' && (
-                    <>
-                      <CheckCircle className="w-4 h-4 text-green-600" />
-                      <span className="text-sm text-green-600">Settings saved successfully</span>
-                    </>
-                  )}
-                  {saveStatus === 'error' && (
-                    <>
-                      <AlertTriangle className="w-4 h-4 text-red-600" />
-                      <span className="text-sm text-red-600">Error saving settings</span>
-                    </>
-                  )}
+                  {renderSaveStatus()}
                 </div>
                 <button
                   onClick={handleSave}

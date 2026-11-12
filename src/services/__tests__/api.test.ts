@@ -111,6 +111,14 @@ describe('API Client', () => {
     }
   });
 
+  it('should convert a real AbortError into a "Request timeout" error', async () => {
+    const abortError = new Error('The operation was aborted');
+    abortError.name = 'AbortError';
+    (global.fetch as jest.Mock).mockRejectedValueOnce(abortError);
+
+    await expect(apiClient.get('/test-abort')).rejects.toThrow('Request timeout');
+  });
+
   it('should retry failed requests on a 5xx server error', async () => {
     // First call returns a retryable 5xx response, second succeeds
     (global.fetch as jest.Mock)
@@ -141,6 +149,24 @@ describe('API Client', () => {
     await apiClient.get('/test-auth');
 
     expect(sessionService.getToken).toHaveBeenCalled();
+  });
+
+  it('should send an empty bearer token when there is no session token', async () => {
+    (sessionService.getToken as jest.Mock).mockReturnValueOnce(null);
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      json: async () => ({ data: 'test' })
+    });
+
+    await apiClient.get('/test-no-token');
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({
+        headers: expect.objectContaining({ 'Authorization': 'Bearer ' })
+      })
+    );
   });
 
   it('should include request ID in headers', async () => {
@@ -478,6 +504,9 @@ describe('typed API helpers', () => {
     await searchApi.tasks('bug', { priority: 'high' });
     expect(apiClient.get).toHaveBeenCalledWith('/search/tasks?q=bug&priority=high');
 
+    await searchApi.tasks('bug');
+    expect(apiClient.get).toHaveBeenCalledWith('/search/tasks?q=bug');
+
     await searchApi.users('alice');
     expect(apiClient.get).toHaveBeenCalledWith('/search/users?q=alice');
   });
@@ -495,7 +524,13 @@ describe('typed API helpers', () => {
     await analyticsApi.getTasks({ range: '7d' });
     expect(apiClient.get).toHaveBeenCalledWith('/analytics/tasks?range=7d');
 
+    await analyticsApi.getTasks();
+    expect(apiClient.get).toHaveBeenCalledWith('/analytics/tasks');
+
     await analyticsApi.getTeam({ range: '90d' });
     expect(apiClient.get).toHaveBeenCalledWith('/analytics/team?range=90d');
+
+    await analyticsApi.getTeam();
+    expect(apiClient.get).toHaveBeenCalledWith('/analytics/team');
   });
 });

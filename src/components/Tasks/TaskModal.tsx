@@ -8,8 +8,12 @@ interface TaskModalProps {
   onClose: () => void;
 }
 
-export function TaskModal({ task, onClose }: TaskModalProps) {
+export function TaskModal({ task: taskProp, onClose }: TaskModalProps) {
   const { state, dispatch } = useApp();
+  // Read the live task from context (falling back to the prop) so that
+  // saving an edit is reflected immediately instead of showing stale data
+  // until the parent happens to pass a fresh task object.
+  const task = state.tasks.find(t => t.id === taskProp.id) ?? taskProp;
   const [isEditing, setIsEditing] = useState(false);
   const [editedTask, setEditedTask] = useState(task);
 

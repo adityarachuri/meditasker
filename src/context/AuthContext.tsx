@@ -72,6 +72,9 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
         ...state,
         isLoading: action.payload,
       };
+    /* istanbul ignore next -- AuthContextType doesn't expose dispatch, so no
+       caller outside this module can ever send an action type the reducer
+       doesn't know about. */
     default:
       return state;
   }
@@ -97,13 +100,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       if (sessionInfo) {
         try {
-          dispatch({ 
-            type: 'LOGIN_SUCCESS', 
-            payload: { 
-              user: sessionInfo.user, 
-              token: sessionInfo.token 
+          dispatch({
+            type: 'LOGIN_SUCCESS',
+            payload: {
+              user: sessionInfo.user,
+              token: sessionInfo.token
             }
           });
+        /* istanbul ignore next -- dispatch from useReducer is a stable
+           function that never throws synchronously; this guards a failure
+           mode React doesn't actually produce. */
         } catch {
           sessionService.endSession();
           dispatch({ type: 'SET_LOADING', payload: false });

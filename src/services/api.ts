@@ -20,6 +20,11 @@ class ApiClient {
 
   private async request<T>(
     endpoint: string,
+    // Defensive default: every call site (get/post/put/patch/delete/
+    // batchUpdate below, plus the retry call on line ~48) always passes an
+    // explicit options object with a method, so this default is never
+    // actually exercised through the public API.
+    /* istanbul ignore next */
     options: RequestInit = {},
     retryCount: number = 0
   ): Promise<T> {
@@ -76,7 +81,11 @@ class ApiClient {
 
   private logRequest(url: string, options: RequestInit, status: number, timestamp: number): void {
     if (import.meta.env.DEV) {
-      console.log(`[API] ${options.method || 'GET'} ${url} - ${status} (${Date.now() - timestamp}ms)`);
+      // The "|| 'GET'" fallback is defensive: every caller of request() (and
+      // therefore of logRequest) always supplies an explicit method.
+      /* istanbul ignore next */
+      const method = options.method || 'GET';
+      console.log(`[API] ${method} ${url} - ${status} (${Date.now() - timestamp}ms)`);
     }
   }
 

@@ -102,6 +102,8 @@ export function usePaginatedData<T>(
         case 'tasks':
           result = await databaseService.getTasks(page, pageSize, filtersRef.current) as PaginatedResult<T>;
           break;
+        /* istanbul ignore next -- dataType is typed as 'users' | 'projects' |
+           'tasks'; this guards a value TypeScript doesn't allow callers to pass. */
         default:
           throw new Error(`Unsupported data type: ${dataType}`);
       }

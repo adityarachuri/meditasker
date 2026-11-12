@@ -181,4 +181,22 @@ describe('usePaginatedData', () => {
       expect(mockGetUsers).toHaveBeenCalledWith(1, 200, { role: 'manager' });
     });
   });
+
+  it('warns about a slow data load when optimizing for large datasets', async () => {
+    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    const nowSpy = jest.spyOn(performance, 'now');
+    let current = 0;
+    nowSpy.mockImplementation(() => {
+      current += 1100; // each call 1100ms after the last -> well past both warning thresholds
+      return current;
+    });
+
+    renderHook(() => usePaginatedData('users', { optimizeForLargeDatasets: true }));
+    await waitFor(() => expect(warnSpy).toHaveBeenCalled());
+
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('Slow data load detected'));
+
+    nowSpy.mockRestore();
+    warnSpy.mockRestore();
+  });
 });

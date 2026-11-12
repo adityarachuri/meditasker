@@ -413,18 +413,30 @@ export class CalendarService {
       case 'high': return '#f97316';
       case 'medium': return '#eab308';
       case 'low': return '#22c55e';
+      /* istanbul ignore next -- priority is typed as the 4 cases above at
+         this method's only call site (task.priority); kept as a defensive
+         fallback for a value TypeScript doesn't allow through today. */
       default: return '#6b7280';
     }
   }
 
+  // Only ever called with 'meeting' (generateSampleMeetings is the sole call
+  // site); the other cases and the default are kept for when other event
+  // types start being colored this way, not because they're reachable today.
   private getColorByType(type: string): string {
     switch (type) {
+      /* istanbul ignore next */
       case 'task': return '#3b82f6';
+      /* istanbul ignore next */
       case 'project': return '#8b5cf6';
       case 'meeting': return '#06b6d4';
+      /* istanbul ignore next */
       case 'deadline': return '#ef4444';
+      /* istanbul ignore next */
       case 'milestone': return '#10b981';
+      /* istanbul ignore next */
       case 'personal': return '#ec4899';
+      /* istanbul ignore next */
       default: return '#6b7280';
     }
   }

@@ -53,6 +53,8 @@ export function BulkOperations({ type, items, onBulkUpdate, onBulkDelete }: Bulk
         case 'updatePriority':
           await onBulkUpdate(selectedIds.map(id => ({ id, updates: { priority: value } })));
           break;
+        /* istanbul ignore next -- no menu control dispatches 'assignUser'; the
+           handler exists for a bulk-reassign feature that was never wired into the UI */
         case 'assignUser':
           await onBulkUpdate(selectedIds.map(id => ({ id, updates: { assigneeId: value } })));
           break;

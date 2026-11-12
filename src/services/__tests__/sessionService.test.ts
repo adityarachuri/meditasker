@@ -238,6 +238,81 @@ describe('SessionService', () => {
     });
   });
 
+  describe('Direct session checks', () => {
+    it('should return the stored token via getToken', () => {
+      sessionService.startSession(mockToken, mockUser);
+      expect(sessionService.getToken()).toBe(mockToken);
+    });
+
+    it('should return the stored user via getUser', () => {
+      sessionService.startSession(mockToken, mockUser);
+      expect(sessionService.getUser()).toEqual(mockUser);
+    });
+
+    it('should return null from getUser when there is no stored user', () => {
+      expect(sessionService.getUser()).toBeNull();
+    });
+
+    it('should do nothing when renewing a session that does not exist', () => {
+      expect(() => sessionService.renewSession()).not.toThrow();
+      expect(sessionService.getSessionInfo()).toBeNull();
+    });
+
+    it('should end an already-stored session found to be expired, without going through the scheduled timeout', () => {
+      // Write an already-expired session directly into storage, bypassing
+      // startSession (which would also schedule its own auto-end timeout) -
+      // this isolates isSessionActive()'s own expiry check from that timeout.
+      mockStorage.setItem('auth_token', mockToken);
+      mockStorage.setItem('auth_user', JSON.stringify(mockUser));
+      mockStorage.setItem('auth_token_expires', (Date.now() - 1000).toString());
+
+      expect(sessionService.isSessionActive()).toBe(false);
+      expect(mockStorage.removeItem).toHaveBeenCalledWith('auth_token');
+    });
+  });
+
+  describe('initializeFromStorage', () => {
+    it('sets up the timeout, activity listeners, and notifies listeners when a valid session is in storage', () => {
+      sessionService.configure({ renewOnActivity: true });
+      sessionService.startSession(mockToken, mockUser);
+
+      const listener = jest.fn();
+      sessionService.addListener(listener);
+
+      sessionService.initializeFromStorage();
+
+      expect(listener).toHaveBeenCalledWith(true);
+    });
+
+    it('renews the session on user activity when renewOnActivity is enabled', () => {
+      sessionService.configure({ renewOnActivity: true });
+      sessionService.startSession(mockToken, mockUser);
+      sessionService.initializeFromStorage();
+
+      const beforeExpiry = parseInt(mockStorage._getStore()['auth_token_expires'], 10);
+
+      jest.advanceTimersByTime(100);
+      document.dispatchEvent(new Event('mousedown'));
+
+      const afterExpiry = parseInt(mockStorage._getStore()['auth_token_expires'], 10);
+      expect(afterExpiry).toBeGreaterThan(beforeExpiry);
+    });
+
+    it('does not renew the session on user activity when renewOnActivity is disabled', () => {
+      sessionService.configure({ renewOnActivity: false });
+      sessionService.startSession(mockToken, mockUser);
+      sessionService.initializeFromStorage();
+
+      const beforeExpiry = parseInt(mockStorage._getStore()['auth_token_expires'], 10);
+
+      jest.advanceTimersByTime(100);
+      document.dispatchEvent(new Event('mousedown'));
+
+      const afterExpiry = parseInt(mockStorage._getStore()['auth_token_expires'], 10);
+      expect(afterExpiry).toBe(beforeExpiry);
+    });
+  });
+
   describe('Edge Cases', () => {
     it('should handle corrupted user data', () => {
       // Set up corrupted data

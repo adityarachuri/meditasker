@@ -1,5 +1,8 @@
-export function analyzeBundleSize() {
-  if (import.meta.env.DEV) {
+// isDev defaults to the real environment flag; accepting it as a parameter
+// lets tests exercise the production-only analysis branch below, since
+// Jest's import.meta shim otherwise hardcodes DEV to true for every test.
+export function analyzeBundleSize(isDev: boolean = import.meta.env.DEV) {
+  if (isDev) {
     console.log('Bundle analysis is only available in development mode');
     return;
   }

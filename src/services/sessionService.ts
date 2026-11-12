@@ -222,8 +222,11 @@ class SessionService {
     }
     
     const sessionInfo = this.getSessionInfo();
+    /* istanbul ignore next -- both callers (renewSession, initializeFromStorage)
+       already guard on a non-null session before calling this private method,
+       so this is a defensive check with no reachable path to exercise today. */
     if (!sessionInfo) return;
-    
+
     const timeRemaining = Math.max(0, sessionInfo.expiresAt - Date.now());
     
     this.timeoutId = setTimeout(() => {

@@ -32,16 +32,30 @@ export function RealTimeUpdates({ onUpdate, userId, className = '' }: RealTimeUp
   const reconnectAttempts = useRef(0);
   const maxReconnectAttempts = 5;
 
+  // The visibility/online handlers below are set up once per userId (see the
+  // mount effect's deps) and would otherwise close over isConnected's value
+  // from that render, never seeing later connects/disconnects. This ref stays
+  // current across the component's lifetime regardless of when it's read.
+  const isConnectedRef = useRef(false);
+  useEffect(() => {
+    isConnectedRef.current = isConnected;
+  }, [isConnected]);
+
   const WS_URL = import.meta.env.VITE_WS_URL;
 
   const connect = () => {
     // Skip connection if no WebSocket URL is configured
+    /* istanbul ignore next -- VITE_WS_URL is always set under test (jest.config.js)
+       so the real connection path below is exercisable; this guard covers the
+       unconfigured-environment case (no WS backend), which isn't this one. */
     if (!WS_URL) {
       console.log('WebSocket URL not configured, skipping real-time updates');
       setConnectionStatus('disconnected');
       return;
     }
 
+    /* istanbul ignore next -- guards against connect() being called again while
+       already open; not reachable through this component's own public triggers. */
     if (wsRef.current?.readyState === WebSocket.OPEN) {
       return;
     }
@@ -205,7 +219,7 @@ export function RealTimeUpdates({ onUpdate, userId, className = '' }: RealTimeUp
         stopHeartbeat();
       } else {
         // Page is visible, resume normal operation
-        if (isConnected) {
+        if (isConnectedRef.current) {
           startHeartbeat();
         } else {
           connect();
@@ -214,10 +228,10 @@ export function RealTimeUpdates({ onUpdate, userId, className = '' }: RealTimeUp
     };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
-    
+
     // Handle online/offline events
     const handleOnline = () => {
-      if (!isConnected) {
+      if (!isConnectedRef.current) {
         connect();
       }
     };

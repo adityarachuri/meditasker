@@ -142,7 +142,16 @@ describe('useSession Hook', () => {
     (sessionService.getSessionTimeRemaining as jest.Mock).mockReturnValue(0);
     
     const { result: result3 } = renderHook(() => useSession());
-    
+
     expect(result3.current.formattedTimeRemaining).toBe('00:00');
+  });
+
+  it('should expose null user and token when there is no session info', () => {
+    (sessionService.getSessionInfo as jest.Mock).mockReturnValue(null);
+
+    const { result } = renderHook(() => useSession());
+
+    expect(result.current.user).toBeNull();
+    expect(result.current.token).toBeNull();
   });
 });

@@ -184,6 +184,13 @@ describe('DatabaseService', () => {
       const result = await service.getProjects(1, 50, { status: 'active', priority: 'high', search: 'alpha' });
       expect(result.data.map(p => p.id)).toEqual(['p1']);
     });
+
+    it('serves cached results for identical repeated project queries', async () => {
+      const first = await service.getProjects(1, 50);
+      const second = await service.getProjects(1, 50);
+      expect(second).toEqual(first);
+      expect(service.getPerformanceMetrics().project_query_cache_hit.count).toBe(1);
+    });
   });
 
   describe('loadTasks / getTasks', () => {
@@ -239,6 +246,13 @@ describe('DatabaseService', () => {
       const result = await service.getTasks(1, 50, { projectId: 'p1', priority: 'high', search: 'login' });
       expect(result.data.map(t => t.id)).toEqual(['t1']);
     });
+
+    it('serves cached results for identical repeated task queries', async () => {
+      const first = await service.getTasks(1, 50);
+      const second = await service.getTasks(1, 50);
+      expect(second).toEqual(first);
+      expect(service.getPerformanceMetrics().task_query_cache_hit.count).toBe(1);
+    });
   });
 
   describe('getStats', () => {
@@ -288,6 +302,28 @@ describe('DatabaseService', () => {
       }
 
       expect(service.getMemoryUsage().cacheEntries).toBeLessThanOrEqual(1000);
+    });
+
+    it('invokes the window.gc hint on loadTasks (via optimizeMemory) when available', async () => {
+      const gcSpy = jest.fn();
+      (window as unknown as { gc: () => void }).gc = gcSpy;
+
+      await service.loadTasks([makeTask()]);
+
+      expect(gcSpy).toHaveBeenCalled();
+      delete (window as unknown as { gc?: () => void }).gc;
+    });
+
+    it('trims performance metrics to the last 50 entries on loadTasks', async () => {
+      await service.loadUsers([makeUser()]);
+      for (let i = 0; i < 55; i++) {
+        await service.getUsers(1, 50, { search: `metric-${i}` });
+      }
+      expect(service.getPerformanceMetrics().user_query_time.count).toBe(55);
+
+      await service.loadTasks([makeTask()]);
+
+      expect(service.getPerformanceMetrics().user_query_time.count).toBe(50);
     });
   });
 
@@ -396,6 +432,89 @@ describe('DatabaseService', () => {
       const health = service.getHealthStatus();
       expect(health.metrics.indexHealth).toBe(false);
       expect(health.status).toBe('critical');
+    });
+
+    it('reports critical status from a low cache-hit rate alone, even with healthy indexes', async () => {
+      await service.loadUsers([makeUser()]);
+      await service.loadProjects([makeProject()]);
+      await service.loadTasks([makeTask()]);
+
+      // 11 distinct (uncached) queries and 0 cache hits keeps cacheHitRate at 0%.
+      for (let i = 0; i < 11; i++) {
+        await service.getUsers(1, 50, { search: `unique-${i}` });
+      }
+
+      const health = service.getHealthStatus();
+      expect(health.metrics.indexHealth).toBe(true);
+      expect(health.status).toBe('critical');
+    });
+
+    it('reports critical status from a very high average query time', async () => {
+      await service.loadUsers([makeUser()]);
+      await service.loadProjects([makeProject()]);
+      await service.loadTasks([makeTask()]);
+
+      // getHealthStatus averages user/task/project query times by dividing
+      // their sum by a fixed 3, regardless of how many of the three actually
+      // have recorded metrics - so with only user_query_time populated, its
+      // raw query time needs to be > 1500ms for the averaged value to clear
+      // the 500ms "critical" threshold.
+      const nowSpy = jest.spyOn(performance, 'now');
+      let current = 0;
+      nowSpy.mockImplementation(() => {
+        current += 1600;
+        return current;
+      });
+
+      await service.getUsers(1, 50);
+
+      nowSpy.mockRestore();
+
+      const health = service.getHealthStatus();
+      expect(health.metrics.averageQueryTime).toBeGreaterThan(500);
+      expect(health.status).toBe('critical');
+    });
+  });
+
+  describe('additional filter and default-parameter branch coverage', () => {
+    it('getUsers/getTasks/getProjects fall back to their default page/limit when called with no arguments', async () => {
+      await service.loadUsers([makeUser()]);
+      await service.loadProjects([makeProject()]);
+      await service.loadTasks([makeTask()]);
+
+      expect((await service.getUsers()).data).toHaveLength(1);
+      expect((await service.getTasks()).data).toHaveLength(1);
+      expect((await service.getProjects()).data).toHaveLength(1);
+    });
+
+    it('returns no results when filtering users by a role with no indexed users', async () => {
+      await service.loadUsers([makeUser({ role: 'developer' })]);
+      const result = await service.getUsers(1, 50, { role: 'qa' });
+      expect(result.data).toEqual([]);
+    });
+
+    it('returns no results when filtering tasks by an unindexed projectId, assigneeId, or status', async () => {
+      await service.loadTasks([makeTask({ projectId: 'p1', assigneeId: 'u1', status: 'todo' })]);
+
+      expect((await service.getTasks(1, 50, { projectId: 'missing' })).data).toEqual([]);
+      expect((await service.getTasks(1, 50, { assigneeId: 'missing' })).data).toEqual([]);
+      expect((await service.getTasks(1, 50, { status: 'missing' })).data).toEqual([]);
+    });
+
+    it('returns no results when filtering projects by an unindexed status', async () => {
+      await service.loadProjects([makeProject({ status: 'active' })]);
+      const result = await service.getProjects(1, 50, { status: 'cancelled' });
+      expect(result.data).toEqual([]);
+    });
+
+    it('reports zero active projects and completed tasks when none exist, instead of undefined', async () => {
+      await service.loadUsers([makeUser()]);
+      await service.loadProjects([makeProject({ status: 'planning' })]);
+      await service.loadTasks([makeTask({ status: 'todo' })]);
+
+      const stats = service.getStats();
+      expect(stats.activeProjects).toBe(0);
+      expect(stats.completedTasks).toBe(0);
     });
   });
 });
