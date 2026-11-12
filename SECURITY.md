@@ -45,3 +45,18 @@ maintainer to open a private channel, without including exploit details.
   rendering, dependency vulnerabilities in `package.json`, prototype
   pollution, ReDoS, or anything that could affect a project built on top of
   this codebase.
+
+## Automated scanning
+
+The following run on every push/PR to `main` (see `.github/workflows/`):
+
+- **Dependabot** (`.github/dependabot.yml`) — weekly dependency-update PRs
+  for npm packages and GitHub Actions, grouped by minor/patch bump.
+- **CodeQL** (`codeql.yml`) — static analysis for the JS/TypeScript codebase,
+  also run weekly on a schedule independent of any push.
+- **Gitleaks** (`ci.yml`'s `secret-scan` job) — scans for hardcoded secrets.
+- **`npm audit --audit-level=high`** (`ci.yml`'s `security-audit` job) — fails
+  the build on high/critical advisories; `npm audit signatures` runs
+  alongside it as an informational (non-blocking) provenance check.
+- **`eslint-plugin-security`** — flags common unsafe patterns (unsafe regex,
+  non-literal `fs`/`child_process` calls, etc.) as part of `npm run lint`.
