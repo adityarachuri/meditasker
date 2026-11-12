@@ -1,4 +1,4 @@
-import { render, screen, act, fireEvent } from '@testing-library/react';
+import { render, screen, act, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { DataExportImport } from '../DataExportImport';
 import { useGlobalStore } from '../../../store/globalStore';
@@ -101,6 +101,21 @@ describe('DataExportImport', () => {
     expect(clickSpy).toHaveBeenCalled();
     expect(revokeObjectURLSpy).toHaveBeenCalled();
   });
+
+  it('resets the exporting state after the post-export delay', async () => {
+    const user = userEvent.setup({ delay: null });
+    render(<DataExportImport />);
+
+    await user.click(screen.getAllByText('Export Data')[1]);
+    expect(screen.getByText(/Exporting/)).toBeInTheDocument();
+
+    // The 1s reset delay is real wall-clock time (this file uses real timers
+    // throughout - see the beforeEach comment above), so this needs a longer
+    // waitFor window than the default 1000ms, not a shorter test.
+    await waitFor(() => {
+      expect(screen.queryByText(/Exporting/)).not.toBeInTheDocument();
+    }, { timeout: 3000 });
+  }, 10000);
 
   it('includes users (sanitized) and activities when their checkboxes are checked', async () => {
     const user = userEvent.setup({ delay: null });
