@@ -179,6 +179,86 @@ describe('DataExportImport', () => {
     expect(parsed.projects.map((p: Project) => p.id)).toEqual(['in-range']);
   });
 
+  it('filters exported data using only a start date', async () => {
+    useGlobalStore.setState({
+      projects: [
+        makeProject({ id: 'in-range', startDate: '2024-06-01' }),
+        makeProject({ id: 'out-of-range', startDate: '2020-01-01' }),
+      ],
+      tasks: [],
+    });
+    const user = userEvent.setup({ delay: null });
+    render(<DataExportImport />);
+
+    const dateInputs = document.querySelectorAll('input[type="date"]');
+    await user.type(dateInputs[0], '2024-01-01');
+    await user.click(screen.getAllByText('Export Data')[1]);
+
+    const blobCall = createObjectURLSpy.mock.calls[0][0] as Blob;
+    const parsed = JSON.parse(await blobCall.text());
+    expect(parsed.projects.map((p: Project) => p.id)).toEqual(['in-range']);
+  });
+
+  it('filters exported data using only an end date', async () => {
+    useGlobalStore.setState({
+      projects: [
+        makeProject({ id: 'in-range', startDate: '2020-06-01' }),
+        makeProject({ id: 'out-of-range', startDate: '2030-01-01' }),
+      ],
+      tasks: [],
+    });
+    const user = userEvent.setup({ delay: null });
+    render(<DataExportImport />);
+
+    const dateInputs = document.querySelectorAll('input[type="date"]');
+    await user.type(dateInputs[1], '2024-12-31');
+    await user.click(screen.getAllByText('Export Data')[1]);
+
+    const blobCall = createObjectURLSpy.mock.calls[0][0] as Blob;
+    const parsed = JSON.parse(await blobCall.text());
+    expect(parsed.projects.map((p: Project) => p.id)).toEqual(['in-range']);
+  });
+
+  it('filters tasks by date range using their createdAt field', async () => {
+    useGlobalStore.setState({
+      projects: [],
+      tasks: [
+        makeTask({ id: 'in-range', createdAt: '2024-06-01T00:00:00.000Z' }),
+        makeTask({ id: 'out-of-range', createdAt: '2020-01-01T00:00:00.000Z' }),
+      ],
+    });
+    const user = userEvent.setup({ delay: null });
+    render(<DataExportImport />);
+
+    const dateInputs = document.querySelectorAll('input[type="date"]');
+    await user.type(dateInputs[0], '2024-01-01');
+    await user.type(dateInputs[1], '2024-12-31');
+    await user.click(screen.getAllByText('Export Data')[1]);
+
+    const blobCall = createObjectURLSpy.mock.calls[0][0] as Blob;
+    const parsed = JSON.parse(await blobCall.text());
+    expect(parsed.tasks.map((t: Task) => t.id)).toEqual(['in-range']);
+  });
+
+  it('exports an empty assignee field in CSV for a task with no assigneeId', async () => {
+    useGlobalStore.setState({
+      projects: [],
+      tasks: [makeTask({ id: 'unassigned-task', assigneeId: undefined })],
+    });
+    const user = userEvent.setup({ delay: null });
+    render(<DataExportImport />);
+
+    await user.selectOptions(screen.getByRole('combobox'), 'csv');
+    await user.click(screen.getAllByText('Export Data')[1]);
+
+    const blobCall = createObjectURLSpy.mock.calls[0][0] as Blob;
+    const text = await blobCall.text();
+    const taskLine = text.split('\n').find(l => l.startsWith('Task,unassigned-task'));
+    expect(taskLine).toBeDefined();
+    const fields = taskLine!.split(',');
+    expect(fields[6]).toBe(''); // Assignee ID column
+  });
+
   it('imports a JSON file and reports success', async () => {
     const user = userEvent.setup({ delay: null });
     render(<DataExportImport />);
@@ -253,6 +333,83 @@ describe('DataExportImport', () => {
 
     expect(await screen.findByText('Import Failed')).toBeInTheDocument();
     expect(screen.getByText('Unsupported file format')).toBeInTheDocument();
+  });
+
+  it('falls back to a generic message when the import file read rejects with a non-Error', async () => {
+    const textSpy = jest.spyOn(File.prototype, 'text').mockRejectedValue('boom');
+    const user = userEvent.setup({ delay: null });
+    render(<DataExportImport />);
+    await user.click(screen.getByText('Import Data'));
+
+    const file = new File(['{}'], 'data.json', { type: 'application/json' });
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+    await user.upload(input, file);
+
+    expect(await screen.findByText('Import Failed')).toBeInTheDocument();
+    expect(screen.getByText('Import failed')).toBeInTheDocument();
+
+    textSpy.mockRestore();
+  });
+
+  it('reports an invalid data format when the imported JSON is not an object', async () => {
+    const user = userEvent.setup({ delay: null });
+    render(<DataExportImport />);
+    await user.click(screen.getByText('Import Data'));
+
+    const file = new File(['"just a plain string"'], 'data.json', { type: 'application/json' });
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+    await user.upload(input, file);
+
+    expect(await screen.findByText('Import Failed')).toBeInTheDocument();
+    expect(screen.getByText('Invalid data format')).toBeInTheDocument();
+  });
+
+  it('records per-item errors without aborting the import when a project or task throws during validation', async () => {
+    const throwingProject = { id: 'bad-project', get name(): string { throw new Error('boom'); } };
+    const goodProject = { id: 'good-project', name: 'Good' };
+    const throwingTask = { id: 'bad-task', get title(): string { throw new Error('boom'); } };
+    const goodTask = { id: 'good-task', title: 'Good task' };
+    const parseSpy = jest.spyOn(JSON, 'parse').mockReturnValue({
+      projects: [throwingProject, goodProject],
+      tasks: [throwingTask, goodTask],
+    });
+
+    const user = userEvent.setup({ delay: null });
+    render(<DataExportImport />);
+    await user.click(screen.getByText('Import Data'));
+
+    const file = new File(['irrelevant - JSON.parse is mocked above'], 'data.json', { type: 'application/json' });
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+    await user.upload(input, file);
+
+    expect(await screen.findByText('Import Failed')).toBeInTheDocument();
+    expect(screen.getByText(/Failed to import project bad-project/)).toBeInTheDocument();
+    expect(screen.getByText(/Failed to import task bad-task/)).toBeInTheDocument();
+    expect(screen.getByText('2 items imported successfully')).toBeInTheDocument();
+
+    parseSpy.mockRestore();
+  });
+
+  it('switches back to the export tab via its own tab button', async () => {
+    const user = userEvent.setup({ delay: null });
+    render(<DataExportImport />);
+    await user.click(screen.getByText('Import Data'));
+    expect(screen.getByText('Import from File')).toBeInTheDocument();
+
+    await user.click(screen.getByText('Export Data'));
+    expect(screen.getByText('Export Options')).toBeInTheDocument();
+  });
+
+  it('clicks the hidden file input when the visible "Choose File" button is clicked', async () => {
+    const user = userEvent.setup({ delay: null });
+    render(<DataExportImport />);
+    await user.click(screen.getByText('Import Data'));
+
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+    const inputClickSpy = jest.spyOn(input, 'click');
+
+    await user.click(screen.getByText('Choose File'));
+    expect(inputClickSpy).toHaveBeenCalled();
   });
 
   it('does nothing when no file is selected', async () => {

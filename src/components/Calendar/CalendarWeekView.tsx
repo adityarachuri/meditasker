@@ -50,14 +50,11 @@ export function CalendarWeekView({
     return slots;
   }, []);
 
+  // Only ever called for events already filtered to `!event.allDay` (below).
   const getEventPosition = (event: CalendarEvent, date: Date) => {
     const eventStart = new Date(event.startDate);
     const eventEnd = new Date(event.endDate);
-    
-    if (event.allDay) {
-      return { top: 0, height: 40 };
-    }
-    
+
     const dayStart = new Date(date);
     dayStart.setHours(0, 0, 0, 0);
     

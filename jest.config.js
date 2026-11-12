@@ -47,6 +47,14 @@ export default {
   collectCoverage: true,
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'lcov', 'html'],
+  coverageThreshold: {
+    global: {
+      statements: 100,
+      branches: 100,
+      functions: 100,
+      lines: 100,
+    },
+  },
   // The default 5000ms is too tight for userEvent-driven interaction tests
   // once the full suite runs with Jest's default parallelism - individual
   // tests are correct (verified in isolation) but can exceed 5s purely from

@@ -56,6 +56,11 @@ describe('AdvancedSearch', () => {
     expect(screen.getByPlaceholderText('Search...')).toBeInTheDocument();
   });
 
+  it('falls back to the default placeholder when none is given', () => {
+    render(<AdvancedSearch type="tasks" onSearch={jest.fn()} />);
+    expect(screen.getByPlaceholderText('Search...')).toBeInTheDocument();
+  });
+
   it('debounces the search query before calling onSearch', async () => {
     const user = userEvent.setup({ delay: null });
     const { onSearch } = renderSearch('tasks');
@@ -157,6 +162,18 @@ describe('AdvancedSearch', () => {
     const selects = screen.getAllByRole('combobox');
     await user.selectOptions(selects[1], 'on-hold');
     expect(selects[1]).toHaveValue('on-hold');
+  });
+
+  it('renders a select-type filter value for priority', async () => {
+    const user = userEvent.setup({ delay: null });
+    renderSearch('tasks');
+
+    await user.click(screen.getAllByRole('button')[0]);
+    await user.selectOptions(screen.getByRole('combobox'), 'priority');
+
+    const selects = screen.getAllByRole('combobox');
+    await user.selectOptions(selects[1], 'critical');
+    expect(selects[1]).toHaveValue('critical');
   });
 
   it('renders a select-type filter value for role on users', async () => {

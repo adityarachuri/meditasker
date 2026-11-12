@@ -99,21 +99,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const sessionInfo = sessionService.getSessionInfo();
       
       if (sessionInfo) {
-        try {
-          dispatch({
-            type: 'LOGIN_SUCCESS',
-            payload: {
-              user: sessionInfo.user,
-              token: sessionInfo.token
-            }
-          });
-        /* istanbul ignore next -- dispatch from useReducer is a stable
-           function that never throws synchronously; this guards a failure
-           mode React doesn't actually produce. */
-        } catch {
-          sessionService.endSession();
-          dispatch({ type: 'SET_LOADING', payload: false });
-        }
+        dispatch({
+          type: 'LOGIN_SUCCESS',
+          payload: {
+            user: sessionInfo.user,
+            token: sessionInfo.token
+          }
+        });
       } else {
         dispatch({ type: 'SET_LOADING', payload: false });
       }

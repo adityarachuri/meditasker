@@ -156,12 +156,12 @@ export function EventModal({ event, defaultDate, onSave, onDelete, onClose }: Ev
   };
 
   const handleDelete = async () => {
-    if (!event || !onDelete) return;
-    
     if (confirm('Are you sure you want to delete this event?')) {
       setLoading(true);
       try {
-        await onDelete(event.id);
+        // Non-null: only reachable via the Delete button below, itself
+        // rendered only when `event && onDelete` is true.
+        await onDelete!(event!.id);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to delete event');
       } finally {

@@ -56,9 +56,9 @@ export function CalendarAgendaView({
     return { allDay, timed };
   };
 
+  // Only ever called for timed (non-all-day) events - see the `timed.map`
+  // call site below.
   const getEventDuration = (event: CalendarEvent) => {
-    if (event.allDay) return null;
-    
     const start = new Date(event.startDate);
     const end = new Date(event.endDate);
     const durationMs = end.getTime() - start.getTime();
@@ -86,15 +86,11 @@ export function CalendarAgendaView({
       </div>
 
       {/* Agenda list */}
+      {/* agendaDays always has at least 7 entries (the "always show first
+          week" rule above), so there's no empty state to render here. */}
       <div className="flex-1 overflow-auto">
-        {agendaDays.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-64 text-gray-500">
-            <Calendar className="w-12 h-12 mb-4" />
-            <p>No events scheduled</p>
-          </div>
-        ) : (
-          <div className="divide-y divide-gray-200">
-            {agendaDays.map(({ date, events: dayEvents }, index) => {
+        <div className="divide-y divide-gray-200">
+          {agendaDays.map(({ date, events: dayEvents }, index) => {
               const { allDay, timed } = groupEventsByTime(dayEvents);
               const isTodayDate = isToday(date);
               
@@ -166,11 +162,9 @@ export function CalendarAgendaView({
                                   hour12: true 
                                 })}
                               </div>
-                              {duration && (
-                                <div className="text-xs text-gray-400 mt-1">
-                                  {duration}
-                                </div>
-                              )}
+                              <div className="text-xs text-gray-400 mt-1">
+                                {duration}
+                              </div>
                             </div>
                             <div className="flex-1">
                               <CalendarEventCard
@@ -188,9 +182,8 @@ export function CalendarAgendaView({
                   )}
                 </div>
               );
-            })}
-          </div>
-        )}
+          })}
+        </div>
       </div>
     </div>
   );

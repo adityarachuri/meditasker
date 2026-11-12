@@ -474,6 +474,38 @@ describe('DatabaseService', () => {
       expect(health.metrics.averageQueryTime).toBeGreaterThan(500);
       expect(health.status).toBe('critical');
     });
+
+    it('defaults averageQueryTime to 0 when no user query has run yet', async () => {
+      await service.loadUsers([]);
+      await service.loadProjects([makeProject()]);
+      await service.loadTasks([makeTask()]);
+
+      // Only task queries run, so user_query_time is never recorded; its
+      // `?.avg || 0` fallback should keep the averaged time from throwing/NaN.
+      await service.getTasks(1, 50);
+
+      const health = service.getHealthStatus();
+      expect(health.metrics.averageQueryTime).toBeGreaterThanOrEqual(0);
+      expect(Number.isNaN(health.metrics.averageQueryTime)).toBe(false);
+    });
+
+    it('reports critical status when only the index health is unhealthy', async () => {
+      // No users loaded at all -> memoryUsage.users stays 0 -> indexHealth false,
+      // while repeating the same query keeps cacheHitRate high and query time low.
+      await service.loadUsers([]);
+      await service.loadProjects([makeProject()]);
+      await service.loadTasks([makeTask()]);
+
+      for (let i = 0; i < 5; i++) {
+        await service.getProjects(1, 50);
+      }
+
+      const health = service.getHealthStatus();
+      expect(health.metrics.indexHealth).toBe(false);
+      expect(health.metrics.averageQueryTime).toBeLessThanOrEqual(500);
+      expect(health.metrics.cacheHitRate).toBeGreaterThanOrEqual(10);
+      expect(health.status).toBe('critical');
+    });
   });
 
   describe('additional filter and default-parameter branch coverage', () => {

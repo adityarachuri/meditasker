@@ -182,6 +182,23 @@ describe('usePaginatedData', () => {
     });
   });
 
+  it('caps its internal query-time history at 20 entries', async () => {
+    mockGetUsers.mockResolvedValue({ data: [{ id: '1' }], total: 9999, hasMore: true });
+    const { result } = renderHook(() => usePaginatedData('users'));
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    // One page is already loaded on mount; 20 more pushes the internal
+    // queryTimeRef history (capped at 20) past its limit, exercising the trim.
+    for (let i = 0; i < 20; i++) {
+      act(() => {
+        result.current.loadMore();
+      });
+      await waitFor(() => expect(result.current.loading).toBe(false));
+    }
+
+    expect(mockGetUsers).toHaveBeenCalledTimes(21);
+  }, 15000);
+
   it('warns about a slow data load when optimizing for large datasets', async () => {
     const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
     const nowSpy = jest.spyOn(performance, 'now');
