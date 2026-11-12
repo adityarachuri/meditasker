@@ -23,10 +23,8 @@
   },
   "overrides": {
     "jest": "^29.7.0",
-    "typescript-eslint": {
-      "@typescript-eslint/typescript-estree": {
-        "minimatch": "^11.0.1"
-      }
+    "@typescript-eslint/typescript-estree": {
+      "minimatch": "^11.0.1"
     }
   },
   "dependencies": {
