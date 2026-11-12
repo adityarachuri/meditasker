@@ -260,7 +260,7 @@ self.addEventListener('push', (event) => {
   }
 
   event.waitUntil(
-    self.registration.showNotification('Softique Health Insure', options)
+    self.registration.showNotification('MediTasker', options)
   );
 });
 
@@ -309,8 +309,8 @@ self.addEventListener('message', (event) => {
 // Utility functions for IndexedDB operations
 async function getOfflineData() {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open('HealthInsureOffline', 1);
-    
+    const request = indexedDB.open('MediTaskerOffline', 1);
+
     request.onerror = () => reject(request.error);
     request.onsuccess = () => {
       const db = request.result;
@@ -333,8 +333,8 @@ async function getOfflineData() {
 
 async function removeOfflineData(id) {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open('HealthInsureOffline', 1);
-    
+    const request = indexedDB.open('MediTaskerOffline', 1);
+
     request.onerror = () => reject(request.error);
     request.onsuccess = () => {
       const db = request.result;

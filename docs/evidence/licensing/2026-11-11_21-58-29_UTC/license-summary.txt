@@ -1,0 +1,59 @@
+Dependency license scan — meditasker
+Generated: 2026-11-11T21:58:29Z
+Commit: 60f3290356e6de1366afedd7777f3ec09cce8acd
+Branch: main
+Tool: license-checker (npx, latest at scan time)
+
+## License breakdown (direct + transitive, 596 packages)
+
+MIT                     485
+ISC                      47
+Apache-2.0               24
+BSD-3-Clause             18
+BSD-2-Clause             10
+(MIT OR CC0-1.0)          3
+MPL-2.0                   2
+MIT-0                     1
+Python-2.0                1
+CC-BY-4.0                 1
+(MPL-2.0 OR Apache-2.0)   1
+BlueOak-1.0.0             1
+(MIT AND Zlib)            1
+MIT*                      1
+MIT AND ISC               1
+
+All licenses present are OSI-approved permissive licenses or dual/either-or
+licenses with a permissive option. No copyleft license requiring source
+disclosure or relicensing of this project (GPL, AGPL, LGPL, SSPL, etc.) is
+present anywhere in the dependency tree.
+
+## Non-trivial licenses, individually reviewed
+
+- dompurify@3.4.17 — (MPL-2.0 OR Apache-2.0). Dual-licensed; this project
+  relies on the Apache-2.0 option, which is fully MIT-compatible.
+- lightningcss@1.33.0 / lightningcss-win32-x64-msvc@1.33.0 — MPL-2.0.
+  Build-time tooling only (transitive dependency of the CSS toolchain),
+  not bundled into the shipped application. MPL-2.0's file-level copyleft
+  does not extend to this project's own source.
+- argparse@2.0.1 — Python-2.0. OSI-approved permissive license.
+- caniuse-lite@1.0.30001823 — CC-BY-4.0. Attribution-only data file (browser
+  support data), not application code.
+- minimatch@10.2.6 — BlueOak-1.0.0. Permissive license.
+
+## Conclusion
+
+No dependency-license compatibility issues with this project's MIT license.
+Nothing here requires a license-scope change or a NOTICE file beyond the
+standard package-lock.json / SBOM record.
+
+## In-memory data service (src/services/databaseService.ts)
+
+The in-memory indexed data service does not use a third-party in-memory
+database or indexing library — it is hand-rolled on native JS `Map`/`Set`.
+There is no additional third-party license exposure beyond the general
+dependency tree scanned above.
+
+## SBOM
+
+sbom.json (CycloneDX 1.7, generated via `npx @cyclonedx/cyclonedx-npm`)
+sits alongside this file.

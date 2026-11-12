@@ -202,4 +202,7 @@ expectations. Please also read the
 ## License
 
 MIT — see [LICENSE](LICENSE). All data in `src/data/mockData.ts` and the demo
-accounts are fictitious and provided for demonstration purposes only.
+accounts are fictitious and provided for demonstration purposes only. The
+MIT grant covers the source code; it does not cover any real data processed
+at runtime or the "meditasker" product name/branding — see
+[COPYRIGHT.md](COPYRIGHT.md) for the full scope.
