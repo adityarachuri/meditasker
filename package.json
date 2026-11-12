@@ -2,7 +2,7 @@
   "name": "meditasker",
   "description": "A demo project management suite for healthcare teams, built with React, TypeScript and Vite.",
   "private": false,
-  "version": "0.2.0",
+  "version": "1.0.0",
   "license": "MIT",
   "repository": {
     "type": "git",
