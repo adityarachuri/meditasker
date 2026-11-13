@@ -33,7 +33,7 @@
   "dependencies": {
     "@hookform/resolvers": "^5.1.1",
     "@tanstack/react-query": "^5.81.5",
-    "@tanstack/react-virtual": "3.13.12",
+    "@tanstack/react-virtual": "3.14.26",
     "date-fns": "^4.1.0",
     "immer": "^10.1.1",
     "jspdf": "^4.2.1",
@@ -64,7 +64,7 @@
     "autoprefixer": "^10.4.18",
     "eslint": "^9.9.1",
     "eslint-plugin-react-hooks": "^5.1.0-rc.0",
-    "eslint-plugin-react-refresh": "^0.4.11",
+    "eslint-plugin-react-refresh": "^0.5.7",
     "eslint-plugin-security": "^4.2.1",
     "globals": "^15.9.0",
     "jest-environment-jsdom": "^30.0.4",
