@@ -31,7 +31,7 @@
     }
   },
   "dependencies": {
-    "@hookform/resolvers": "^5.1.1",
+    "@hookform/resolvers": "^7.0.5",
     "@tanstack/react-query": "^5.81.5",
     "@tanstack/react-virtual": "3.13.12",
     "date-fns": "^4.1.0",
