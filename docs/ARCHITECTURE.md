@@ -185,12 +185,14 @@ components depend on them). `ts-jest-mock-import-meta` shims Vite's
 `import.meta.env` for Jest, since ts-jest's CommonJS output can't represent
 `import.meta` natively — see `jest.config.js`.
 
-Coverage is intentionally uneven: it's concentrated in `services/`, `hooks/`,
-`store/`, and `context/` (several at or near 100%), since that's where the
-business logic and highest-value bugs live. Most presentational components
-are untested — that's a deliberate prioritization, not an oversight. Run
-`npm run test:coverage` and check `docs/evidence/production-readiness/latest.md`
-for current numbers.
+Coverage is 100% (statements/branches/functions/lines) across the whole
+`src/` tree and enforced via `coverageThreshold` in `jest.config.js` - a PR
+that drops coverage fails `npm run test:coverage` (and CI) outright. A small
+number of lines that are genuinely unreachable (e.g. a `default:` case on an
+exhaustive union already covered by every real value) are marked with a
+documented `/* istanbul ignore next -- reason */` rather than left to inflate
+the denominator or chased with a contrived test. Run `npm run test:coverage`
+and check `docs/evidence/production-readiness/latest.md` for current numbers.
 
 ## Build & deployment
 

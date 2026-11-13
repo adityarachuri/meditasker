@@ -1,5 +1,6 @@
-import { render, screen, act, fireEvent } from '@testing-library/react';
+import { render, screen, act, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { sessionService } from '../services/sessionService';
 
 // ReportsDashboard (reachable via the Reports tab) pulls in jspdf, which
 // ships an ESM-only build Jest can't transform; mock it out rather than
@@ -89,6 +90,8 @@ beforeAll(async () => {
   ErrorFallback = mod.ErrorFallback;
   DataViewModeToggle = mod.DataViewModeToggle;
 });
+
+const mockSessionService = sessionService as jest.Mocked<typeof sessionService>;
 
 const renderApp = () => render(<App />);
 
@@ -189,6 +192,35 @@ describe('App', () => {
 
     await user.click(screen.getByText('Enterprise (1M+ records)'));
     expect(screen.getByText(/projects total/)).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Tasks' }));
+    await user.click(screen.getByText('Manage'));
+    // Manage mode reads real seeded mock data via AppContext, unlike
+    // Enterprise mode which reads the (here, empty-mocked) databaseService.
+    expect(screen.getByText(/\d+ tasks?$/)).toBeInTheDocument();
+  });
+
+  it('invokes the onLogout callback when "Logout Now" is clicked on the session-expiry warning', async () => {
+    const user = userEvent.setup({ delay: null });
+    renderApp();
+    await clearDataInitGate();
+    await loginAsAdmin(user);
+
+    // Drop the mocked time-remaining below SessionManager's default 5-minute
+    // warning threshold; useSession's 1s interval picks this up and shows
+    // the expiry warning modal.
+    mockSessionService.getSessionTimeRemaining.mockReturnValue(4 * 60 * 1000);
+    await act(async () => {
+      await jest.advanceTimersByTimeAsync(1000);
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('Session Expiring Soon')).toBeInTheDocument();
+    });
+
+    await user.click(screen.getByText('Logout Now'));
+
+    expect(mockSessionService.endSession).toHaveBeenCalled();
   });
 
 });
@@ -203,6 +235,12 @@ describe('ErrorFallback', () => {
 
     fireEvent.click(screen.getByText('Try again'));
     expect(resetErrorBoundary).toHaveBeenCalled();
+  });
+
+  it('stringifies a non-Error thrown value', () => {
+    render(<ErrorFallback error={'a plain string was thrown' as unknown as Error} resetErrorBoundary={jest.fn()} />);
+
+    expect(screen.getByText('a plain string was thrown')).toBeInTheDocument();
   });
 });
 

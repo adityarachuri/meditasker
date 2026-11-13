@@ -1,6 +1,7 @@
 import { render, screen, act, waitFor } from '@testing-library/react';
 import { AuthProvider, useAuth } from '../AuthContext';
 import { sessionService } from '../../services/sessionService';
+import { authService } from '../../services/authService';
 
 // Mock sessionService: AuthContext talks to this abstraction, not storage
 // directly, so tests control session state through it rather than trying to
@@ -370,5 +371,32 @@ describe('AuthContext', () => {
     expect(firstToken).toBeDefined();
     expect(secondToken).toBeDefined();
     expect(firstToken).not.toBe(secondToken);
+  });
+
+  it('falls back to a generic message when login rejects with a non-Error value', async () => {
+    const loginSpy = jest.spyOn(authService, 'login').mockRejectedValueOnce('boom');
+
+    render(
+      <AuthProvider>
+        <TestComponent />
+      </AuthProvider>
+    );
+
+    await waitFor(() => {
+      const authState = JSON.parse(screen.getByTestId('auth-state').textContent!);
+      expect(authState.isLoading).toBe(false);
+    });
+
+    act(() => {
+      screen.getByText('Login').click();
+    });
+
+    await waitFor(() => {
+      const authState = JSON.parse(screen.getByTestId('auth-state').textContent!);
+      expect(authState.error).toBe('Login failed');
+      expect(authState.isLoading).toBe(false);
+    });
+
+    loginSpy.mockRestore();
   });
 });

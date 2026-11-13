@@ -353,6 +353,41 @@ describe('CalendarService', () => {
       expect(results).toHaveLength(1);
       expect(results[0].description).toContain('Special');
     });
+
+    it('sorts multiple events on the same date by start time', () => {
+      const day = new Date('2024-07-15T00:00:00.000Z');
+      const later = new Date(day); later.setUTCHours(14, 0, 0, 0);
+      const earlier = new Date(day); earlier.setUTCHours(8, 0, 0, 0);
+
+      calendarService.createEvent({
+        title: 'Later same-day event', startDate: later.toISOString(), endDate: later.toISOString(),
+        allDay: false, type: 'meeting', priority: 'medium', status: 'scheduled', color: '#3b82f6', createdBy: 'user1',
+      });
+      calendarService.createEvent({
+        title: 'Earlier same-day event', startDate: earlier.toISOString(), endDate: earlier.toISOString(),
+        allDay: false, type: 'meeting', priority: 'medium', status: 'scheduled', color: '#3b82f6', createdBy: 'user1',
+      });
+
+      const events = calendarService.getEventsForDate(day);
+      expect(events.map(e => e.title)).toEqual(['Earlier same-day event', 'Later same-day event']);
+    });
+
+    it('sorts multiple search matches by start time', () => {
+      const later = new Date(); later.setDate(later.getDate() + 10);
+      const earlier = new Date(); earlier.setDate(earlier.getDate() + 5);
+
+      calendarService.createEvent({
+        title: 'Zenith search match (later)', startDate: later.toISOString(), endDate: later.toISOString(),
+        allDay: true, type: 'meeting', priority: 'medium', status: 'scheduled', color: '#3b82f6', createdBy: 'user1',
+      });
+      calendarService.createEvent({
+        title: 'Zenith search match (earlier)', startDate: earlier.toISOString(), endDate: earlier.toISOString(),
+        allDay: true, type: 'meeting', priority: 'medium', status: 'scheduled', color: '#3b82f6', createdBy: 'user1',
+      });
+
+      const results = calendarService.searchEvents('Zenith search match');
+      expect(results.map(e => e.title)).toEqual(['Zenith search match (earlier)', 'Zenith search match (later)']);
+    });
   });
 
   describe('statistics', () => {

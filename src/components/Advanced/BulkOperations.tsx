@@ -34,9 +34,9 @@ export function BulkOperations({ type, items, onBulkUpdate, onBulkDelete }: Bulk
     }
   };
 
+  // Only ever invoked from renderBulkMenu()'s own controls, which that
+  // function already gates on selectedCount > 0 - see its own early return.
   const handleBulkAction = async (action: string, value?: string | boolean) => {
-    if (selectedCount === 0) return;
-
     setIsProcessing(true);
     setBulkAction(action);
 

@@ -105,6 +105,9 @@ export function Calendar() {
         return <CalendarDayView {...commonProps} />;
       case 'agenda':
         return <CalendarAgendaView {...commonProps} />;
+      /* istanbul ignore next -- view.type is CalendarView['type'], a 4-value
+         literal union all handled above; changeViewType is the only setter
+         and is typed to the same union. */
       default:
         return <CalendarMonthView {...commonProps} />;
     }

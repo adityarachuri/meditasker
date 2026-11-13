@@ -111,6 +111,21 @@ describe('CalendarAgendaView', () => {
     expect(screen.queryByText(/^\d+[hm]/)).not.toBeInTheDocument();
   });
 
+  it('sorts multiple timed events on the same day by start time', () => {
+    const later = makeEvent({ id: 'e4', title: 'Later meeting', startDate: '2024-06-10T14:00:00', endDate: '2024-06-10T14:30:00' });
+    const earlier = makeEvent({ id: 'e5', title: 'Earlier meeting', startDate: '2024-06-10T08:00:00', endDate: '2024-06-10T08:30:00' });
+    render(
+      <CalendarAgendaView
+        {...baseProps}
+        events={[later, earlier]}
+        getEventsForDate={(d) => (d.toDateString() === new Date('2024-06-10').toDateString() ? [later, earlier] : [])}
+      />
+    );
+
+    const titles = screen.getAllByText(/meeting$/i).map(el => el.textContent);
+    expect(titles).toEqual(['Earlier meeting', 'Later meeting']);
+  });
+
   it('calls onDateClick and onEventClick', () => {
     render(
       <CalendarAgendaView
@@ -155,5 +170,13 @@ describe('CalendarAgendaView', () => {
     const futureView: CalendarView = { type: 'agenda', date: new Date('2030-01-01') };
     render(<CalendarAgendaView {...baseProps} view={futureView} events={[]} getEventsForDate={() => []} />);
     expect(screen.getAllByText(/2030/).length).toBeGreaterThan(0);
+  });
+
+  it('omits the year in a day header for the current year', () => {
+    const thisYear = new Date().getFullYear();
+    const todayView: CalendarView = { type: 'agenda', date: new Date() };
+    render(<CalendarAgendaView {...baseProps} view={todayView} events={[]} getEventsForDate={() => []} />);
+    // eslint-disable-next-line security/detect-non-literal-regexp -- thisYear is Date.now()-derived, never user input
+    expect(screen.queryAllByText(new RegExp(String(thisYear))).length).toBe(0);
   });
 });

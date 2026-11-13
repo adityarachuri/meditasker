@@ -134,12 +134,10 @@ npm run test
 npm run test:coverage
 ```
 
-Tests use Jest + React Testing Library against jsdom. As of the latest
-`npm run production-readiness` run: **25 suites / 292 tests, all passing**,
-with statement coverage around 45% — concentrated in the services, hooks,
-store, and context layers (several are at or near 100%), since that's where
-the actual business logic and the highest-value bugs live. Most presentational
-components are intentionally lower-priority for coverage; see
+Tests use Jest + React Testing Library against jsdom. **66 suites / 869
+tests, all passing, with 100% statement/branch/function/line coverage** —
+enforced via `coverageThreshold` in `jest.config.js`, so `npm run
+test:coverage` (and CI) fails the build if coverage ever regresses. See
 `docs/evidence/production-readiness/latest.md` for the current numbers.
 
 ## Known issues
@@ -166,18 +164,32 @@ state:
 
 ## CI/CD
 
-`.github/workflows/ci.yml` runs a quality gate (lint, type-check, test with
-coverage, build) and a separate security-audit job (`npm audit
---audit-level=high`) on every push/PR to `main`. There is no deploy stage yet
-— this project isn't currently hosted anywhere. `npm run production-readiness`
-runs the same checks locally and writes timestamped evidence (logs + a
-markdown/JSON report) to `docs/evidence/production-readiness/`, for anyone
-who wants a dated record of what currently passes/fails.
+`.github/workflows/ci.yml` runs on every push/PR to `main` (and on demand via
+`workflow_dispatch`), with superseded runs on the same branch cancelled
+automatically:
+
+- **`quality-gate`** — lint, type-check, test with coverage (100% enforced
+  via `jest.config.js`'s `coverageThreshold`), build.
+- **`security-audit`** — `npm audit --audit-level=high` (blocking) plus
+  `npm audit signatures` (informational).
+- **`secret-scan`** — Gitleaks, scanning for hardcoded secrets.
+
+`.github/workflows/codeql.yml` runs CodeQL static analysis on the same
+triggers plus a weekly schedule. `.github/dependabot.yml` opens weekly
+dependency-update PRs for npm and GitHub Actions. `main` requires all of
+these checks to pass before a PR can merge (branch protection). There is no
+deploy stage yet — this project isn't currently hosted anywhere. `npm run
+production-readiness` runs the local-equivalent checks and writes timestamped
+evidence (logs + a markdown/JSON report) to
+`docs/evidence/production-readiness/`, for anyone who wants a dated record of
+what currently passes/fails.
 
 ## Security
 
-See [SECURITY.md](SECURITY.md) for how to report vulnerabilities. In short:
-this is a frontend-only demo with no real backend or credentials, so the
+See [SECURITY.md](SECURITY.md) for how to report vulnerabilities, and its
+"Automated scanning" section for the full list of what runs in CI (CodeQL,
+Dependabot, Gitleaks, `npm audit`, `eslint-plugin-security`). In short: this
+is a frontend-only demo with no real backend or credentials, so the
 interesting surface is dependency vulnerabilities and client-side issues
 (XSS, etc.), not server-side auth/data bugs.
 

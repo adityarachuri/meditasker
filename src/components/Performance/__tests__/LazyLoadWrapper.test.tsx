@@ -7,6 +7,11 @@ function ThrowingComponent(): React.ReactElement {
   throw new Error('Boom');
 }
 
+function ThrowingNonErrorComponent(): React.ReactElement {
+  // Deliberately not an Error, to exercise the non-Error fallback path.
+  throw 'Boom as a string';
+}
+
 describe('LazyLoadWrapper', () => {
   it('renders its children normally', () => {
     render(
@@ -66,6 +71,20 @@ describe('LazyLoadWrapper', () => {
     expect(screen.getByText('Boom')).toBeInTheDocument();
 
     await user.click(screen.getByText('Try again'));
+
+    consoleErrorSpy.mockRestore();
+  });
+
+  it('wraps a non-Error thrown value in an Error before passing it to the fallback', () => {
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    render(
+      <LazyLoadWrapper>
+        <ThrowingNonErrorComponent />
+      </LazyLoadWrapper>
+    );
+
+    expect(screen.getByText('Boom as a string')).toBeInTheDocument();
 
     consoleErrorSpy.mockRestore();
   });

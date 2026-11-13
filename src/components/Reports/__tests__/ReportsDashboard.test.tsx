@@ -23,6 +23,8 @@ jest.mock('recharts', () => {
     Tooltip: ({ formatter }: { formatter?: (value: unknown, name: string) => unknown }) => {
       if (formatter) {
         formatter(42, 'budget');
+        formatter(123, 'spent');
+        formatter(undefined, 'budget');
         formatter(7, 'utilization');
       }
       return null;

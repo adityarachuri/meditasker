@@ -4,6 +4,16 @@ import { NotificationList } from '../NotificationList';
 import { AppProvider, useApp } from '../../../context/AppContext';
 import { Notification } from '../../../types';
 
+// Forwards to the real hook by default; one test below overrides it to force
+// an empty notifications list, which the real seeded mock data has no
+// dispatch action to produce.
+jest.mock('../../../context/AppContext', () => {
+  const actual = jest.requireActual('../../../context/AppContext');
+  return { ...actual, useApp: jest.fn(actual.useApp) };
+});
+const mockUseApp = useApp as jest.Mock;
+const actualUseApp = jest.requireActual('../../../context/AppContext').useApp;
+
 const makeNotification = (overrides: Partial<Notification> = {}): Notification => ({
   id: `notif-${Math.random()}`,
   type: 'system',
@@ -34,6 +44,10 @@ const SeedNotifications = ({ count }: { count: number }) => {
 };
 
 describe('NotificationList', () => {
+  beforeEach(() => {
+    mockUseApp.mockImplementation(actualUseApp);
+  });
+
   it('renders the seeded notifications as a plain list', () => {
     render(
       <AppProvider>
@@ -42,6 +56,14 @@ describe('NotificationList', () => {
     );
 
     expect(screen.getByText('New Task Assigned')).toBeInTheDocument();
+  });
+
+  it('shows an empty state when there are no notifications', () => {
+    mockUseApp.mockReturnValue({ state: { notifications: [] }, dispatch: jest.fn() });
+
+    render(<NotificationList />);
+
+    expect(screen.getByText('No notifications yet')).toBeInTheDocument();
   });
 
   it('marks a notification as read when clicked', async () => {

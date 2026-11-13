@@ -106,11 +106,6 @@ export function DataExportImport() {
     setExportProgress(0);
 
     try {
-      // Simulate progress
-      const progressInterval = setInterval(() => {
-        setExportProgress(prev => Math.min(prev + 10, 90));
-      }, 200);
-
       // Prepare data based on options
       const exportData: ExportedData = {
         metadata: {
@@ -141,7 +136,6 @@ export function DataExportImport() {
         exportData.activities = filterDataByDateRange(activities, exportOptions.dateRange);
       }
 
-      clearInterval(progressInterval);
       setExportProgress(100);
 
       // Generate and download file
@@ -159,17 +153,27 @@ export function DataExportImport() {
     }
   };
 
-  const filterDataByDateRange = <T extends { createdAt?: string; startDate?: string; joinDate?: string },>(
+  // Callers are projects (has startDate), tasks, and activities (both have
+  // createdAt) - never users, which are exported without date filtering.
+  const getComparableDate = (item: { createdAt?: string; startDate?: string }): Date => {
+    if (item.createdAt) return new Date(item.createdAt);
+    if (item.startDate) return new Date(item.startDate);
+    /* istanbul ignore next -- every current caller has createdAt or
+       startDate; this guards a future caller with neither. */
+    return new Date(0);
+  };
+
+  const filterDataByDateRange = <T extends { createdAt?: string; startDate?: string },>(
     data: T[],
     dateRange: { start: string; end: string }
   ): T[] => {
     if (!dateRange.start && !dateRange.end) return data;
 
     return data.filter(item => {
-      const itemDate = new Date(item.createdAt || item.startDate || item.joinDate || 0);
+      const itemDate = getComparableDate(item);
       const start = dateRange.start ? new Date(dateRange.start) : new Date(0);
       const end = dateRange.end ? new Date(dateRange.end) : new Date();
-      
+
       return itemDate >= start && itemDate <= end;
     });
   };

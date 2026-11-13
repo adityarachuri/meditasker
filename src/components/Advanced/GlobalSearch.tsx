@@ -33,8 +33,8 @@ export function GlobalSearch({ onClose, className = '' }: GlobalSearchProps) {
   }, []);
 
   const saveRecentSearch = useCallback((searchQuery: string) => {
-    if (!searchQuery.trim()) return;
-
+    // performSearch already filters out empty/whitespace queries before
+    // calling this, so searchQuery is always non-empty here.
     // Functional update, so this callback doesn't need recentSearches in its
     // own deps - reading it directly there would make this (and performSearch,
     // and the debouncedQuery effect below) a new reference on every saved

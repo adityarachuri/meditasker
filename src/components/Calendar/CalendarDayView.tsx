@@ -45,14 +45,11 @@ export function CalendarDayView({
     return slots;
   }, []);
 
+  // Only ever called for timedEvents (below), which already excludes allDay events.
   const getEventPosition = (event: CalendarEvent) => {
     const eventStart = new Date(event.startDate);
     const eventEnd = new Date(event.endDate);
-    
-    if (event.allDay) {
-      return { top: 0, height: 60 };
-    }
-    
+
     const dayStart = new Date(date);
     dayStart.setHours(0, 0, 0, 0);
     

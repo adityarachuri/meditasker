@@ -1,8 +1,9 @@
-import { render, screen, waitFor, act } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { TaskListVirtualized } from '../TaskListVirtualized';
 import { AppProvider } from '../../../context/AppContext';
 import { databaseService } from '../../../services/databaseService';
+import { usePaginatedData } from '../../../hooks/usePaginatedData';
 import { Task, Project, User } from '../../../types';
 
 jest.mock('../../../services/databaseService', () => ({
@@ -13,9 +14,19 @@ jest.mock('../../../services/databaseService', () => ({
   },
 }));
 
+// Forwards to the real hook by default; individual tests can override its
+// return value to deterministically force a state (e.g. loading) that's
+// otherwise racy to reach through the real fetch/virtualized-list plumbing.
+jest.mock('../../../hooks/usePaginatedData', () => {
+  const actual = jest.requireActual('../../../hooks/usePaginatedData');
+  return { ...actual, usePaginatedData: jest.fn(actual.usePaginatedData) };
+});
+
 const mockGetTasks = databaseService.getTasks as jest.Mock;
 const mockGetProjectById = databaseService.getProjectById as jest.Mock;
 const mockGetUserById = databaseService.getUserById as jest.Mock;
+const mockUsePaginatedData = usePaginatedData as jest.Mock;
+const actualUsePaginatedData = jest.requireActual('../../../hooks/usePaginatedData').usePaginatedData;
 
 const project: Project = {
   id: 'p1',
@@ -69,6 +80,7 @@ describe('TaskListVirtualized', () => {
     mockGetTasks.mockResolvedValue({ data: [makeTask()], total: 1, hasMore: false });
     mockGetProjectById.mockReturnValue(project);
     mockGetUserById.mockReturnValue(user1);
+    mockUsePaginatedData.mockImplementation(actualUsePaginatedData);
   });
 
   it('loads and renders tasks in the table view by default, including project/assignee lookups', async () => {
@@ -111,6 +123,25 @@ describe('TaskListVirtualized', () => {
     });
   });
 
+  it('colors a due-soon date orange and a far-off one gray', async () => {
+    const soon = new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString();
+    mockGetTasks.mockResolvedValue({ data: [makeTask({ dueDate: soon })], total: 1, hasMore: false });
+    const { unmount } = renderComponent();
+    await waitFor(() => {
+      const el = screen.getByText(new Date(soon).toLocaleDateString());
+      expect(el.className).toContain('text-orange-600');
+    });
+    unmount();
+
+    const farOff = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+    mockGetTasks.mockResolvedValue({ data: [makeTask({ dueDate: farOff })], total: 1, hasMore: false });
+    renderComponent();
+    await waitFor(() => {
+      const el = screen.getByText(new Date(farOff).toLocaleDateString());
+      expect(el.className).toContain('text-gray-700');
+    });
+  });
+
   it('truncates tags beyond 2 with a "+N more" label', async () => {
     mockGetTasks.mockResolvedValue({
       data: [makeTask({ tags: ['a', 'b', 'c', 'd'] })],
@@ -146,20 +177,54 @@ describe('TaskListVirtualized', () => {
     expect(screen.queryByRole('heading', { name: 'Design review' })).not.toBeInTheDocument();
   });
 
-  it('shows a loading indicator in card view while fetching more', async () => {
+  it('logs a click on a table row and on a card', async () => {
     const user = userEvent.setup();
-    let resolveSecondPage: (value: unknown) => void = () => {};
-    mockGetTasks
-      .mockResolvedValueOnce({ data: [makeTask()], total: 2, hasMore: true })
-      .mockImplementationOnce(() => new Promise((resolve) => { resolveSecondPage = resolve; }));
-
+    const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
     renderComponent();
     await waitFor(() => expect(screen.getByText('Design review')).toBeInTheDocument());
-    await user.click(screen.getByTitle('Card view'));
 
-    await act(async () => {
-      resolveSecondPage({ data: [], total: 2, hasMore: true });
+    await user.click(screen.getByText('Design review'));
+    expect(consoleSpy).toHaveBeenCalledWith('Task clicked:', 'Design review');
+
+    await user.click(screen.getByTitle('Card view'));
+    const heading = await screen.findByRole('heading', { name: 'Design review' });
+    consoleSpy.mockClear();
+    await user.click(heading);
+    expect(consoleSpy).toHaveBeenCalledWith('Task clicked:', 'Design review');
+
+    consoleSpy.mockRestore();
+  });
+
+  it('shows a loading indicator in card view while fetching more', async () => {
+    const user = userEvent.setup();
+    mockUsePaginatedData.mockReturnValue({
+      data: [makeTask()],
+      loading: true,
+      hasMore: true,
+      total: 2,
+      loadMore: jest.fn(),
+      search: jest.fn(),
     });
+
+    renderComponent();
+    await user.click(screen.getByTitle('Card view'));
+    expect(screen.getByText('Loading more tasks...')).toBeInTheDocument();
+  });
+
+  it('hides the card-view loading indicator once fetching more finishes', async () => {
+    const user = userEvent.setup();
+    mockUsePaginatedData.mockReturnValue({
+      data: [makeTask()],
+      loading: false,
+      hasMore: true,
+      total: 2,
+      loadMore: jest.fn(),
+      search: jest.fn(),
+    });
+
+    renderComponent();
+    await user.click(screen.getByTitle('Card view'));
+    expect(screen.queryByText('Loading more tasks...')).not.toBeInTheDocument();
   });
 
   it('filters by status, priority, and assignee, and searches', async () => {

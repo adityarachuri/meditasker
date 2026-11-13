@@ -176,13 +176,25 @@ export function AdvancedSearch({
     
     switch (option?.type) {
       case 'select': {
-        const selectOptions = filter.field === 'status'
-          ? (type === 'tasks' ? ['todo', 'in-progress', 'review', 'completed', 'blocked'] : ['planning', 'active', 'on-hold', 'completed', 'cancelled'])
-          : filter.field === 'priority'
-          ? ['low', 'medium', 'high', 'critical']
-          : filter.field === 'role'
-          ? ['admin', 'manager', 'developer', 'designer', 'qa']
-          : [];
+        let selectOptions: string[];
+        switch (filter.field) {
+          case 'status':
+            selectOptions = type === 'tasks'
+              ? ['todo', 'in-progress', 'review', 'completed', 'blocked']
+              : ['planning', 'active', 'on-hold', 'completed', 'cancelled'];
+            break;
+          case 'priority':
+            selectOptions = ['low', 'medium', 'high', 'critical'];
+            break;
+          case 'role':
+            selectOptions = ['admin', 'manager', 'developer', 'designer', 'qa'];
+            break;
+          /* istanbul ignore next -- every 'select'-type entry in filterOptions
+             above is one of status/priority/role; this guards a future
+             'select' field added there without a matching case here. */
+          default:
+            selectOptions = [];
+        }
 
         return (
           <select

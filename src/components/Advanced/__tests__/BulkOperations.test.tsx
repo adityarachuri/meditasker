@@ -153,6 +153,21 @@ describe('BulkOperations', () => {
     expect(onBulkUpdate).toHaveBeenCalledWith([{ id: 't1', updates: { tags: ['first'] } }]);
   });
 
+  it('creates a tags array for a task whose tags field is undefined', async () => {
+    const user = userEvent.setup();
+    const onBulkUpdate = jest.fn().mockResolvedValue(undefined);
+    const tasks = [makeTask({ id: 't1', tags: undefined })];
+    act(() => {
+      useGlobalStore.getState().selectItem('t1');
+    });
+    render(<BulkOperations type="tasks" items={tasks} onBulkUpdate={onBulkUpdate} onBulkDelete={jest.fn()} />);
+
+    await user.click(screen.getByText('Bulk Actions'));
+    await user.type(screen.getByPlaceholderText('Enter tag name...'), 'first{Enter}');
+
+    expect(onBulkUpdate).toHaveBeenCalledWith([{ id: 't1', updates: { tags: ['first'] } }]);
+  });
+
   it('archives selected items', async () => {
     const user = userEvent.setup();
     const onBulkUpdate = jest.fn().mockResolvedValue(undefined);
@@ -201,6 +216,9 @@ describe('BulkOperations', () => {
     });
     render(<BulkOperations type="projects" items={projects} onBulkUpdate={jest.fn()} onBulkDelete={jest.fn()} />);
 
+    await user.click(screen.getByText('Bulk Actions'));
+    expect(screen.getByText('On-hold')).toBeInTheDocument();
+    expect(screen.getByText('Cancelled')).toBeInTheDocument();
     expect(screen.queryByPlaceholderText('Enter tag name...')).not.toBeInTheDocument();
 
     await user.click(screen.getByText('Clear'));

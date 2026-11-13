@@ -1,8 +1,9 @@
-import { render, screen, waitFor, act } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ProjectListVirtualized } from '../ProjectListVirtualized';
 import { AppProvider } from '../../../context/AppContext';
 import { databaseService } from '../../../services/databaseService';
+import { usePaginatedData } from '../../../hooks/usePaginatedData';
 import { Project } from '../../../types';
 
 jest.mock('../../../services/databaseService', () => ({
@@ -11,7 +12,17 @@ jest.mock('../../../services/databaseService', () => ({
   },
 }));
 
+// Forwards to the real hook by default; individual tests can override its
+// return value to deterministically force a state (e.g. loading) that's
+// otherwise racy to reach through the real fetch/virtualized-list plumbing.
+jest.mock('../../../hooks/usePaginatedData', () => {
+  const actual = jest.requireActual('../../../hooks/usePaginatedData');
+  return { ...actual, usePaginatedData: jest.fn(actual.usePaginatedData) };
+});
+
 const mockGetProjects = databaseService.getProjects as jest.Mock;
+const mockUsePaginatedData = usePaginatedData as jest.Mock;
+const actualUsePaginatedData = jest.requireActual('../../../hooks/usePaginatedData').usePaginatedData;
 
 const makeProject = (overrides: Partial<Project> = {}): Project => ({
   id: 'p1',
@@ -39,6 +50,7 @@ describe('ProjectListVirtualized', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockGetProjects.mockResolvedValue({ data: [makeProject()], total: 1, hasMore: false });
+    mockUsePaginatedData.mockImplementation(actualUsePaginatedData);
   });
 
   it('loads and renders projects in the table view by default', async () => {
@@ -69,21 +81,52 @@ describe('ProjectListVirtualized', () => {
 
   it('shows a loading indicator in card view while fetching more', async () => {
     const user = userEvent.setup();
-    let resolveSecondPage: (value: unknown) => void = () => {};
-    mockGetProjects
-      .mockResolvedValueOnce({ data: [makeProject()], total: 2, hasMore: true })
-      .mockImplementationOnce(() => new Promise((resolve) => { resolveSecondPage = resolve; }));
+    mockUsePaginatedData.mockReturnValue({
+      data: [makeProject()],
+      loading: true,
+      hasMore: true,
+      total: 2,
+      loadMore: jest.fn(),
+      search: jest.fn(),
+    });
 
     renderComponent();
-    await waitFor(() => expect(screen.getByText('Project Alpha')).toBeInTheDocument());
     await user.click(screen.getByTitle('Card view'));
+    expect(screen.getByText('Loading more projects...')).toBeInTheDocument();
+  });
 
-    await act(async () => {
-      // Directly triggering the infinite-scroll sentinel from outside the
-      // component is awkward; resolving the in-flight second page exercises
-      // the same loading-state code path the sentinel's callback would.
-      resolveSecondPage({ data: [], total: 2, hasMore: true });
+  it('hides the card-view loading indicator once fetching more finishes', async () => {
+    const user = userEvent.setup();
+    mockUsePaginatedData.mockReturnValue({
+      data: [makeProject()],
+      loading: false,
+      hasMore: true,
+      total: 2,
+      loadMore: jest.fn(),
+      search: jest.fn(),
     });
+
+    renderComponent();
+    await user.click(screen.getByTitle('Card view'));
+    expect(screen.queryByText('Loading more projects...')).not.toBeInTheDocument();
+  });
+
+  it('logs a click on a table row and on a card', async () => {
+    const user = userEvent.setup();
+    const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
+    renderComponent();
+    await waitFor(() => expect(screen.getByText('Project Alpha')).toBeInTheDocument());
+
+    await user.click(screen.getByText('Project Alpha'));
+    expect(consoleSpy).toHaveBeenCalledWith('Project clicked:', 'Project Alpha');
+
+    await user.click(screen.getByTitle('Card view'));
+    const heading = await screen.findByRole('heading', { name: 'Project Alpha' });
+    consoleSpy.mockClear();
+    await user.click(heading);
+    expect(consoleSpy).toHaveBeenCalledWith('Project clicked:', 'Project Alpha');
+
+    consoleSpy.mockRestore();
   });
 
   it('renders filter dropdowns and a search box that call the service with new filters', async () => {

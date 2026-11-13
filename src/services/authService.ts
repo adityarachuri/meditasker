@@ -85,7 +85,8 @@ class AuthService {
       throw new Error('Invalid email or password');
     }
 
-    // Simple password validation (in real app, this would be handled by backend)
+    // Simple password validation (in real app, this would be handled by backend).
+    // eslint-disable-next-line security/detect-possible-timing-attacks -- demo-only fixed password for mock accounts, not real auth; see SECURITY.md
     if (password !== 'password123') {
       throw new Error('Invalid email or password');
     }

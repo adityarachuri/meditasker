@@ -93,6 +93,13 @@ describe('TaskModal', () => {
     });
   });
 
+  it('shows "Due tomorrow" for a due date exactly one day out', () => {
+    withFixedNow('2024-06-01T00:00:00.000Z', () => {
+      renderModal(makeTask({ dueDate: '2024-06-02T00:00:00.000Z' }));
+      expect(screen.getByText('(Due tomorrow)')).toBeInTheDocument();
+    });
+  });
+
   const statuses: Array<Task['status']> = ['todo', 'in-progress', 'review', 'completed', 'blocked'];
   it.each(statuses)('renders the %s status badge in view mode', (status) => {
     renderModal(makeTask({ status }));
@@ -105,6 +112,12 @@ describe('TaskModal', () => {
     renderModal(makeTask({ priority }));
     const label = priority.charAt(0).toUpperCase() + priority.slice(1);
     expect(screen.getAllByText(label).length).toBeGreaterThan(0);
+  });
+
+  it('falls back to the default color for an unrecognized priority value', () => {
+    renderModal(makeTask({ priority: 'unknown' as Task['priority'] }));
+    const label = screen.getAllByText('Unknown')[0];
+    expect(label.className).toContain('text-gray-600');
   });
 
   it('renders all tags', () => {

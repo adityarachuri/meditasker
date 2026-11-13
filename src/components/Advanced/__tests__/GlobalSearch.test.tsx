@@ -157,11 +157,15 @@ describe('GlobalSearch', () => {
   it('shows "+N more" when a category has more than 5 results', async () => {
     const user = userEvent.setup({ delay: null });
     const users = Array.from({ length: 7 }, (_, i) => makeUser({ id: `u${i}`, name: `User ${i}` }));
-    mockSearchGlobal.mockResolvedValue({ users, projects: [], tasks: [], total: 7 });
+    const projects = Array.from({ length: 6 }, (_, i) => makeProject({ id: `p${i}`, name: `Project ${i}` }));
+    const tasks = Array.from({ length: 8 }, (_, i) => makeTask({ id: `t${i}`, title: `Task ${i}` }));
+    mockSearchGlobal.mockResolvedValue({ users, projects, tasks, total: 21 });
     render(<GlobalSearch />);
     await type(user, 'alpha');
 
     expect(await screen.findByText('+2 more users')).toBeInTheDocument();
+    expect(screen.getByText('+1 more projects')).toBeInTheDocument();
+    expect(screen.getByText('+3 more tasks')).toBeInTheDocument();
   });
 
   it('loads recent searches from localStorage and lets you re-run one', async () => {
@@ -186,6 +190,45 @@ describe('GlobalSearch', () => {
     await type(user, 'alpha');
     const storedAgain = JSON.parse(window.localStorage.getItem('recent_searches') || '[]');
     expect(storedAgain).toEqual(['alpha']);
+  });
+
+  it('renders every project-status and task-priority/status badge color', async () => {
+    const user = userEvent.setup({ delay: null });
+    mockSearchGlobal.mockResolvedValue({
+      users: [],
+      projects: [
+        makeProject({ id: 'p2', name: 'Project Completed', status: 'completed' }),
+        makeProject({ id: 'p3', name: 'Project Planning', status: 'planning' }),
+      ],
+      tasks: [
+        makeTask({ id: 't2', title: 'Critical task', priority: 'critical', status: 'completed' }),
+        makeTask({ id: 't3', title: 'High task', priority: 'high', status: 'in-progress' }),
+        makeTask({ id: 't4', title: 'Low task', priority: 'low', status: 'blocked' }),
+      ],
+      total: 5,
+    });
+    render(<GlobalSearch />);
+
+    await type(user, 'alpha');
+
+    expect(screen.getByText('Project Completed')).toBeInTheDocument();
+    expect(screen.getByText('Project Planning')).toBeInTheDocument();
+    expect(screen.getByText('Critical task')).toBeInTheDocument();
+    expect(screen.getByText('High task')).toBeInTheDocument();
+    expect(screen.getByText('Low task')).toBeInTheDocument();
+  });
+
+  it('keeps other recent searches when saving a new one on top of them', async () => {
+    window.localStorage.setItem('recent_searches', JSON.stringify(['beta']));
+    const user = userEvent.setup({ delay: null });
+    render(<GlobalSearch />);
+
+    await type(user, 'alpha');
+
+    await waitFor(() => {
+      const stored = JSON.parse(window.localStorage.getItem('recent_searches') || '[]');
+      expect(stored).toEqual(['alpha', 'beta']);
+    });
   });
 
   it('logs and clears results when the search fails', async () => {

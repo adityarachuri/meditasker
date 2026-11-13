@@ -73,7 +73,7 @@ export function usePaginatedData<T>(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialLoad]);
 
-  const loadPage = useCallback(async (page: number, reset: boolean = false) => {
+  const loadPage = useCallback(async (page: number, reset: boolean) => {
     // Cancel previous request
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();

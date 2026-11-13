@@ -94,7 +94,6 @@ function App() {
   // actually supports creating, editing, and bulk-updating projects/tasks.
   const [dataViewMode, setDataViewMode] = useState<'enterprise' | 'manage'>('enterprise');
   const [isDataInitialized, setIsDataInitialized] = useState(false);
-  const [showSessionManager] = useState(true);
   usePerformanceMonitor('App');
   const { handleUpdate } = useRealTimeUpdates('current-user-id');
 
@@ -123,6 +122,9 @@ function App() {
         return 'Notifications';
       case 'settings':
         return 'Settings';
+      /* istanbul ignore next -- activeTab is only ever set by Sidebar's own
+         nav buttons, all 8 of which are covered above; this guards a value
+         Sidebar doesn't actually produce. */
       default:
         return 'Dashboard';
     }
@@ -180,6 +182,9 @@ function App() {
             <SettingsPage />
           </LazyLoadWrapper>
         );
+      /* istanbul ignore next -- activeTab is only ever set by Sidebar's own
+         nav buttons, all 8 of which are covered above; this guards a value
+         Sidebar doesn't actually produce. */
       default:
         return (
           <LazyLoadWrapper>
@@ -212,12 +217,12 @@ function App() {
                   <Header
                     title={getPageTitle()}
                     showAddButton={activeTab === 'projects' || activeTab === 'tasks'}
-                    sessionManager={showSessionManager ?
+                    sessionManager={
                       <SessionManager
                         onLogout={() => {
                           // Handle logout
                         }}
-                      /> : null
+                      />
                     }
                   />
                   <main className="flex-1 p-6">

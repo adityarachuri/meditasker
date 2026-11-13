@@ -277,6 +277,30 @@ describe('ProtectedRoute', () => {
     expect(screen.queryByText('Protected Content')).not.toBeInTheDocument();
   });
 
+  it('passes an onExpire callback to useSession that can be invoked without error', () => {
+    mockUseAuth.mockReturnValue({
+      state: {
+        user: null,
+        isAuthenticated: false,
+        isLoading: false,
+        error: null,
+        token: null,
+      },
+      login: jest.fn(),
+      logout: jest.fn(),
+      clearError: jest.fn(),
+    });
+
+    render(
+      <ProtectedRoute>
+        <TestComponent />
+      </ProtectedRoute>
+    );
+
+    const { onExpire } = mockUseSession.mock.calls[0][0]!;
+    expect(() => onExpire!()).not.toThrow();
+  });
+
   it('handles missing user object when authenticated', () => {
     mockUseAuth.mockReturnValue({
       state: {

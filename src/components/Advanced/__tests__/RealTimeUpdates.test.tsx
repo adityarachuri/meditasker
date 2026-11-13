@@ -75,6 +75,14 @@ describe('RealTimeUpdates', () => {
     expect(FakeWebSocket.lastInstance.url).toContain('token=tok-123');
   });
 
+  it('connects with an empty token when none is stored', async () => {
+    window.localStorage.removeItem('auth_token');
+    const onUpdate = jest.fn();
+    render(<RealTimeUpdates onUpdate={onUpdate} userId="u1" />);
+
+    expect(FakeWebSocket.lastInstance.url.endsWith('token=')).toBe(true);
+  });
+
   it('shows Connecting while the socket is pending', () => {
     const onUpdate = jest.fn();
     render(<RealTimeUpdates onUpdate={onUpdate} userId="u1" />);
